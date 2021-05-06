@@ -1,0 +1,14 @@
+name: bokeh
+# This is a bokeh/jupyterlab specific environment
+channels:
+  - conda-forge
+dependencies:
+  - bokeh
+  - jupyter_bokeh
+  - cartopy
+  - geopandas
+  - xlrd
+  - openpyxl
+  - jupyterlab
+  - conda
+  - pip

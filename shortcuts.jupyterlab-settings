@@ -1,0 +1,18 @@
+{
+    "shortcuts": [
+        {
+            "command": "notebook:move-cell-up",
+            "keys": [
+                "Ctrl Shift ArrowUp"
+            ],
+            "selector": ".jp-Notebook:focus"
+        },
+        {
+            "command": "notebook:move-cell-down",
+            "keys": [
+                "Ctrl Shift ArrowDown"
+            ],
+            "selector": ".jp-Notebook:focus"
+        },
+    ]
+}

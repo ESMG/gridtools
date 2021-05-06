@@ -1,0 +1,10 @@
+name: earthsim
+# Post install
+# conda install -c conda-forge holoviews geoviews cartopy panel
+# conda install -c jupyterlab
+channels:
+  - conda-forge
+dependencies:
+  - earthsim
+  - conda
+  - pip

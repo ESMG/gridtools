@@ -1,0 +1,19 @@
+name: xesmfTools
+# This follows the pattern on https://github.com/holoviz/geoviews
+# Avoid xesmf version 0.5.2
+# Requires post installation:
+# -c pyviz -c conda-forge netcdf4 geoviews jupyterlab matplotlib jupyter-resource-usage
+# -c pyviz -c nbserverproxy
+# Install datashader from github: https://github.com/holoviz/datashader.git
+# cd ${SRC}/datashader
+# pip -e install .
+# Manual install of https://github.com/adcroft/numpypi.git to lib
+channels:
+  - pyviz
+  - conda-forge
+dependencies:
+  - xesmf
+  - esmf
+  - esmpy
+  - conda
+  - pip

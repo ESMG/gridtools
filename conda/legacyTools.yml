@@ -1,0 +1,15 @@
+name: legacyTools
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - netcdf4
+  - pygmt
+  - owslib
+  - ipyleaflet
+  - jupyterlab
+  - matplotlib
+  - cartopy
+  - folium
+  - conda
+  - pip

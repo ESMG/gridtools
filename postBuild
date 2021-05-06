@@ -1,0 +1,25 @@
+#!/bin/bash
+# enable nbserverproxy
+jupyter serverextension enable --sys-prefix nbserverproxy
+# install the panel server extension so that
+# panel launches at startup
+mv panelserverextension.py ${NB_PYTHON_PREFIX}/lib/python*/site-packages/
+# enable panel extension
+jupyter serverextension enable --sys-prefix panelserverextension
+# Load auxillary packages required for the grid toolset
+# See README.md for workaround details
+export LIBROOT="/home/jovyan/gridTools/lib"
+# Binder uses "notebook" as the loaded conda environment
+# Paths are setup already
+# conda activate notebook
+export OPWD=`pwd`
+# datashader
+git clone https://github.com/holoviz/datashader.git
+cd datashader
+pip install -e .
+# numpypi
+cd ${OPWD}
+git clone https://github.com/adcroft/numpypi.git
+cd numpypi
+cp numpypi_series.py ignore_this.py ${LIBROOT}
+cd ${OPWD}

@@ -1,0 +1,15 @@
+name: xgcmTools
+# Requires post installation:
+# -c pyviz -c conda-forge netcdf4 geoviews jupyterlab matplotlib
+# -c pyviz -c nbserverproxy
+# Install datashader from github: https://github.com/holoviz/datashader.git
+# cd ${SRC}/datashader
+# pip -e install .
+# Manual install of https://github.com/adcroft/numpypi.git to lib
+channels:
+  - pyviz
+  - conda-forge
+dependencies:
+  - xgcm
+  - conda
+  - pip
