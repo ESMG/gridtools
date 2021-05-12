@@ -1,10 +1,10 @@
-import setuptools
+from setuptools import find_packages, setup
 import gridtools
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="gridtools", # Replace with your own username
     version=gridtools.__version__,
     author="James Simkins",
@@ -24,7 +24,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
+    packages=find_packages(exclude=['conda','docs','examples']),
     python_requires=">=3.6",
 )

@@ -14,10 +14,10 @@ from matplotlib.backends.backend_agg import FigureCanvas
 # Required for:
 #  * ROMS to MOM6 grid conversion
 #  * Computation of MOM6 grid metrics
-import spherical
+from . import spherical
 
 # GridUtils() application
-from app import App
+from . import app
 
 class GridUtils:
 
@@ -88,7 +88,7 @@ class GridUtils:
     def app(self):
         '''By calling this function, the user is requesting the application functionality of GridUtils().
            return the dashboard, but GridUtils() also has an internal pointer to the application.'''
-        appObj = App(grd=self)
+        appObj = app.App(grd=self)
         self.app = appObj
         return appObj.dashboard
 

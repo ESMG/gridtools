@@ -6,6 +6,13 @@
  - Add more TODOs including reproducibility goals
  - Create a exp/pipInstaller branch for testing
  - Refactor repo (again) to support pip install of library
+ - Copied a versioning method from the sphinx project
+ - Removed warning handling
+ - Removed xgcm from app.py (not sure why it was working either)
+ - Had to change how gridutils.py imports packages at its own level to enable from gridtools import * to work
+ - Add a pyproject.toml file template; had to delete build-backend for pip install -e . to work
+ - Modify setuptools import to model that of the sphinx setup.py
+ - Refactoring likely broke a lot of stuff...have to check
 
 # 2021-05-10
 
