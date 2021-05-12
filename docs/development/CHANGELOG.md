@@ -1,5 +1,14 @@
 # Change Log
 
+# 2021-05-11
+
+ - Finish out 0.1 milestones
+ - Add more TODOs including reproducibility goals
+
+# 2021-05-10
+
+ - Establish 0.2 milestones
+
 # 2021-05-06
 
  - BUG(app): Stereographic grid generation does not work when dx/dy is not

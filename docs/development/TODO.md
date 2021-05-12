@@ -14,19 +14,25 @@
    - [X] Test application for stereographic grid generation
    - [X] Tackle critical TODO items
    - [X] Publish initial commit to ESMG
-   - [ ] Ensure mybinder.org works with the published github commit
+   - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
+   - [ ] Improve reproducibility of library
    - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] Allow import of ROMS grid for conversion to MOM6
-   - [ ] Enhanced grid/plot projection options
-   - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
-   - [ ] Leverage dask (expecially for binder.org)
+   - [ ] Pictorial manual for installation process
+   - [ ] Creation of all needed files to run a MOM6 simulation
+   - [ ] Provide initial bathymetry grid
+   - [ ] Provide initial grid land mask
  - [ ] Verison 0.x
-   - [ ] Bathymetry and boundery condition support
+   - [ ] Leverage dask (expecially for binder.org)
+   - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
+   - [ ] Enhanced grid/plot projection options
+   - [ ] Allow import of ROMS grid for conversion to MOM6
+   - [ ] Boundery condition support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
    - [ ] This library is installable via pip
    - [ ] This library is installable via conda
+   - [ ] Subset existing grids and infrastructure
 
 # BUGS
  - [ ] A nested dictionary will clobber other nested elements instead
@@ -69,6 +75,7 @@
    - [ ] https://github.com/nikizadehgfdl/ocean_model_topog_generator
    - [ ] xesmf regridder
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
+ - [ ] include a dump of conda environment in the grid file (nc)
  - [ ] Add option to use Alistair's numpypi package as a configurable option in toolsets
  - [ ] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
@@ -154,6 +161,9 @@
        features of the library: help, debugging, etc.
  - [ ] Dask optimizations
    - [ ] IBCAO grid is too big for mybinder.org
+ - [ ] Subset any grid for running with MOM6
+   - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
+   - [ ] May be especially useful for debugging situations
  - [ ] Pull in BC and forcing fields from various sources
    - [ ] Delta method: "We extract 20-30 years of a future projection from several models, build an average of each forcing variable which we superpose on modern day climate.  It’s the so-called delta method.  It debiases climate projections relative to modern day (reanalysis constrained) dynamics, but adds the climate change signal on top of it (as a secular change/delta)."
    - [ ] CMIP/ESM
@@ -165,3 +175,4 @@
      - [ ] https://github.com/MackenzieBlanusa/OHC_CMIP6
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
+
