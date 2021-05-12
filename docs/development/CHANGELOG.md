@@ -4,6 +4,8 @@
 
  - Finish out 0.1 milestones
  - Add more TODOs including reproducibility goals
+ - Create a exp/pipInstaller branch for testing
+ - Refactor repo (again) to support pip install of library
 
 # 2021-05-10
 
