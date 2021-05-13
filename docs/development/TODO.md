@@ -2,7 +2,7 @@
 
 ## Milestones
 
- - [ ] Version 0.1
+ - [X] Version 0.1
    - [X] Simple polar grid generation
    - [X] Clean up documentation
    - [X] Generify current examples
@@ -16,12 +16,12 @@
    - [X] Publish initial commit to ESMG
    - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
-   - [ ] Improve reproducibility of library
+   - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
    - [ ] Pictorial manual for installation process
    - [ ] Creation of all needed files to run a MOM6 simulation
-   - [ ] Provide initial bathymetry grid
-   - [ ] Provide initial grid land mask
+   - [ ] Construct initial bathymetry grid for new grids
+   - [ ] Construct initial grid land mask for new grids
  - [ ] Verison 0.x
    - [ ] Leverage dask (expecially for binder.org)
    - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180

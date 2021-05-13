@@ -106,30 +106,41 @@ If you plan to use the grid generation software on your system, you need to pefo
 
 ## Step 1
 
-[Download](https://github.com/ESMG/gridtools/archive/refs/heads/main.zip) or [clone](https://github.com/ESMG/gridtools.git) the 
-[ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
+Install conda or manually install the python libraries and software
+dependencies that would allow you to run the python scripts or notebooks.
 
-Discover the full directory path to gridtools/gridTools/lib.   Place the full path in the environment variable `LIBROOT` if you are planning to run
-the python notebooks.  If you are going to use the library in your scripts, simply append the full path to `PYTHONPATH`.  In the future, we will enable
-installation using ptyhon pip.
+We have pulled together some pre-defined environments.  You may also
+install an environment yourself.   Please look at the
+[conda](docs/conda/README.md) page for more information about conda.
+
+We currently recommend the *xesmfTools* environment for use with this
+library.
 
 ## Step 2
 
-Install conda or manually install the python libraries and software dependencies that would allow you to run the python scripts or notebooks.
+[Download](https://github.com/ESMG/gridtools/archive/refs/heads/main.zip) or [clone](https://github.com/ESMG/gridtools.git) the 
+[ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
 
-We have pulled together some pre-defined environments.  You may also install an environment yourself.   Please look at the [conda](docs/conda/README.md)
-page for more information about conda.
+You may use any of the typical installation methods to install the grid tool library.
 
-We currently recommend the *xesmfTools* environment for use with this libaray.
+### pip
 
-## Step 3
+```
+$ cd gridtools
+$ python -m pip install .
+```
 
-Follow any steps in the "Workarounds" section.
+### setup.py
+
+```
+$ cd gridtools
+$ python setup.py install
+```
 
 # Workarounds
 
 These are the current workarounds that are required for the grid toolset
-package.  You will need to perform these steps once if you plan to install a
+package.  You may need to perform these steps once if you plan to install a
 copy of the grid generation software.
 
 ## datashader
@@ -144,6 +155,9 @@ Installation:
   * Change directory to the datashader directory.
   * Make sure your conda enviroment is active.
   * `pip install -e .`
+
+NOTE: The datashader library should be automatically installed as a dependency of
+gridtools.
 
 ## numpypi
 

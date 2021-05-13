@@ -7,20 +7,7 @@
 #  * ipython
 
 import sys, os, logging
-
-#if (os.environ.get('LIBROOT')):
-#    sys.path.append(os.environ.get('LIBROOT'))
-sys.path.append('lib')
-
-#from sysinfo import SysInfo
-#info = SysInfo()
-#info.show(vList=['platform','python','esmf','esmpy','xgcm','xesmf',
-#                 'netcdf4','numpy','xarray',
-#                 'cartopy','matplotlib',
-#                 'jupyter_core','jupyterlab','notebook',
-#                 'dask'])
-
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 # Initialize a grid object
 grd = GridUtils()

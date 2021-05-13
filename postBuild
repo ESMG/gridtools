@@ -13,9 +13,7 @@ export LIBROOT="/home/jovyan/gridTools/lib"
 # Paths are setup already
 # conda activate notebook
 export OPWD=`pwd`
-# datashader
-git clone https://github.com/holoviz/datashader.git
-cd datashader
+# Install gridtools locally
 pip install -e .
 # numpypi
 cd ${OPWD}

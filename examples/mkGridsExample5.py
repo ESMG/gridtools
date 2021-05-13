@@ -34,8 +34,7 @@ print(yy[0,0], xx[0,0], lat[0,0], lon[0,0])
 print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1], lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])
 
 import os, sys
-sys.path.append('lib')
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 grd = GridUtils()
 

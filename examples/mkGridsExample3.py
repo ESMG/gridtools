@@ -7,20 +7,7 @@
 #  * ipython
 
 import sys, os, logging
-
-#if (os.environ.get('LIBROOT')):
-#    sys.path.append(os.environ.get('LIBROOT'))
-sys.path.append('lib')
-
-#from sysinfo import SysInfo
-#info = SysInfo()
-#info.show(vList=['platform','python','esmf','esmpy','xgcm','xesmf',
-#                 'netcdf4','numpy','xarray',
-#                 'cartopy','matplotlib',
-#                 'jupyter_core','jupyterlab','notebook',
-#                 'dask'])
-
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 # Initialize a grid object
 grd = GridUtils()
@@ -29,7 +16,7 @@ grd.printMsg("")
 
 # We can turn on extra output from the module
 grd.printMsg("Set print and logging messages to the DEBUG level.")
-logFilename = 'configs/test/nikiTest.log'
+logFilename = 'configs/test/gridTest.log'
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -49,13 +36,19 @@ grd.setGridParameters({
         'lon_0': 230.0,
         'lat_0': 40.0
     },
-    'dx': 1.0,
+    'centerX': 230.0,
+    'centerY': 40.0,
+    'centerUnits': 'degrees',
+    'dx': 20.0,
     'dxUnits': 'degrees',
-    'dy': 1.0,
+    'dy': 30.0,
     'dyUnits': 'degrees',
     'tilt': gtilt,
     'gridResolution': 1.0,
-    'gridMode': 2.0
+    'gridMode': 2.0,
+    'gridType': 'MOM6',
+    'ensureEvenI': True,
+    'ensureEvenJ': True
 })
 grd.showGridParameters()
 grd.printMsg("")

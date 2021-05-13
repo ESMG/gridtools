@@ -1,5 +1,18 @@
 # Change Log
 
+# 2021-05-13
+
+ - Add datashader dependency to setup.py
+ - Remove duplicate logging example
+ - Update examples to use refactored installable library
+ - Update mybinder.org to see if that still works with refactored library
+ - Refactored library: from gridutils import GridUtils becomes from gridtools.gridutils import GridUtils, etc
+ - Add .swp to .gitignore 
+ - Move installable library to 0.2 milestones
+ - Remove LIBROOT dependency for library
+ - setup.py installs the datashader requirement
+ - Update documentation for installation and use
+
 # 2021-05-11
 
  - Finish out 0.1 milestones

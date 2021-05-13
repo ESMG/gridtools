@@ -26,4 +26,10 @@ setup(
     ],
     packages=find_packages(exclude=['conda','docs','examples']),
     python_requires=">=3.6",
+    install_requires=[
+        'datashader@git+https://github.com/holoviz/datashader.git@v0.12.2a0#egg=datashader'
+    ],
+    dependency_links=[
+        'git+https://github.com/holoviz/datashader.git@v0.12.2a0#egg=datashader',
+    ]
 )

@@ -18,6 +18,7 @@ quicker recovery of a generic environment.
 
 Initialization:
 ```
+$ cat conda/xesmfTools.yml
 $ conda env create -f conda/xesmfTools.yml
 $ conda env export > conda/xesmfTools_export.yml
 ```
@@ -28,11 +29,8 @@ $ conda env remove --name xesmfTools
 $ conda env create conda/xesmfTools_export.yaml
 ```
 
-NOTE: Initialization of holoviz from the generic YAML file took over an hour.
-It only took a couple of minutes from the resolved export YAML file.
-
-AND: Sometimes it is faster to slowly bootstrap an environment and then
-capture the result.
+NOTE: Read any post-installation comments found in the yml files.  Sometimes
+multiple steps are required to help conda resolve dependencies.
 
 Example:
 ```
