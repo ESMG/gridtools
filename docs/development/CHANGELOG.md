@@ -12,6 +12,8 @@
  - Remove LIBROOT dependency for library
  - setup.py installs the datashader requirement
  - Update documentation for installation and use
+ - Fix mybinder.org detection in application
+ - Fix mybinder.org installation paths
 
 # 2021-05-11
 

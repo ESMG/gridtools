@@ -8,7 +8,6 @@ mv panelserverextension.py ${NB_PYTHON_PREFIX}/lib/python*/site-packages/
 jupyter serverextension enable --sys-prefix panelserverextension
 # Load auxillary packages required for the grid toolset
 # See README.md for workaround details
-export LIBROOT="/home/jovyan/gridTools/lib"
 # Binder uses "notebook" as the loaded conda environment
 # Paths are setup already
 # conda activate notebook
@@ -19,5 +18,5 @@ pip install -e .
 cd ${OPWD}
 git clone https://github.com/adcroft/numpypi.git
 cd numpypi
-cp numpypi_series.py ignore_this.py ${LIBROOT}
+cp numpypi_series.py ignore_this.py ${CONDA_PREFIX}/lib/python*/site-packages/
 cd ${OPWD}

@@ -16,6 +16,7 @@
    - [X] Publish initial commit to ESMG
    - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
+   - [ ] Make library installable via pip or setup.py
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
    - [ ] Pictorial manual for installation process
@@ -30,7 +31,6 @@
    - [ ] Boundery condition support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
-   - [ ] This library is installable via pip
    - [ ] This library is installable via conda
    - [ ] Subset existing grids and infrastructure
 
