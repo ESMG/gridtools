@@ -36,9 +36,15 @@ jobs:
           uname -a
           printenv
 
+      # Show the environment of the runner
+      - name: Conda init
+        run: |
+          conda init bash
+
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
+          conda update -n base -c defaults conda
           conda env create conda/gridTools_export.yml
           conda activate gridTools
           python -m pip install .
