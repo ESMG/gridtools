@@ -6,6 +6,10 @@
  - Start on continuous integration (CI) and testing of repo code to help check for inadvertant bugs
  - Add a contributing stub.
  - Modify initial workflow to do some basic sluthing.
+ - Pare down gridTools environment
+ - Remove netCDF4 module from app.py since we have xarray
+ - Add pytest and some tests; try in CI
+ - Update conda README with update instructions with explicit
 
 # 2021-05-13
 

@@ -25,6 +25,8 @@ These are people, references and bookmarks that provided useful information to m
 ## Bookmarks
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+ * https://docs.github.com/en/actions/quickstart
+ * https://docs.pytest.org/en/6.2.x/getting-started.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://geohackweek.github.io/nDarrays/09-masking/
@@ -38,7 +40,6 @@ These are people, references and bookmarks that provided useful information to m
  * https://matplotlib.org/stable/tutorials/colors/colormaps.html
  * https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py
  * https://panel.holoviz.org/gallery/index.html
-
  * https://pangeo-xesmf.readthedocs.io/en/latest/notebooks/Compare_algorithms.html
  * https://rabernat.github.io/research_computing/xarray.html
  * https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html

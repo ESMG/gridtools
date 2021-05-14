@@ -23,6 +23,12 @@ $ conda env create -f conda/xesmfTools.yml
 $ conda env export > conda/xesmfTools_export.yml
 ```
 
+NOTE: The environment can also be exported using `conda --list explicit`.
+
+```
+$ conda list --explicit > conda/xesmfTools_explicit.yml
+```
+
 For a quicker recovery of a conda environment, use the exported YAML file:
 ```
 $ conda env remove --name xesmfTools
@@ -34,17 +40,22 @@ multiple steps are required to help conda resolve dependencies.
 
 Example:
 ```
-$ conda env create -f gridtools/conda/gridTools.yml
+$ conda env create -f conda/gridTools.yml
 $ conda activate gridTools
 (gridTools) $ conda install -c conda-forge geopandas matplotlib ipympl cartopy netcdf4 conda
-(gridTools) $ conda env export -n gridTools > gridtools/conda/gridTools_export.yml
+(gridTools) $ conda env export -n gridTools > conda/gridTools_export.yml
+```
+
+You can also restore a conda environment using the explicit dump of packages.
+```
+$ conda create --name gridTools --file conda/gridTools_explicit.txt
 ```
 
 You can capture the time it takes to run the creation of an enviroment as well
 as set a timeout so you can tune the YAML file.  In this example, the timeout
 is set to 5 minutes to allow resolution of the environment.
 ```
-$ time timeout 5m conda env create -f gridtools/conda/gridTools.yml
+$ time timeout 5m conda env create -f conda/gridTools.yml
 ```
 
 ## xesmfTools
@@ -102,7 +113,7 @@ to be installed before you can use interactive bokeh elements.  You can check
 to see if extensions are installed first and install extensions as needed.
 
 ```
-$ conda env create -f gridtools/conda/gridTools.yml
+$ conda env create -f conda/gridTools.yml
 $ conda activate gridTools
 (gridTools) $ jupyter labextension list
 (gridTools) $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
