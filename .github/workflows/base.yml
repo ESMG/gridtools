@@ -36,14 +36,9 @@ jobs:
           uname -a
           printenv
 
-      # Run a set of commands
-      - name: Files and directories
+      # The worker drops you in the middle of your checked out repository
+      - name: Install
         run: |
-          echo "Current directory:"
-          pwd
-          ls -a
-          echo "Github workspace:"
-          ls -lR ${{ github.workspace }}
-          echo "Root:"
-          ls -a /
+          conda info
+          python -m pip install .
 
