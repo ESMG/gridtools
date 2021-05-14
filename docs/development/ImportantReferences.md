@@ -31,6 +31,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://geohackweek.github.io/nDarrays/09-masking/
  * https://github.com/binder-examples/conda
+ * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/SciTools/cartopy/issues/787
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
  * http://mathworld.wolfram.com

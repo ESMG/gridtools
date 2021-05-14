@@ -10,6 +10,8 @@
  - Remove netCDF4 module from app.py since we have xarray
  - Add pytest and some tests; try in CI
  - Update conda README with update instructions with explicit
+ - Found key to getting conda environment working
+ - Each step needs conda activate
 
 # 2021-05-13
 

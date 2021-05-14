@@ -56,6 +56,7 @@ jobs:
       - name: Tests
         run: |
           cd ${{ github.workspace }}
+          conda activate gridTools
           cd tests
           pytest
 
