@@ -19,7 +19,7 @@ quicker recovery of a generic environment.
 Initialization:
 ```
 $ cat conda/xesmfTools.yml
-$ conda env create -f conda/xesmfTools.yml
+$ conda env create -f=conda/xesmfTools.yml
 $ conda env export > conda/xesmfTools_export.yml
 ```
 
@@ -32,7 +32,7 @@ $ conda list --explicit > conda/xesmfTools_explicit.yml
 For a quicker recovery of a conda environment, use the exported YAML file:
 ```
 $ conda env remove --name xesmfTools
-$ conda env create conda/xesmfTools_export.yaml
+$ conda env create -f=conda/xesmfTools_export.yaml
 ```
 
 NOTE: Read any post-installation comments found in the yml files.  Sometimes

@@ -24,6 +24,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      # Initialize conda environment
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
 
       # Show the environment of the runner
       - name: Environment
@@ -36,16 +40,10 @@ jobs:
           uname -a
           printenv
 
-      # Show the environment of the runner
-      - name: Conda init
-        run: |
-          conda init bash
-
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
-          conda update -n base -c defaults conda
-          conda env create conda/gridTools_export.yml
+          conda env create -f=conda/gridTools_export.yml
           conda activate gridTools
           python -m pip install .
 
