@@ -5,6 +5,7 @@
  - Delete conda/xesmfTest.yml; this used for testing a conda install environment for the reworked repo
  - Start on continuous integration (CI) and testing of repo code to help check for inadvertant bugs
  - Add a contributing stub.
+ - Modify initial workflow to do some basic sluthing.
 
 # 2021-05-13
 
