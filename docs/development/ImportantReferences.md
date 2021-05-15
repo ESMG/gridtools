@@ -27,6 +27,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/quickstart
  * https://docs.pytest.org/en/6.2.x/getting-started.html
+ * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://geohackweek.github.io/nDarrays/09-masking/

@@ -12,6 +12,9 @@
  - Update conda README with update instructions with explicit
  - Found key to getting conda environment working
  - Each step needs conda activate
+ - Update pytest tests with expected failures
+ - Add gridtool module import tests
+ - Add a couple more tests (incomplete)
 
 # 2021-05-13
 

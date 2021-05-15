@@ -135,7 +135,7 @@
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
    - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
  - [ ] Add testing harnesses.
-   - [ ] pytest: This will allow testing of core code via command line and iterative methods.
+   - [X] pytest: This will allow testing of core code via command line and iterative methods.
    - [ ] selenium: Testing interactive methods may be harder.
 
 # WISH
