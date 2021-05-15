@@ -92,7 +92,7 @@ Use the following options:
 Author: Niki Zadeh [REPO](https://github.com/nikizadehgfdl/grid_generation)
  * [regional_grid_spheical.ipynb](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb)
 
-## Numpy bitwise-the-same floating-point values
+## Portable intrinsics for numpy
 Author: Alistair Adcroft [REPO](https://github.com/adcroft/numpypi)
  * To obtain bitwise-the-same floating-point values in certain non-time-critical calculations.
 
@@ -141,7 +141,8 @@ $ python setup.py install
 
 These are the current workarounds that are required for the grid toolset
 package.  You may need to perform these steps once if you plan to install a
-copy of the grid generation software.
+copy of the grid generation software.  These workaround should be
+automatically installed with gridtools.
 
 ## datashader
 
@@ -161,11 +162,12 @@ gridtools.
 
 ## numpypi
 
-NOTE: This has not been fully implemented yet.  Do not worry about this just yet.
-
 For bitwise-the-same reproducable results, a numpy subset of computational functions are
 provided.  These routines are slower than the numpy native routines.  
-[REPO](https://github.com/adcroft/numpypi)
+[REPO](https://github.com/adcroft/numpypi).  A repackaged installable
+[REPO](https://github.com/jr3cermak/numpypi/tree/dev) of the library.
+
+
 
 # More
 

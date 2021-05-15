@@ -1,5 +1,11 @@
 # Change Log
 
+# 2021-05-15
+
+ - Aggregate mybinder.org into its binder directory to further clean up the repository
+ - Add numpypi to setup.py for automatic installation
+ - Update binder to only install gridtools(+datashader+numpypi)
+
 # 2021-05-14
 
  - Delete conda/xesmfTest.yml; this used for testing a conda install environment for the reworked repo

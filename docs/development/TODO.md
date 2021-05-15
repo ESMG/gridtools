@@ -16,10 +16,10 @@
    - [X] Publish initial commit to ESMG
    - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
-   - [ ] Make library installable via pip or setup.py
+   - [X] Make library installable via pip or setup.py
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] Pictorial manual for installation process
+   - [ ] PDF manual with figures demonstrating the installation process
    - [ ] Creation of all needed files to run a MOM6 simulation
    - [ ] Construct initial bathymetry grid for new grids
    - [ ] Construct initial grid land mask for new grids
@@ -76,8 +76,8 @@
    - [ ] xesmf regridder
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] include a dump of conda environment in the grid file (nc)
- - [ ] Add option to use Alistair's numpypi package as a configurable option in toolsets
- - [ ] turn numpypi into a loadable package via pip
+ - [ ] Add option to use Alistair's numpypi package as a configurable option in gridtools
+ - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
@@ -91,7 +91,7 @@
  - [X] Create an application method within the GridUtils() class; GridTools().app()
  - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [ ] create a setup.py to allow this library to be installable via pip
+ - [X] create a setup.py to allow this library to be installable via pip
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
        the supergrid.
 
@@ -134,6 +134,8 @@
    - [ ] Reset appropriately when clearGrid() is called
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
    - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
+ - [ ] numpypi
+   - [ ] test fails in test_trunc.py
  - [ ] Add testing harnesses.
    - [X] pytest: This will allow testing of core code via command line and iterative methods.
    - [ ] selenium: Testing interactive methods may be harder.

@@ -26,6 +26,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/quickstart
+ * https://pypi.org/classifiers/
  * https://docs.pytest.org/en/6.2.x/getting-started.html
  * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
