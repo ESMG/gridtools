@@ -17,9 +17,9 @@
    - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
    - [X] Make library installable via pip or setup.py
+   - [X] Specific installation instructions
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] PDF manual with figures demonstrating the installation process
    - [ ] Creation of all needed files to run a MOM6 simulation
    - [ ] Construct initial bathymetry grid for new grids
    - [ ] Construct initial grid land mask for new grids
@@ -138,6 +138,8 @@
    - [ ] test fails in test_trunc.py
  - [ ] Add testing harnesses.
    - [X] pytest: This will allow testing of core code via command line and iterative methods.
+   - [ ] pytest: Setup some simple projection tests: IBCAO, ....
+   - [ ] pytest: Refactor numpypi into structured tests under pytest
    - [ ] selenium: Testing interactive methods may be harder.
 
 # WISH

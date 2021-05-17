@@ -1,5 +1,12 @@
 # Change Log
 
+# 2021-05-17
+
+ - Merge updates
+   - Add netcdf metadata: grid\*, conda\_env, package\_versions and software\_version.
+ - Redefining gridTools.yml.  Attempting to combine panel, xesmf and xgcm packages.
+   - Currently defined gridTools loads xesmf(0.5.3) and xgcm(0.5.1) for x86\_64.
+
 # 2021-05-15
 
  - Aggregate mybinder.org into its binder directory to further clean up the repository
