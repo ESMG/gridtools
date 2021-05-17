@@ -1,6 +1,4 @@
 name: gridTools
-# This allows us to create or modify model grids.
-# Use "xesmfTools" to manipulate grid content.
 channels:
   - pyviz
   - conda-forge
