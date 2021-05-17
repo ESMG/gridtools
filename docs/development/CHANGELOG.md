@@ -2,7 +2,7 @@
 
 # 2021-05-17
 
- - Merge updates
+ - Merge updates (PR#2)
    - Add netcdf metadata: grid\*, conda\_env, package\_versions and software\_version.
  - Redefining gridTools.yml.  Attempting to combine panel, xesmf and xgcm packages.
    - Currently defined gridTools loads xesmf(0.5.3) and xgcm(0.5.1) for x86\_64.
