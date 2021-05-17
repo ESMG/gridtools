@@ -23,11 +23,17 @@ $ conda env create -f=conda/xesmfTools.yml
 $ conda env export > conda/xesmfTools_export.yml
 ```
 
+NOTE: The exported yml file will specify a directory path for installation.  It is
+recommended to delete the last line in the yml file before publication.
+
 NOTE: The environment can also be exported using `conda --list explicit`.
 
 ```
-$ conda list --explicit > conda/xesmfTools_explicit.yml
+$ conda list --explicit > conda/xesmfTools_explicit.txt
 ```
+
+NOTE: The explicit dumps will contain a specific OS platform target (e.g. linux-64) and
+may not be compatible with the intended target platform for installation of the library.
 
 For a quicker recovery of a conda environment, use the exported YAML file:
 ```

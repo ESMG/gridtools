@@ -47,6 +47,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://rabernat.github.io/research_computing/xarray.html
  * https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html
  * https://realpython.com/python-bindings-overview/
+ * https://rietta.com/blog/github-merge-types/
  * https://scitools.org.uk/cartopy/docs/latest/index.html
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
  * https://scitools.org.uk/cartopy/docs/latest/gallery/effects_of_the_ellipse.html

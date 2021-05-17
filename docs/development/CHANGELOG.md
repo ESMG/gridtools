@@ -6,6 +6,8 @@
    - Add netcdf metadata: grid\*, conda\_env, package\_versions and software\_version.
  - Redefining gridTools.yml.  Attempting to combine panel, xesmf and xgcm packages.
    - Currently defined gridTools loads xesmf(0.5.3) and xgcm(0.5.1) for x86\_64.
+ - Indicate some pitfalls in maintaining exported configurations for conda
+ - Resync binder/environment.yml with conda/gridTools\_export.yml
 
 # 2021-05-15
 
