@@ -4,6 +4,8 @@ import cartopy, warnings, pdb
 import numpy as np
 import xarray as xr
 from pyproj import CRS, Transformer
+import pandas as pd
+import requests
 
 # Needed for panel.pane                
 from matplotlib.figure import Figure
@@ -433,6 +435,31 @@ class GridUtils:
         self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
         self.grid.attrs['history'] = "%s: created grid with GridTools library" % (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
         self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
+        self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
+        self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
+        self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
+        self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
+        self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
+        self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
+        self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
+        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+                        
+        try:
+            os.system("conda list --explicit > package_versions.txt")
+            self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+        except:
+            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']           
+        
+        
+        try:
+            response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
+            self.grid.attrs['software_version'] =  print(response.json()["name"])         
+        except:
+            self.grid.attrs['software_version'] = ""
+        
+        
+        
         try:
             self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
         except:

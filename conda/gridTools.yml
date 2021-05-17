@@ -2,16 +2,20 @@ name: gridTools
 # This allows us to create or modify model grids.
 # Use "xesmfTools" to manipulate grid content.
 channels:
+  - pyviz
   - conda-forge
 dependencies:
-  - panel
+  - cartopy
+  - conda
+  - coverage
+  - dask
   - jupyterlab
   - matplotlib
-  - cartopy
-  - xarray
-  - dask
+  - pandas
+  - panel
+  - pip
   - pyproj
   - pytest
-  - converage
-  - conda
-  - pip
+  - xarray
+  - xesmf
+  - xgcm
