@@ -5,40 +5,38 @@ manage python environments.  To learn much more details about
 conda, we suggest visiting the 
 [conda documentation](https://docs.conda.io/projects/conda/en/latest/index.html) website.
 
-A YAML specification file is to configurate a python environment.  We have prepared
+A YAML specification file is to configure a python environment.  We have prepared
 a few specification files, please see the conda directory.
 
 These instructions assume you have conda/miniconda installed.  If conda is not installed,
 please consult this
 [webpage](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
-There is a generic YAML file that pulls together a development environment.  To
-expidite the conda environment solver, a YAML\_export file is also provided for
-quicker recovery of a generic environment.
+If **conda cannot be used**, please consult the
+[required software](../development/Requirements.md) for packages to install.
+
+Several basic YAML files are provided to install an appropriate python environment.
+To expidite the conda environment solver, a YAML\_export or YAML\_explicit file is
+also provided for quicker recovery of python environment.
 
 Initialization:
 ```
-$ cat conda/xesmfTools.yml
-$ conda env create -f=conda/xesmfTools.yml
-$ conda env export > conda/xesmfTools_export.yml
+$ cat conda/gridTools.yml
+$ conda env create -f=conda/gridTools.yml
+$ conda env export > conda/gridTools_export.yml
+$ conda list --explicit > conda/gridTools_explicit.txt
 ```
 
 NOTE: The exported yml file will specify a directory path for installation.  It is
 recommended to delete the last line in the yml file before publication.
-
-NOTE: The environment can also be exported using `conda --list explicit`.
-
-```
-$ conda list --explicit > conda/xesmfTools_explicit.txt
-```
 
 NOTE: The explicit dumps will contain a specific OS platform target (e.g. linux-64) and
 may not be compatible with the intended target platform for installation of the library.
 
 For a quicker recovery of a conda environment, use the exported YAML file:
 ```
-$ conda env remove --name xesmfTools
-$ conda env create -f=conda/xesmfTools_export.yaml
+$ conda env remove --name gridTools
+$ conda env create -f=conda/gridTools_export.yaml
 ```
 
 NOTE: Read any post-installation comments found in the yml files.  Sometimes
@@ -57,75 +55,29 @@ You can also restore a conda environment using the explicit dump of packages.
 $ conda create --name gridTools --file conda/gridTools_explicit.txt
 ```
 
-You can capture the time it takes to run the creation of an enviroment as well
-as set a timeout so you can tune the YAML file.  In this example, the timeout
-is set to 5 minutes to allow resolution of the environment.
+## Performance
+
+Sometimes the conda resolution can take a very long time to run.
+Setting an automatic timeout is recommended if building a custom
+conda enviroment.  This can be done using the `timeout` feature
+of UNIX `time` command.  
+
+In this example, the timeout is set to 5 minutes to allow resolution
+of the environment.
 ```
 $ time timeout 5m conda env create -f conda/gridTools.yml
 ```
 
-## xesmfTools
-
-This is the main enviroment for utilizing the grid generation libraries.
-
-Some of the main libraries within this environment:
- * cartopy
- * esmf
- * esmpy
- * xarray
- * xesmf
-
-NOTE: Avoid version 0.5.2 of xesmf.  If you need to use the xgcm library,
-      install it as a separate environment.
-
 # Environments
 
-Current operational environment for the grid toolset: ***xesmfTools***
-
-## Initialization
-
-Initialization times:
- * bokeh: 9m 17s
- * gridTools: 11m 47s(!)
- * legacyTools: 4m 53s(!)
- * pangeo: 10m 41s
- * pyroms: 1m 43s
- * xesmfTools: 5m 5s(!)
-
-(!) Requires post installation steps, see below.
-
-This list of environments may change over time.  Other environments
-are used for experimentation and development purposes in another 
-development [repository](https://github.com/jr3cermak/gridtools).
-
-## xesmfTools
-
-Please read the YAML configuration file,
-[xesmfTools.yml](../../conda/xesmfTools.yml),
-for additional steps to create a complete environment.
-
-If you use the export file, you only need to install datashader.  If you use
-the xesmfTools.yml, you will need to install additional libraries in conda
-and install datashader.  
-
-Attempting to load all the libraries together initially takes conda a very
-long time to resolve package conflicts or it fails completely.  Partitioning
-the install process speeds up the process and is more successful.
+Current operational environment for the grid toolset: ***gridTools***
 
 ## gridTools
 
-After installing the initial environment, two jupyter lab extensions may need
-to be installed before you can use interactive bokeh elements.  You can check
-to see if extensions are installed first and install extensions as needed.
+This is the main enviroment for utilizing the grid generation libraries.
 
-```
-$ conda env create -f conda/gridTools.yml
-$ conda activate gridTools
-(gridTools) $ jupyter labextension list
-(gridTools) $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-(gridTools) $ jupyter labextension install @bokeh/jupyter_bokeh
-```
-
+NOTE: Avoid version 0.5.2 of xesmf.  If you need to use the xgcm library,
+      install it as a separate environment.
 ## legacyTools
 
 NOTE: This is a very limited environment with netcdf4 and matplotlib's basemap
