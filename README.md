@@ -141,8 +141,8 @@ $ python setup.py install
 
 These are the current workarounds that are required for the grid toolset
 package.  You may need to perform these steps once if you plan to install a
-copy of the grid generation software.  These workaround should be
-automatically installed with gridtools.
+copy of the grid generation software.  These workarounds should be
+automatically installed with an installation of gridtools.
 
 ## datashader
 
@@ -162,12 +162,10 @@ gridtools.
 
 ## numpypi
 
+Portable intrinsics for numpy ([REPO](https://github.com/adcroft/numpypi)).
 For bitwise-the-same reproducable results, a numpy subset of computational functions are
-provided.  These routines are slower than the numpy native routines.  
-[REPO](https://github.com/adcroft/numpypi).  A repackaged installable
-[REPO](https://github.com/jr3cermak/numpypi/tree/dev) of the library.
-
-
+provided.  These routines are slower than the numpy native routines.
+A repackaged installable [REPO](https://github.com/jr3cermak/numpypi/tree/dev) of the library.
 
 # More
 
@@ -179,6 +177,7 @@ to upkeep of a manual index.
   * [development](docs/development)
     * [CHANGELOG](docs/development/CHANGELOG.md): Development log of changes
     * [CREDITS](docs/development/CREDITS.md)
+    * [DEPLOY](docs/development/DEPLOY.md)
     * [Design](docs/development/Design.md): Design elements for the grid generation library
     * [Important References](docs/development/ImportantReferences.md): Things that helped this project work
     * [Jupyter](docs/development/Jupyter.md): Notes on embeddeding applications within a notebook

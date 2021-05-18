@@ -1,5 +1,9 @@
 # Change Log
 
+# 2021-05-18
+
+ - Finish out documentation updates for PR#1
+
 # 2021-05-17
 
  - Merge updates (PR#2)
