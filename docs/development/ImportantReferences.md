@@ -28,6 +28,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
  * https://docs.github.com/en/actions/quickstart
  * https://pypi.org/classifiers/
+ * https://docs.github.com/en/github/writing-on-github/autolinked-references-and-urls
  * https://docs.pytest.org/en/6.2.x/getting-started.html
  * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids

@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+# conda: gridTools
+
+# Gridtools library demonstration in
+#  * Command line
+#  * ipython
+#  * jupyter lab console
+
 import os, sys, logging
 from gridtools.gridutils import GridUtils
 

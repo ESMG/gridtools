@@ -1,10 +1,11 @@
 #!/bin/env python3
 
-# conda: xesmfTools
+# conda: gridTools
 
-# Grid toolset demonstration in
-#  * Command line script form
+# Gridtools library demonstration in
+#  * Command line
 #  * ipython
+#  * jupyter lab console
 
 import sys, os, logging
 from gridtools.gridutils import GridUtils
