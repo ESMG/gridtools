@@ -1,26 +1,14 @@
 #!/bin/env python3
 
-# conda: xesmfTools
+# conda: gridTools
 
-# Grid toolset demonstration in
-#  * Command line script form
+# Gridtools library demonstration in
+#  * Command line
 #  * ipython
+#  * jupyter lab console
 
 import sys, os, logging
-
-#if (os.environ.get('LIBROOT')):
-#    sys.path.append(os.environ.get('LIBROOT'))
-sys.path.append('lib')
-
-#from sysinfo import SysInfo
-#info = SysInfo()
-#info.show(vList=['platform','python','esmf','esmpy','xgcm','xesmf',
-#                 'netcdf4','numpy','xarray',
-#                 'cartopy','matplotlib',
-#                 'jupyter_core','jupyterlab','notebook',
-#                 'dask'])
-
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 # Initialize a grid object
 grd = GridUtils()
@@ -29,7 +17,7 @@ grd.printMsg("")
 
 # We can turn on extra output from the module
 grd.printMsg("Set print and logging messages to the DEBUG level.")
-logFilename = 'configs/test/nikiTest.log'
+logFilename = 'configs/test/LCC_20x30.log'
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -41,7 +29,8 @@ grd.clearGrid()
 
 # Specify the grid parameters
 # gridMode should be 2.0 for supergrid
-gtilt = 0.0
+# Normally 30.0; 0.0 for debugging
+gtilt = 30.0
 grd.printMsg("Initial grid parameters are set:")
 grd.setGridParameters({
     'projection': {
@@ -49,13 +38,19 @@ grd.setGridParameters({
         'lon_0': 230.0,
         'lat_0': 40.0
     },
-    'dx': 1.0,
+    'centerX': 230.0,
+    'centerY': 40.0,
+    'centerUnits': 'degrees',
+    'dx': 20.0,
     'dxUnits': 'degrees',
-    'dy': 1.0,
+    'dy': 30.0,
     'dyUnits': 'degrees',
     'tilt': gtilt,
     'gridResolution': 1.0,
-    'gridMode': 2.0
+    'gridMode': 2,
+    'gridType': 'MOM6',
+    'ensureEvenI': True,
+    'ensureEvenJ': True
 })
 grd.showGridParameters()
 grd.printMsg("")
@@ -74,7 +69,7 @@ grd.makeGrid()
 
 # Save the new grid to a netCDF file
 grd.printMsg("Attempt to save the grid to a netCDF file.")
-grd.saveGrid(filename="configs/test/gridTest.nc")
+grd.saveGrid(filename="configs/test/LCC_20x30_script.nc")
 
 # This prints out all the current grid parameters
 # Note: for Lambert Conformal Conic grids, two additional projection parameters are computed.
@@ -106,7 +101,7 @@ grd.setPlotParameters(
         'iLinewidth': 1.0,
         'jLinewidth': 1.0,
         'showGridCells': True,
-        'title': "Nearside Perspective: 1x1 with %.1f degree tilt" % (gtilt),
+        'title': "Nearside Perspective: 20x30 with %.1f degree tilt" % (gtilt),
         'iColor': 'k',
         'jColor': 'k'
     }
@@ -140,9 +135,9 @@ the plot.
 # You can save the figure using the savefig() method on the
 # figure object.  Many formats are possible.
 grd.printMsg("Save the figure in two different formats: jpg and pdf.")
-figure.savefig('configs/test/gridTest.jpg', dpi=None, facecolor='w', edgecolor='w',
+figure.savefig('configs/test/LCC_20x30_script.jpg', dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 
-figure.savefig('configs/test/gridTest.pdf', dpi=None, facecolor='w', edgecolor='w',
+figure.savefig('configs/test/LCC_20x30_script.pdf', dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 

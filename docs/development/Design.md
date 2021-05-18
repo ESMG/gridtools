@@ -27,6 +27,10 @@ Grid operation:
  * Zoom in/out
  * Draw, adjust or delete the drawn grid
 
+Reproducability:
+ * Added metadata to produced grid files for tracing the software stack
+ * Repository tests to sanity check accuracy of calculations
+
 ### Features
 
 This is a list of elements that would be nice to have.

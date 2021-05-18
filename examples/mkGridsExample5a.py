@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 # This is the same as Example4 but in a python script instead of
-# a notebook
+# a notebook.  This example uses a slightly different default
+# radius.
 
 import numpy as np
 import xarray as xr
@@ -17,9 +18,13 @@ y = np.arange(-2902500., 2902500. + dy, dy, dtype=np.float32)
 
 yy, xx = np.meshgrid(y, x)
 
+# From the command line we can convert single points
+# gdaltransform -s_srs "+proj=stere +lat_0=90 +lat_ts=75" -t_srs EPSG:4326
+# The pyproj library provides for 2D array transformation of coordinates.
+
 from pyproj import CRS, Transformer
 
-PROJSTRING = "+ellps=WGS84 +proj=stere +lat_0=90 +lat_ts=75"
+PROJSTRING = "+ellps=WGS84 +proj=stere +lat_0=90 +lat_ts=75 +R=6378000"
 
 # create the coordinate reference system
 crs = CRS.from_proj4(PROJSTRING)
@@ -34,8 +39,7 @@ print(yy[0,0], xx[0,0], lat[0,0], lon[0,0])
 print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1], lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])
 
 import os, sys
-sys.path.append('lib')
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 grd = GridUtils()
 
@@ -46,6 +50,7 @@ grd.setGridParameters({
     'projection': {
         'name': "Stereographic",
         'ellps': 'WGS84',
+        'R': 6378000.0,
         'lon_0': 0.0,
         'lat_0': 90.0,
         'lat_ts': 75.0,
@@ -65,7 +70,6 @@ grd.setGridParameters({
     'ensureEvenI': True,
     'ensureEvenJ': True
 })
-
 grd.grid['x'] = (('nyp','nxp'), lon)
 grd.grid['y'] = (('nyp','nxp'), lat)
 
@@ -90,6 +94,6 @@ grd.setPlotParameters(
 grd.computeGridMetrics()
 
 (figure, axes) = grd.plotGrid()
-figure.savefig('configs/test/IBCAO_Example5_script.jpg')
+figure.savefig('configs/test/IBCAO_Example5a_script.jpg')
 
 print(grd.grid)

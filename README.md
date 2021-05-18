@@ -10,75 +10,72 @@ For in depth details about the MOM6 ocean model, please visit provided
 details about this repository can be found below.  For usage of
 the GridUtils library, please visit the [user manual](docs/manual/GridUtils.md).
 
-Required items:
- * spherical.py
- * gridutils.py
- * app.py
-
-Optional items:
- * sysinfo.py
-
-Various tools are available to manipulation of new and existing grids in
-an iterative or interactive form.
+Various examples are available to demonstrate manipulation of new and existing
+grids in an iterative or interactive form.
 
 Python notebooks:
  * mkGridIterative.ipynb
  * mkGridInteractive.ipynb
 
-With this software, you should be able to operate in any mode you prefer.
+Python scripts:
+ * [examples](examples)
 
 # Operational Modes
 
 ## Command Line
 
-Using the command line or writing your own python scripts possible utilizing this library.
-To look at a few examples, please look at the mkGridsExample1.py, mkGridsExample2.py and
-mkGridsExample3.py programs.
+Using the command line or writing your own python scripts is also
+possible utilizing this library.  Please see the python scripts
+in the [examples](examples) folder.
 
 ## Command Line Widget Mode
 
  * ipython --pylab
 
-The interpreter, ipython, can run python scripts and notebook scripts.  To run a notebook
-script, you can use `ipython -c "%run your_script.ipynb"`.  Or start ipython, and then
+The interpreter, ipython, can run python scripts and notebook scripts.
+To run a notebook script, you can use
+`ipython -c "%run your_script.ipynb"`.  Or start ipython, and then
 `%run your_script.ipynb`.
 
-Again, the mkGridsExample.py programs can be run with ipython.
+The [example](examples) python scripts can also be run with ipython.
 
 ## Jupyter notebook
 
  * jupyter notebook
  
-These prefer notebook files (ipynb).  Please see the mkGridIterative.ipynb program for a hands
-on way to access the grid generation library.  
+These prefer notebook files (ipynb).  Please see the
+mkGridIterative.ipynb notebook for a hands on way to access the grid
+generation library.  
 
-A simple graphical user interface (GUI) was built and is available when you run the
+A simple graphical user interface (GUI) was built and is available using the
 mkGridInteractive.ipynb notebook.
 
 ## Jupyter lab
 
  * jupyter lab
 
-These prefer notebook files (ipynb).  Please see the mkGridIterative.ipynb program for a hands
-on way to access the grid generation library.  
+These prefer notebook files (ipynb).  Please see the
+mkGridIterative.ipynb notebook for a hands on way to access the grid
+generation library.  Jupyter lab also provides a command console
+for running python scripts.
 
-A simple graphical user interface (GUI) was built and is available when you run the
-mkGridInteractive.ipynb notebook.
+## Application
 
-## mybinder
+The grid generation application, mkGridInteractive.ipynb, can be run
+using jupyter on a cloud hosting system.
+
+### mybinder.org
 
  * Main: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ESMG/gridtools/main)
  * Dev: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ESMG/gridtools/dev)
 
-Instead of loading software on your computer, the library and application is hosted on a cloud system.  You do not
-have to install anything on your system to use the cloud system's copy of the grid generation library.
+NOTE: This is provided as a point of demonstration.  These cloud
+system instances do not persist for a long period of time and should
+not be used in production.  Any information created on these systems
+should be backed up as soon as possible.
 
-# Application
-
-The grid generation application, mkGridInteractive.ipynb, can be run on a cloud hosting system.  The application has been adapted to work on mybinder.org.
-NOTICE: The mybinder application can take upwards to 30 minutes to build.
-
-Use the following options:
+The form at mybinder.org can be manually filled out instead of useing the links
+above:
  * GitHub=https://github.com/ESMG/gridtools
  * Git ref=main
  * Launch
@@ -86,56 +83,66 @@ Use the following options:
  * Re-run all the cells
  * Have fun with the grid editor.
 
-# Code contributions
-
-## Lambert Conformal Conic Grid Generation
-Author: Niki Zadeh [REPO](https://github.com/nikizadehgfdl/grid_generation)
- * [regional_grid_spheical.ipynb](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb)
-
-## Numpy bitwise-the-same floating-point values
-Author: Alistair Adcroft [REPO](https://github.com/adcroft/numpypi)
- * To obtain bitwise-the-same floating-point values in certain non-time-critical calculations.
-
-## ROMS to MOM6 Grid Converter
-Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
- * [convert_ROMS_grid_to_MOM6.py](https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/convert_ROMS_grid_to_MOM6.py)
-
 # Installation
 
-If you plan to use the grid generation software on your system, you need to peform the following steps.
+If you plan to use the grid generation software on your system, you
+need to peform the following steps.
 
 ## Step 1
 
-[Download](https://github.com/ESMG/gridtools/archive/refs/heads/main.zip) or [clone](https://github.com/ESMG/gridtools.git) the 
-[ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
+Install conda or manually install the python libraries and software
+dependencies that would allow you to run the python scripts or notebooks.
 
-Discover the full directory path to gridtools/gridTools/lib.   Place the full path in the environment variable `LIBROOT` if you are planning to run
-the python notebooks.  If you are going to use the library in your scripts, simply append the full path to `PYTHONPATH`.  In the future, we will enable
-installation using ptyhon pip.
+We have pulled together some pre-defined environments.  You may also
+install an environment yourself.   Please review the
+[conda](docs/conda/README.md) page for more information about conda.
+
+We currently recommend the *gridTools* environment for use with this
+library.
+
+NOTE: If **conda** cannot be used,
+a list of [required software](docs/development/Requirements.md) is
+provided.  Once software and libraries are installed, the remaining
+software should be installable via pip and/or python's virtual
+environment (venv).
 
 ## Step 2
 
-Install conda or manually install the python libraries and software dependencies that would allow you to run the python scripts or notebooks.
+[Download](https://github.com/ESMG/gridtools/archive/refs/heads/main.zip)
+or [clone](https://github.com/ESMG/gridtools.git) the
+[ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
 
-We have pulled together some pre-defined environments.  You may also install an environment yourself.   Please look at the [conda](docs/conda/README.md)
-page for more information about conda.
+You may use any of the typical installation methods to install the grid
+tool library.
 
-We currently recommend the *xesmfTools* environment for use with this libaray.
+### pip
 
-## Step 3
+```
+$ cd gridtools
+$ python -m pip install .
+```
 
-Follow any steps in the "Workarounds" section.
+### setup.py
+
+```
+$ cd gridtools
+$ python setup.py install
+```
 
 # Workarounds
 
-These are the current workarounds that are required for the grid toolset
-package.  You will need to perform these steps once if you plan to install a
-copy of the grid generation software.
+These are the current workarounds that are required for the grid
+toolset package.  You may need to perform these steps once if you
+plan to install a copy of the grid generation software. 
+
+NOTE: These workarounds should be automatically installed with
+an installation of gridtools.
 
 ## datashader
 
-The lastest version from github is required for proper operation of bokeh, holoviews and panel which
-are used by the interactive portions of the grid generation library.
+The lastest version from github is required for proper operation of
+bokeh, holoviews and panel which are used by the interactive portions
+of the grid generation library.
 
 [REPO](https://github.com/holoviz/datashader)
 
@@ -145,13 +152,29 @@ Installation:
   * Make sure your conda enviroment is active.
   * `pip install -e .`
 
+NOTE: The datashader library should be automatically installed as a
+dependency of gridtools.
+
 ## numpypi
 
-NOTE: This has not been fully implemented yet.  Do not worry about this just yet.
-
+Portable intrinsics for numpy ([REPO](https://github.com/adcroft/numpypi)).
 For bitwise-the-same reproducable results, a numpy subset of computational functions are
-provided.  These routines are slower than the numpy native routines.  
-[REPO](https://github.com/adcroft/numpypi)
+provided.  These routines are slower than the numpy native routines.
+A repackaged installable [REPO](https://github.com/jr3cermak/numpypi/tree/dev) of the library.
+
+# Code contributions
+
+## Lambert Conformal Conic Grid Generation
+Author: Niki Zadeh [REPO](https://github.com/nikizadehgfdl/grid_generation)
+ * [regional_grid_spheical.ipynb](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb)
+
+## Portable intrinsics for numpy
+Author: Alistair Adcroft [REPO](https://github.com/adcroft/numpypi)
+ * To obtain bitwise-the-same floating-point values in certain non-time-critical calculations.
+
+## ROMS to MOM6 Grid Converter
+Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
+ * [convert_ROMS_grid_to_MOM6.py](https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/convert_ROMS_grid_to_MOM6.py)
 
 # More
 
@@ -163,6 +186,7 @@ to upkeep of a manual index.
   * [development](docs/development)
     * [CHANGELOG](docs/development/CHANGELOG.md): Development log of changes
     * [CREDITS](docs/development/CREDITS.md)
+    * [DEPLOY](docs/development/DEPLOY.md)
     * [Design](docs/development/Design.md): Design elements for the grid generation library
     * [Important References](docs/development/ImportantReferences.md): Things that helped this project work
     * [Jupyter](docs/development/Jupyter.md): Notes on embeddeding applications within a notebook
@@ -183,5 +207,7 @@ to upkeep of a manual index.
 
 # Development
 
-This project is soliciting help in development.  Please contribute ideas or bug requests using the issues tab.
-Code contributions can be sent via github's pull request process.
+This project is soliciting help in development.  Please contribute
+ideas or bug requests using the issues tab.  Code contributions can
+be sent via github's pull request process.  Code adoption will follow
+the [contribution](CONTRIBUTING.md) process.

@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
+# conda: gridTools
+
+# Gridtools library demonstration in
+#  * Command line
+#  * ipython
+#  * jupyter lab console
+
 import os, sys, logging
-sys.path.append('lib')
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 grd = GridUtils()
 
@@ -15,7 +21,7 @@ grd.printMsg("developers may ask for other information depending on the nature o
 grd.printMsg("the problem.")
 grd.printMsg("---")
 
-from sysinfo import SysInfo
+from gridtools.sysinfo import SysInfo
 info = SysInfo()
 info.show(vList=['platform','python','esmf','esmpy','xgcm','xesmf',
                  'netcdf4','numpy','xarray',

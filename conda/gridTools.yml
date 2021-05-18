@@ -1,21 +1,19 @@
 name: gridTools
-# This allows us to create or modify model grids.
-# Use this tool to perform mask editing operations.
-# Use "xesmfTools" to manipulate grid content.
-# Load other packages after initial environment creation:
-# -c conda-forge geopandas matplotlib ipympl cartopy netcdf4 conda
 channels:
+  - pyviz
   - conda-forge
 dependencies:
-  - netcdf4
+  - cartopy
+  - conda
+  - coverage
+  - dask
   - jupyterlab
   - matplotlib
+  - pandas
+  - panel
+  - pip
+  - pyproj
+  - pytest
+  - xarray
   - xesmf
   - xgcm
-  - cartopy
-  - panel
-  - jupyterlab
-  - pandas
-  - pyproj
-  - conda
-  - pip

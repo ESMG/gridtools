@@ -7,10 +7,8 @@ import numpy as np
 import cartopy.crs as ccrs
 import cartopy
 import matplotlib.pyplot as plt
-import netCDF4 as nc
 import warnings
 import xarray as xr
-import xgcm
 from io import BytesIO
 import panel as pn
 pn.extension()

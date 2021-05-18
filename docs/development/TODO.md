@@ -2,7 +2,7 @@
 
 ## Milestones
 
- - [ ] Version 0.1
+ - [X] Version 0.1
    - [X] Simple polar grid generation
    - [X] Clean up documentation
    - [X] Generify current examples
@@ -16,12 +16,13 @@
    - [X] Publish initial commit to ESMG
    - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
-   - [ ] Improve reproducibility of library
+   - [X] Make library installable via pip or setup.py
+   - [X] Specific installation instructions
+   - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] Pictorial manual for installation process
    - [ ] Creation of all needed files to run a MOM6 simulation
-   - [ ] Provide initial bathymetry grid
-   - [ ] Provide initial grid land mask
+   - [ ] Construct initial bathymetry grid for new grids
+   - [ ] Construct initial grid land mask for new grids
  - [ ] Verison 0.x
    - [ ] Leverage dask (expecially for binder.org)
    - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
@@ -30,7 +31,6 @@
    - [ ] Boundery condition support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
-   - [ ] This library is installable via pip
    - [ ] This library is installable via conda
    - [ ] Subset existing grids and infrastructure
 
@@ -76,8 +76,8 @@
    - [ ] xesmf regridder
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] include a dump of conda environment in the grid file (nc)
- - [ ] Add option to use Alistair's numpypi package as a configurable option in toolsets
- - [ ] turn numpypi into a loadable package via pip
+ - [ ] Add option to use Alistair's numpypi package as a configurable option in gridtools
+ - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
@@ -91,7 +91,7 @@
  - [X] Create an application method within the GridUtils() class; GridTools().app()
  - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [ ] create a setup.py to allow this library to be installable via pip
+ - [X] create a setup.py to allow gridtools to be installable via pip
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
        the supergrid.
 
@@ -134,8 +134,13 @@
    - [ ] Reset appropriately when clearGrid() is called
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
    - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
+ - [ ] numpypi
+   - [ ] a test fails in test_trunc.py
  - [ ] Add testing harnesses.
-   - [ ] pytest: This will allow testing of core code via command line and iterative methods.
+   - [X] pytest: This will allow testing of core code via command line and iterative methods.
+   - [ ] pytest: Setup some simple projection tests: IBCAO, ....
+   - [ ] pytest: Refactor numpypi into structured tests under pytest
+   - [ ] pytest: allow certain tests to fail if a module is not available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
 
 # WISH
@@ -164,6 +169,9 @@
  - [ ] Subset any grid for running with MOM6
    - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
    - [ ] May be especially useful for debugging situations
+ - [ ] Allow gridtools to be used without xesmf and xgcm; enable module detection for available capabilities
+ - [ ] Update setup.py and other files with package dependencies
+   - Create a configuration script that would perform autosetup of gridtools library
  - [ ] Pull in BC and forcing fields from various sources
    - [ ] Delta method: "We extract 20-30 years of a future projection from several models, build an average of each forcing variable which we superpose on modern day climate.  It’s the so-called delta method.  It debiases climate projections relative to modern day (reanalysis constrained) dynamics, but adds the climate change signal on top of it (as a secular change/delta)."
    - [ ] CMIP/ESM

@@ -5,8 +5,7 @@
 # supergrid of 41x41
 
 import os, sys
-sys.path.append('lib')
-from gridutils import GridUtils
+from gridtools.gridutils import GridUtils
 
 grd = GridUtils()
 grd.clearGrid()

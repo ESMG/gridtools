@@ -1,9 +1,68 @@
 # Change Log
 
+# 2021-05-18
+
+ - Finish out documentation updates for PR#1
+
+# 2021-05-17
+
+ - Merge updates (PR#2)
+   - Add netcdf metadata: grid\*, conda\_env, package\_versions and software\_version.
+ - Redefining gridTools.yml.  Attempting to combine panel, xesmf and xgcm packages.
+   - Currently defined gridTools loads xesmf(0.5.3) and xgcm(0.5.1) for x86\_64.
+ - Indicate some pitfalls in maintaining exported configurations for conda
+ - Resync binder/environment.yml with conda/gridTools\_export.yml
+
+# 2021-05-15
+
+ - Aggregate mybinder.org into its binder directory to further clean up the repository
+ - Add numpypi to setup.py for automatic installation
+ - Update binder to only install gridtools(+datashader+numpypi)
+
+# 2021-05-14
+
+ - Delete conda/xesmfTest.yml; this used for testing a conda install environment for the reworked repo
+ - Start on continuous integration (CI) and testing of repo code to help check for inadvertant bugs
+ - Add a contributing stub.
+ - Modify initial workflow to do some basic sluthing.
+ - Pare down gridTools environment
+ - Remove netCDF4 module from app.py since we have xarray
+ - Add pytest and some tests; try in CI
+ - Update conda README with update instructions with explicit
+ - Found key to getting conda environment working
+ - Each step needs conda activate
+ - Update pytest tests with expected failures
+ - Add gridtool module import tests
+ - Add a couple more tests (incomplete)
+
+# 2021-05-13
+
+ - Add datashader dependency to setup.py
+ - Remove duplicate logging example
+ - Update examples to use refactored installable library
+ - Update mybinder.org to see if that still works with refactored library
+ - Refactored library: from gridutils import GridUtils becomes from gridtools.gridutils import GridUtils, etc
+ - Add .swp to .gitignore 
+ - Move installable library to 0.2 milestones
+ - Remove LIBROOT dependency for library
+ - setup.py installs the datashader requirement
+ - Update documentation for installation and use
+ - Fix mybinder.org detection in application
+ - Fix mybinder.org installation paths
+
 # 2021-05-11
 
  - Finish out 0.1 milestones
  - Add more TODOs including reproducibility goals
+ - Create a exp/pipInstaller branch for testing
+ - Refactor repo (again) to support pip install of library
+ - Copied a versioning method from the sphinx project
+ - Removed warning handling
+ - Removed xgcm from app.py (not sure why it was working either)
+ - Had to change how gridutils.py imports packages at its own level to enable from gridtools import * to work
+ - Add a pyproject.toml file template; had to delete build-backend for pip install -e . to work
+ - Modify setuptools import to model that of the sphinx setup.py
+ - Refactoring likely broke a lot of stuff...have to check
 
 # 2021-05-10
 
