@@ -10,22 +10,15 @@ For in depth details about the MOM6 ocean model, please visit provided
 details about this repository can be found below.  For usage of
 the GridUtils library, please visit the [user manual](docs/manual/GridUtils.md).
 
-Required items:
- * spherical.py
- * gridutils.py
- * app.py
-
-Optional items:
- * sysinfo.py
-
-Various tools are available to manipulation of new and existing grids in
-an iterative or interactive form.
+Various examples are available to demonstrate manipulation of new and existing
+grids in an iterative or interactive form.
 
 Python notebooks:
  * mkGridIterative.ipynb
  * mkGridInteractive.ipynb
 
-With this software, you should be able to operate in any mode you prefer.
+Python scripts:
+ * [examples](examples)
 
 # Operational Modes
 
@@ -49,21 +42,19 @@ Again, the mkGridsExample.py programs can be run with ipython.
 
  * jupyter notebook
  
-These prefer notebook files (ipynb).  Please see the mkGridIterative.ipynb program for a hands
+These prefer notebook files (ipynb).  Please see the mkGridIterative.ipynb notebook for a hands
 on way to access the grid generation library.  
 
-A simple graphical user interface (GUI) was built and is available when you run the
+A simple graphical user interface (GUI) was built and is available using the
 mkGridInteractive.ipynb notebook.
 
 ## Jupyter lab
 
  * jupyter lab
 
-These prefer notebook files (ipynb).  Please see the mkGridIterative.ipynb program for a hands
-on way to access the grid generation library.  
-
-A simple graphical user interface (GUI) was built and is available when you run the
-mkGridInteractive.ipynb notebook.
+These prefer notebook files (ipynb).  Please see the mkGridIterative.ipynb notebook for a hands
+on way to access the grid generation library.  Jupyter lab also provides a command console
+for running python scripts.
 
 ## mybinder
 
@@ -85,20 +76,6 @@ Use the following options:
  * Once the server loads, navigate to gridTools/mkMapInteractive.ipynb
  * Re-run all the cells
  * Have fun with the grid editor.
-
-# Code contributions
-
-## Lambert Conformal Conic Grid Generation
-Author: Niki Zadeh [REPO](https://github.com/nikizadehgfdl/grid_generation)
- * [regional_grid_spheical.ipynb](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb)
-
-## Portable intrinsics for numpy
-Author: Alistair Adcroft [REPO](https://github.com/adcroft/numpypi)
- * To obtain bitwise-the-same floating-point values in certain non-time-critical calculations.
-
-## ROMS to MOM6 Grid Converter
-Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
- * [convert_ROMS_grid_to_MOM6.py](https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/convert_ROMS_grid_to_MOM6.py)
 
 # Installation
 
@@ -166,6 +143,20 @@ Portable intrinsics for numpy ([REPO](https://github.com/adcroft/numpypi)).
 For bitwise-the-same reproducable results, a numpy subset of computational functions are
 provided.  These routines are slower than the numpy native routines.
 A repackaged installable [REPO](https://github.com/jr3cermak/numpypi/tree/dev) of the library.
+
+# Code contributions
+
+## Lambert Conformal Conic Grid Generation
+Author: Niki Zadeh [REPO](https://github.com/nikizadehgfdl/grid_generation)
+ * [regional_grid_spheical.ipynb](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb)
+
+## Portable intrinsics for numpy
+Author: Alistair Adcroft [REPO](https://github.com/adcroft/numpypi)
+ * To obtain bitwise-the-same floating-point values in certain non-time-critical calculations.
+
+## ROMS to MOM6 Grid Converter
+Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
+ * [convert_ROMS_grid_to_MOM6.py](https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/convert_ROMS_grid_to_MOM6.py)
 
 # More
 

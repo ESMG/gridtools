@@ -91,7 +91,7 @@
  - [X] Create an application method within the GridUtils() class; GridTools().app()
  - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [X] create a setup.py to allow this library to be installable via pip
+ - [X] create a setup.py to allow gridtools to be installable via pip
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
        the supergrid.
 
@@ -135,11 +135,12 @@
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
    - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
  - [ ] numpypi
-   - [ ] test fails in test_trunc.py
+   - [ ] a test fails in test_trunc.py
  - [ ] Add testing harnesses.
    - [X] pytest: This will allow testing of core code via command line and iterative methods.
    - [ ] pytest: Setup some simple projection tests: IBCAO, ....
    - [ ] pytest: Refactor numpypi into structured tests under pytest
+   - [ ] pytest: allow certain tests to fail if a module is not available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
 
 # WISH
@@ -168,6 +169,9 @@
  - [ ] Subset any grid for running with MOM6
    - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
    - [ ] May be especially useful for debugging situations
+ - [ ] Allow gridtools to be used without xesmf and xgcm; enable module detection for available capabilities
+ - [ ] Update setup.py and other files with package dependencies
+   - Create a configuration script that would perform autosetup of gridtools library
  - [ ] Pull in BC and forcing fields from various sources
    - [ ] Delta method: "We extract 20-30 years of a future projection from several models, build an average of each forcing variable which we superpose on modern day climate.  It’s the so-called delta method.  It debiases climate projections relative to modern day (reanalysis constrained) dynamics, but adds the climate change signal on top of it (as a secular change/delta)."
    - [ ] CMIP/ESM
