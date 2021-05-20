@@ -35,6 +35,7 @@
    - [ ] Subset existing grids and infrastructure
 
 # BUGS
+ - [ ] app:Remote Files does not save the grid in the specified directory
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
        `setGridParameters` to recursively update dictionary elements.
@@ -76,7 +77,7 @@
    - [ ] xesmf regridder
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] include a dump of conda environment in the grid file (nc)
- - [ ] Add option to use Alistair's numpypi package as a configurable option in gridtools
+ - [ ] Add option to use numpypi package (Alistair) as a configurable option in gridtools
  - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
@@ -153,7 +154,10 @@
    - [ ] Allow conversion of MOM6 grids to ROMS grids
  - [ ] grid reading and plot parameter defaults should be dynamic with grid type declaration and potentially
        split out into separate library modules? lib/gridTools/grids/{MOM6,ROMS,WRF}
- - [ ] Place additional projection metadata into MOM6 grid files
+ - [ ] Place additional metadata into MOM6 grid files
+   - [X] Grid parameters
+   - [X] Software stack, git information
+   - [ ] Alternate version/software capture if conda and/or git is not available
    - [X] Added proj string to netCDF file
    - [ ] Tri polar grid description
  - [ ] Work with generic non-mapping reference systems for use with some of the sample MOM6 problems
@@ -183,4 +187,4 @@
      - [ ] https://github.com/MackenzieBlanusa/OHC_CMIP6
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
-
+ - [ ] triton node issue: python netCDF4 large file reading seems to hang nodes

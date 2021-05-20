@@ -1,7 +1,16 @@
 # Change Log
 
+# 2021-05-20
+
+ - Add a few informational links
+ - Update to push exp/bathyV1
+
 # 2021-05-18
 
+ - Add info on running dask in a cluster environment
+ - Delete duplicate conda/docs directory; not sure how that got there
+ - Create exp/bathyV1 branch
+ - Merge https://github.com/ESMG/gridtools/pull/1
  - Finish out documentation updates for PR#1
 
 # 2021-05-17

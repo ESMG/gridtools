@@ -18,9 +18,9 @@ These are people, references and bookmarks that provided useful information to m
  * Lambert Conformal Conic grid generation provided by:
    https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb
 
-## mapx
- * NSIDC Map Transformations Library (Mapx)
-   https://nsidc.org/support/42415620-Mapx-Map-Transformations-Library
+ * A set of tools to generate model topography given model grid and observation data:
+   Branch: create_spear_grid (generates tri-polar grids)
+   https://github.com/nikizadehgfdl/ocean_model_topog_generator
 
 ## Bookmarks
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
@@ -33,7 +33,9 @@ These are people, references and bookmarks that provided useful information to m
  * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
  * https://en.wikipedia.org/wiki/World_Geodetic_System
+ * https://edbennett.github.io/high-performance-python/11-dask/index.html
  * https://geohackweek.github.io/nDarrays/09-masking/
+ * https://www.git-tower.com/learn/git/faq/delete-remote-branch/
  * https://github.com/binder-examples/conda
  * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/SciTools/cartopy/issues/787
@@ -44,11 +46,15 @@ These are people, references and bookmarks that provided useful information to m
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py
  * https://matplotlib.org/stable/tutorials/colors/colormaps.html
  * https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py
+ * https://mpi4py.readthedocs.io/en/stable/tutorial.html
+ * https://nsidc.org/support/42415620-Mapx-Map-Transformations-Library
  * https://panel.holoviz.org/gallery/index.html
+ * https://pangeo-xesmf.readthedocs.io/en/latest/large_problems_on_HPC.html#technical-point-mpi4py-considerations
  * https://pangeo-xesmf.readthedocs.io/en/latest/notebooks/Compare_algorithms.html
  * https://rabernat.github.io/research_computing/xarray.html
  * https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html
  * https://realpython.com/python-bindings-overview/
+ * https://researchcomputing.princeton.edu/support/knowledge-base/mpi4py
  * https://rietta.com/blog/github-merge-types/
  * https://scitools.org.uk/cartopy/docs/latest/index.html
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
