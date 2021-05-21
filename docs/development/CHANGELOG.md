@@ -2,6 +2,7 @@
 
 # 2021-05-20
 
+ - Add netCDF4 to gridTools.yml base packages; xarray needs it to read netcdf version 4 files
  - Add a few informational links
  - Update to push exp/bathyV1
 

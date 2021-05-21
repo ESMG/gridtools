@@ -9,6 +9,7 @@ dependencies:
   - dask
   - jupyterlab
   - matplotlib
+  - netCDF4
   - pandas
   - panel
   - pip
