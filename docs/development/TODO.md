@@ -17,22 +17,24 @@
    - [X] Ensure mybinder.org works with the published github commit
  - [ ] Version 0.2
    - [X] Make library installable via pip or setup.py
-   - [X] Specific installation instructions
+   - [ ] Create specific installation instructions
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
    - [ ] Creation of all needed files to run a MOM6 simulation
    - [ ] Construct initial bathymetry grid for new grids
    - [ ] Construct initial grid land mask for new grids
  - [ ] Verison 0.x
+   - [ ] Sponge data preparation
+   - [ ] Subset existing grids and infrastructure
    - [ ] Leverage dask (expecially for binder.org)
    - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
    - [ ] Enhanced grid/plot projection options
    - [ ] Allow import of ROMS grid for conversion to MOM6
+   - [ ] Allow export of MOM6 grid to ROMS
    - [ ] Boundery condition support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
    - [ ] This library is installable via conda
-   - [ ] Subset existing grids and infrastructure
 
 # BUGS
  - [ ] app:Remote Files does not save the grid in the specified directory
@@ -42,6 +44,8 @@
 
 # TASKS
 
+ - [ ] Sponge data preparation
+   - [ ] Current scripts generate u,v fields on h-points; this needs to be changed to C-grid u/v-points instead
  - [ ] general documentation
    - [X] grid parameters
    - [X] plot parameters
@@ -73,8 +77,11 @@
      - [X] Allow user control
  - [ ] grid mask editor (land, etc)
  - [ ] integration of bathymetric sources and apply to grids
-   - [ ] https://github.com/nikizadehgfdl/ocean_model_topog_generator
+   - [ ] https://github.com/nikizadehgfdl/ocean\_model\_topog\_generator
    - [ ] xesmf regridder
+   - [ ] fix native zero band columns in partitions
+   - [ ] flexible partitioning
+   - [ ] implement current hack as --fix-by-overlap-qh-grid-shift
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] include a dump of conda environment in the grid file (nc)
  - [ ] Add option to use numpypi package (Alistair) as a configurable option in gridtools
