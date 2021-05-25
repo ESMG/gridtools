@@ -38,6 +38,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://www.git-tower.com/learn/git/faq/delete-remote-branch/
  * https://github.com/binder-examples/conda
  * https://github.com/marketplace/actions/setup-miniconda
+ * https://github.com/pydata/xarray/issues/2899
  * https://github.com/SciTools/cartopy/issues/787
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
  * http://mathworld.wolfram.com
@@ -75,6 +76,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://xarray.pydata.org/en/stable/examples/ROMS_ocean_model.html
  * https://xarray.pydata.org/en/stable/data-structures.html#dictionary-like-methods
  * https://xarray.pydata.org/en/stable/dask.html
+ * http://xarray.pydata.org/en/stable/user-guide/io.html#string-encoding
 
 ## Paywall Bookmarks
 
