@@ -1,5 +1,19 @@
 # Change Log
 
+# 2021-05-26
+
+ - Fix remote saving to correct directory as shown in the application
+ - Improve gridtools metadata output; add hashes to certain variables
+ - For pip installs, if jupyterlab<3.0.0 is required, require: jupyter labextension install @pyviz/jupyterlab_pyviz
+ - In gridutils, self.app was overwriting the app() function; changed to self.applicationObj
+ - Add a couple more try blocks on a machine without conda
+ - Add example #7 demonstrating grid generation of bathymetric roughness(h2)
+   and other bathymetric or other general field options.
+ - Add hashlib to gridutils
+ - Add package requirements to setup.py and requirements.txt
+ - Begin construction of topoutils.py based on ocean_model_topog_generator
+ - Begin construction of datasource.py that will manage data sources
+
 # 2021-05-20
 
  - Add netCDF4 to gridTools.yml base packages; xarray needs it to read netcdf version 4 files

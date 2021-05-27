@@ -1,6 +1,6 @@
 # General imports and definitions
 import os, sys, datetime, logging
-import cartopy, warnings, pdb
+import cartopy, warnings, pdb, hashlib
 import numpy as np
 import xarray as xr
 from pyproj import CRS, Transformer
@@ -19,7 +19,7 @@ from matplotlib.backends.backend_agg import FigureCanvas
 from . import spherical
 
 # GridUtils() application
-from . import app
+#from . import app
 
 class GridUtils:
 
@@ -31,6 +31,8 @@ class GridUtils:
         self._default_ellps = 'GRS80'
         self._default_availableGridTypes = ['MOM6']
         
+        # Application object
+        self.applicationObj = None
         # File pointers
         self.xrOpen = False
         self.xrDS = xr.Dataset()
@@ -90,8 +92,11 @@ class GridUtils:
     def app(self):
         '''By calling this function, the user is requesting the application functionality of GridUtils().
            return the dashboard, but GridUtils() also has an internal pointer to the application.'''
+        # Delay loading app module until we actually call app()
+        # GridUtils() application
+        from . import app
         appObj = app.App(grd=self)
-        self.app = appObj
+        self.applicationObj = appObj
         return appObj.dashboard
 
     def application(self, app={}):
@@ -443,14 +448,20 @@ class GridUtils:
         self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
         self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
         self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
-        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+
+        try:
+            self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+        except:
+            self.grid.attrs['conda_env'] = "Conda environment not found."
                         
         try:
             os.system("conda list --explicit > package_versions.txt")
             self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
         except:
-            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']           
-        
+            try:
+                self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+            except:
+                self.grid.attrs['conda_env'] = "Conda environment not found."
         
         try:
             response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
@@ -483,9 +494,13 @@ class GridUtils:
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
+        self.grid.dx.attrs['standard_name'] = 'grid_edge_x_distance'
         self.grid.dx.attrs['units'] = 'meters'
+        self.grid.dx.attrs['sha256'] = hashlib.sha256( np.array( self.grid['dx'] ) ).hexdigest()
         self.grid['dy'] = (('ny' , 'nxp'), R * spherical.angle_through_center( (lat[1:, :],lon[1:, :]), (lat[:-1,:  ],lon[:-1,:  ]) ))
+        self.grid.dy.attrs['standard_name'] = 'grid_edge_y_distance'
         self.grid.dy.attrs['units'] = 'meters'
+        self.grid.dy.attrs['sha256'] = hashlib.sha256( np.array( self.grid['dy'] ) ).hexdigest()
 
         # Scaling by latitude?
         cos_lat = np.cos(np.radians(lat))
@@ -498,10 +513,15 @@ class GridUtils:
         angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
         angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
         self.grid['angle_dx'] = (('nyp', 'nxp'), angle_dx)
+        #self.grid.angle_dx.attrs['standard_name'] = 'grid_vertex_x_angle_WRT_geographic_east'
+        #self.grid.angle_dx.attrs['units'] = 'degrees_east'
         self.grid.angle_dx.attrs['units'] = 'radians'
+        self.grid.angle_dx.attrs['sha256'] = hashlib.sha256( np.array( angle_dx ) ).hexdigest()
 
         self.grid['area'] = (('ny','nx'), R * R * spherical.quad_area(lat, lon))
-        self.grid.area.attrs['units'] = 'meters^2'
+        self.grid.area.attrs['standard_name'] = 'grid_cell_area'
+        self.grid.area.attrs['units'] = 'm2'
+        self.grid.area.attrs['sha256'] = hashlib.sha256( np.array( self.grid['area'] ) ).hexdigest()
 
         return
 
@@ -691,9 +711,13 @@ class GridUtils:
                     (nxp, nyp) = lonGrid.shape
 
                     self.grid['x'] = (('nyp','nxp'), lonGrid)
+                    self.grid.x.attrs['standard_name'] = 'geographic_longitude'
                     self.grid.x.attrs['units'] = 'degrees_east'
+                    self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                     self.grid['y'] = (('nyp','nxp'), latGrid)
+                    self.grid.y.attrs['standard_name'] = 'geographic_latitude'
                     self.grid.y.attrs['units'] = 'degrees_north'
+                    self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                     newGridCreated = True
 
@@ -734,9 +758,13 @@ class GridUtils:
                         (nxp, nyp) = lonGrid.shape
 
                         self.grid['x'] = (('nyp','nxp'), lonGrid)
+                        self.grid.x.attrs['standard_name'] = 'geographic_longitude'
                         self.grid.x.attrs['units'] = 'degrees_east'
+                        self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                         self.grid['y'] = (('nyp','nxp'), latGrid)
+                        self.grid.y.attrs['standard_name'] = 'geographic_latitude'
                         self.grid.y.attrs['units'] = 'degrees_north'
+                        self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                         newGridCreated = True
                     
@@ -766,9 +794,13 @@ class GridUtils:
                         (nxp, nyp) = lonGrid.shape
 
                         self.grid['x'] = (('nyp','nxp'), lonGrid)
+                        self.grid.x.attrs['standard_name'] = 'geographic_longitude'
                         self.grid.x.attrs['units'] = 'degrees_east'
+                        self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                         self.grid['y'] = (('nyp','nxp'), latGrid)
+                        self.grid.y.attrs['standard_name'] = 'geographic_latitude'
                         self.grid.y.attrs['units'] = 'degrees_north'
+                        self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                         newGridCreated = True
                     
@@ -787,9 +819,13 @@ class GridUtils:
             (nxp, nyp) = lonGrid.shape
 
             self.grid['x'] = (('nyp','nxp'), lonGrid)
+            self.grid.x.attrs['standard_name'] = 'geographic_longitude'
             self.grid.x.attrs['units'] = 'degrees_east'
+            self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
             self.grid['y'] = (('nyp','nxp'), latGrid)
+            self.grid.y.attrs['standard_name'] = 'geographic_latitude'
             self.grid.y.attrs['units'] = 'degrees_north'
+            self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
             newGridCreated = True
 
@@ -813,9 +849,13 @@ class GridUtils:
             (nxp, nyp) = lonGrid.shape
 
             self.grid['x'] = (('nyp','nxp'), lonGrid)
+            self.grid.x.attrs['standard_name'] = 'geographic_longitude'
             self.grid.x.attrs['units'] = 'degrees_east'
+            self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
             self.grid['y'] = (('nyp','nxp'), latGrid)
+            self.grid.y.attrs['standard_name'] = 'geographic_latitude'
             self.grid.y.attrs['units'] = 'degrees_north'
+            self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
             newGridCreated = True
 
@@ -870,9 +910,13 @@ class GridUtils:
             (nxp, nyp) = lonGrid.shape
 
             self.grid['x'] = (('nyp','nxp'), lonGrid)
+            self.grid.x.attrs['standard_name'] = 'geographic_longitude'
             self.grid.x.attrs['units'] = 'degrees_east'
+            self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
             self.grid['y'] = (('nyp','nxp'), latGrid)
+            self.grid.y.attrs['standard_name'] = 'geographic_latitude'
             self.grid.y.attrs['units'] = 'degrees_north'
+            self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
             # This technique seems to return a Lambert Conformal Projection with the following properties
             # This only works if the grid does not overlap a polar point
@@ -1348,11 +1392,13 @@ class GridUtils:
         return ncEncoding
 
     
-    def saveGrid(self, filename=None):
+    def saveGrid(self, filename=None, directory=None):
         '''
         This operation is destructive using the last known filename which can be overridden.
         '''
         if filename:
+            if directory:
+                filename = os.path.join(directory, filename)
             self.xrFilename = filename
             if self.grid.x.attrs['units'] == 'degrees_east':
                 self.grid.x.values = np.where(self.grid.x.values>180, self.grid.x.values-360, self.grid.x.values)
@@ -1747,4 +1793,72 @@ class GridUtils:
 
         if not(subKey):
             self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
+
+    # External routines
+
+    def compute_bathymetric_roughness_h2(self, dsName, **kwargs):
+        '''This generates h2 and depth based on an algorithm described in:
+
+        Adcroft, A., 2013: Representation of topography by porous barriers and objective
+        interpolation of topographic data. Ocean Modelling, doi:10.1016/j.ocemod.2013.03.002.
+        (http://dx.doi.org/10.1016/j.ocemod.2013.03.002)
+
+        Optional fields that can be included:
+        h_std, h_min, h_max, wet, land and height fields.  The default names
+        for h2 and depth can be changed.
+
+        By default, this generates bathymetric roughness grids on Arakawa C h-points
+
+        Options after specification of the dataset source:
+            maxMb=300
+            h2Name='h2'
+            depthName='depth'
+            auxFields=['h_std', 'h_min', 'h_max', 'wet', 'land', 'height']
+            gridPoint='uv','q','h'
+            superGrid=False,True
+              if superGrid is True, gridPoint is ignored
+
+        For gridPoint, a diagram of a grid cells is:
+
+          q-----v-----q
+          |           |
+          u     h     u
+          |           |
+          q-----v-----q
+
+        Requests may be for one type only.
+          'h' h-point; grid center
+          'q' q-point; grid corners
+          'uv' u- and v-point; grid faces
+        If you want everything, set superGrid=True
+
+        Algorithm implementation notes:
+          * For the supergrid, four zero bands along longitude are returned
+            representing the four grid partitions.  This needs to be fixed
+            in the future.
+          * For h-points, h2 is created on the q-points and shifted by 1/2
+            a grid cell back to the h-points.  Accuracy of the roughness is
+            off by a 1/2 grid cell.
+          * Support for 'q' and 'uv' grid points are not supported.
+          * If the program is running out of memory, reduce the maxMb value.
+            This reduces the available memory footprint available to
+            this routine.  This will also reduce the number of available
+            refinements against the bathymetry data source.
+        '''
+
+        return
+
+    def generate_conservative_regrid(self, dsName, **kwargs):
+        '''Generates a grid from a data source using conservative regridding.'''
+
+        return
+
+    # Data source routines
+    # url can be parsed using
+    # zz = urllib.parse.urlparse('file:///home/cermak/mom6/bathy/gebco/GEBCO_2020.nc')
+    # print(zz)
+    # ParseResult(scheme='file', netloc='', path='/home/cermak/mom6/bathy/gebco/GEBCO_2020.nc', params='', query='', fragment='')
+
+    def useDataSources(self, dsObj):
+        self.dataSourcesObj = dsObj
 

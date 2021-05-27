@@ -37,7 +37,7 @@
    - [ ] This library is installable via conda
 
 # BUGS
- - [ ] app:Remote Files does not save the grid in the specified directory
+ - [X] app:Remote Files does not save the grid in the specified directory
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
        `setGridParameters` to recursively update dictionary elements.
@@ -63,9 +63,9 @@
      - [ ] changing plot parameters lat_1 and lat_2 do not seem to impact the view
    - [ ] make Mercator grids; needs testing
      - [ ] issue a warning if tilt is non-zero - disabled
-     - [ ] Niki might have solved lat lon tilt?
      - [ ] having tilt may not produce conformal grids
      - [X] Niki's example added; but it may not be correct
+     - [ ] Niki might have solved lat lon tilt?
    - [X] make Stereographic grids; needs testing
      - [X] using meters; no tilt; based on code from Raphael
      - [X] using degrees; with tilt; based on code from Niki; may not be correct
@@ -76,14 +76,20 @@
      - [X] Gridutils initializes with proj GRS80
      - [X] Allow user control
  - [ ] grid mask editor (land, etc)
+ - [ ] integration of data sources
+   - [ ] xesmf regridder for bathymetry sources
+   - [ ] option to create land_mask fraction
+   - [ ] option to use source grid as a supergrid for coarsening
  - [ ] integration of bathymetric sources and apply to grids
    - [ ] https://github.com/nikizadehgfdl/ocean\_model\_topog\_generator
-   - [ ] xesmf regridder
    - [ ] fix native zero band columns in partitions
    - [ ] flexible partitioning
    - [ ] implement current hack as --fix-by-overlap-qh-grid-shift
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
- - [ ] include a dump of conda environment in the grid file (nc)
+ - [ ] improve reproducibility
+   - [ ] include a dump of conda environment in the grid file (nc)
+   - [ ] if conda environment does not exist, do some other snooping
+   - [X] add sha256 to grid elements
  - [ ] Add option to use numpypi package (Alistair) as a configurable option in gridtools
  - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
@@ -153,7 +159,8 @@
 
 # WISH
 
- - [ ] Add an activity spinner to indicate the notebook is busy
+ - [ ] app:Save remote files; additional sanity checks
+ - [ ] app:Add an activity spinner to indicate the notebook is busy
  - [ ] Compute angle_dy for testing of grid conformality.  Theoretically, we can do this check for all grid
        and supergrid cells.
  - [ ] tripolar grids: use FRE-NCtools via cython?
@@ -176,10 +183,10 @@
  - [ ] Add a notebook or two that demonstrates some of the esoteric API
        features of the library: help, debugging, etc.
  - [ ] Dask optimizations
-   - [ ] IBCAO grid is too big for mybinder.org
+   - [ ] creating the native IBCAO grid is too big for mybinder.org
  - [ ] Subset any grid for running with MOM6
    - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
-   - [ ] May be especially useful for debugging situations
+   - [ ] May be especially useful for debugging situations; Arctic6
  - [ ] Allow gridtools to be used without xesmf and xgcm; enable module detection for available capabilities
  - [ ] Update setup.py and other files with package dependencies
    - Create a configuration script that would perform autosetup of gridtools library

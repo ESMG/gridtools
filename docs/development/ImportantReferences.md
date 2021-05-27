@@ -5,9 +5,9 @@ These are people, references and bookmarks that provided useful information to m
 ## Alistair Adcroft
  * numpypi: https://github.com/adcroft/numpypi
 
-## Raphael Dussin
- * Use of pyproj to convert coordinates in 2D array
- * https://github.com/raphaeldussin/regrid_weights_bedmachine_gebco/blob/master/create_grids.py
+## James Simkins
+ * Conservative regridding
+   https://github.com/jsimkins2/esm_lab/blob/main/bathyTools/examples/xesmf_regrid_ex.py
 
 ## Mehmet Ilicak; Alistair Adcroft; Matthew Harrison
  * ROMS to MOM6 grid converter
@@ -22,20 +22,27 @@ These are people, references and bookmarks that provided useful information to m
    Branch: create_spear_grid (generates tri-polar grids)
    https://github.com/nikizadehgfdl/ocean_model_topog_generator
 
+   Adcroft, A., 2013: Representation of topography by porous barriers and objective
+   interpolation of topographic data. Ocean Modelling, doi:10.1016/j.ocemod.2013.03.002.
+   (http://dx.doi.org/10.1016/j.ocemod.2013.03.002)
+
+## Raphael Dussin
+ * Use of pyproj to convert coordinates in 2D array
+ * https://github.com/raphaeldussin/regrid_weights_bedmachine_gebco/blob/master/create_grids.py
+
 ## Bookmarks
- * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
+ * https://cfconventions.org/standard-names.html
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
  * https://docs.github.com/en/actions/quickstart
- * https://pypi.org/classifiers/
  * https://docs.github.com/en/github/writing-on-github/autolinked-references-and-urls
+ * https://docs.python.org/3/reference/compound_stmts.html#function-definitions
  * https://docs.pytest.org/en/6.2.x/getting-started.html
  * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://edbennett.github.io/high-performance-python/11-dask/index.html
  * https://geohackweek.github.io/nDarrays/09-masking/
- * https://www.git-tower.com/learn/git/faq/delete-remote-branch/
  * https://github.com/binder-examples/conda
  * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/pydata/xarray/issues/2899
@@ -52,6 +59,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://panel.holoviz.org/gallery/index.html
  * https://pangeo-xesmf.readthedocs.io/en/latest/large_problems_on_HPC.html#technical-point-mpi4py-considerations
  * https://pangeo-xesmf.readthedocs.io/en/latest/notebooks/Compare_algorithms.html
+ * https://pypi.org/classifiers/
  * https://rabernat.github.io/research_computing/xarray.html
  * https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html
  * https://realpython.com/python-bindings-overview/
@@ -64,23 +72,33 @@ These are people, references and bookmarks that provided useful information to m
  * https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
  * https://stackoverflow.com/questions/6999621/how-to-use-extent-in-matplotlib-pyplot-imshow
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
+ * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/21778118/counting-the-number-of-non-nan-elements-in-a-numpy-ndarray-in-python
  * https://stackoverflow.com/questions/32234156/how-to-unimport-a-python-module-which-is-already-imported
  * https://stackoverflow.com/questions/44412432/cartopy-zoom-in-to-a-region
  * https://stackoverflow.com/questions/51357691/python-logging-only-for-own-imported-modules
  * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://unidata.github.io/MetPy/latest/examples/Four_Panel_Map.html
+ * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
+ * https://www.git-tower.com/learn/git/faq/delete-remote-branch/
  * https://www.kite.com/python/answers/how-to-hide-a-figure-from-being-shown-in-matplotlib-in-python
  * https://www.mathsisfun.com/geometry/interior-angles-polygons.html
+ * https://www.myroms.org/wiki/Numerical_Solution_Technique
  * https://www.python.org/dev/peps/pep-0008/#package-and-module-names
  * https://xarray.pydata.org/en/stable/examples/ROMS_ocean_model.html
  * https://xarray.pydata.org/en/stable/data-structures.html#dictionary-like-methods
  * https://xarray.pydata.org/en/stable/dask.html
- * http://xarray.pydata.org/en/stable/user-guide/io.html#string-encoding
+ * https://xarray.pydata.org/en/stable/user-guide/io.html#string-encoding
 
 ## Paywall Bookmarks
+
+ * https://towardsdatascience.com/10-examples-to-master-args-and-kwargs-in-python-6f1e8cc30749
 
 ## For Review Later
 
  * http://dsrs.atmos.umd.edu/DATA/aosc/greenland/code/MOM4SODA/MOM_TEST/src/tools/make_hgrid/make_hgrid.c
    * Be aware, this may be Arakawa B grid code
+
+ * https://github.com/nsidc/mapx
+   * The NSIDC mapx library and associated binary tools for gridding/reprojection.
+

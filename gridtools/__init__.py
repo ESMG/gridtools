@@ -1,5 +1,5 @@
 
-__all__ = ["app", "gridutils", "spherical", "sysinfo"]
+__all__ = ["app", "datasource", "gridutils", "spherical", "sysinfo", "topoutils"]
 
 # Copied from sphinx/src/sphinx/__init__.py
 # Remove warnings support
