@@ -1,3 +1,5 @@
+numpy
+cython
 wheel
 pytest
 coverage
@@ -9,7 +11,6 @@ cartopy
 ipython
 matplotlib
 netCDF4
-numpy
 pandas
 scipy
 xarray
