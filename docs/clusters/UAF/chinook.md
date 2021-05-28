@@ -46,6 +46,8 @@ pip install pyviz-comms
 
 ## ENVIRONMENT #2
 
-conda
-conda create -n gridTools python
+conda update -n base -c defaults conda
+conda env create -f conda/gridTools.yml
 conda activate gridTools
+cd src/gridtools
+python -m pip install .

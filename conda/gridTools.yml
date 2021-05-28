@@ -10,6 +10,7 @@ dependencies:
   - jupyterlab
   - matplotlib
   - netCDF4
+  - numba
   - pandas
   - panel
   - pip
