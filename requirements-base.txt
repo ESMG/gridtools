@@ -1,5 +1,7 @@
 param
 numpy
+dask
+colorcet
 cython
 pytest
 coverage
@@ -7,3 +9,4 @@ requests
 pyct
 pykdtree
 pyproj
+datashape

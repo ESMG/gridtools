@@ -9,6 +9,7 @@ python3.7 using venv
 deactivate
 rm -rf workdir/local/venv/base
 
+# Make sure you have python3 and a compiler environment
 module load lang/Python/3.7.0-pic-intel-2019b
 # INIT-ONCE: python3 -m venv workdir/local/venv/base
 source workdir/local/venv/base/bin/activate
@@ -27,27 +28,27 @@ export LD_LIBRARY_PATH=${LOCAL_SW_PATH}/lib:${LD_LIBRARY_PATH}
 # X:proj(8.0.1): https://github.com/OSGeo/PROJ.git
 # ./configure --prefix=/import/AKWATERS/jrcermakiii/local
 
-# INIT-ONCE: pip install --upgrade pip
 # INIT-ONCE:
-pip install cython numpy setuptools
-pip uninstall certifi
-pip install certifi
-pip uninstall importlib-metadata
+pip install --upgrade pip
+pip uninstall -y setuptools
+pip install certifi cython numpy setuptools
 pip install "importlib-metadata<4"
-pip uninstall setuptools
-pip check
-
 python setup.py develop
 # INIT-ONCE:
 jupyter lab build
-pip uninstall pyviz-comms
+pip uninstall -y pyviz-comms
 pip install pyviz-comms
+pip check
 ```
 
 ## ENVIRONMENT #2
 
+conda
+
+```
 conda update -n base -c defaults conda
 conda env create -f conda/gridTools.yml
 conda activate gridTools
 cd src/gridtools
 python -m pip install .
+```

@@ -12,6 +12,25 @@ with open('requirements-post.txt') as f:
     requiredPost = f.read().splitlines()
 
 required = requiredBase + requiredPost
+requiredPackages = []
+# Process any package lines like:
+# numpypi@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
+# Change to:
+# pip@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
+# Allows python setup.py develop and python -m pip install -e . to work
+for rPkg in required:
+    # Ignore package comments
+    if rPkg.find('#') == 0:
+        continue
+    atRef = rPkg.find('@')
+    if atRef > -1:
+        pkgName = rPkg[0:atRef]
+        eggName = 'egg=%s' % (pkgName)
+        if rPkg.find(eggName) > -1:
+            nPkg = 'pip@%s' % (rPkg[atRef+1:])
+            requiredPackages.append(nPkg)
+    else:
+        requiredPackages.append(rPkg)
 
 setup(
     name="gridtools", # Replace with your own username
@@ -35,5 +54,5 @@ setup(
     ],
     packages=find_packages(exclude=['conda','docs','examples']),
     python_requires=">=3.6",
-    install_requires=required
+    install_requires=requiredPackages
 )

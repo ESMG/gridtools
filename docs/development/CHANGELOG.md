@@ -6,7 +6,9 @@
  - python setup.py develop mostly works; still some workarounds needed
  - Providing install info for specific compute clusters: python3 -m venv on UAF:chinook
  - Fixes for: python -m pip install .
-   - Add numba to gridTools conda environment
+ - Add numba to gridTools conda environment and removed as TBB was old on UAF:chinook due to ancient compiler
+ - Add other dependencies: dask, colorcet and datashape
+ - Add a hack for supporting differences in package requirements for pip vs. setup.py
 
 # 2021-05-26
 
