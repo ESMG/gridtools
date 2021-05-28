@@ -32,9 +32,11 @@ These are people, references and bookmarks that provided useful information to m
 
 ## Bookmarks
  * https://cfconventions.org/standard-names.html
+ * https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
  * https://docs.github.com/en/actions/quickstart
+ * https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
  * https://docs.github.com/en/github/writing-on-github/autolinked-references-and-urls
  * https://docs.python.org/3/reference/compound_stmts.html#function-definitions
  * https://docs.pytest.org/en/6.2.x/getting-started.html

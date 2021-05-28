@@ -1,0 +1,9 @@
+param
+numpy
+cython
+pytest
+coverage
+requests
+pyct
+pykdtree
+pyproj

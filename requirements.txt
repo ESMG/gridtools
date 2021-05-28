@@ -1,21 +1,2 @@
-numpy
-cython
-wheel
-pytest
-coverage
-requests
-pyct
-pykdtree
-pyproj
-cartopy
-ipython
-matplotlib
-netCDF4
-pandas
-scipy
-xarray
-param
-panel
-jupyterlab
-numpypi@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
-datashader@git+https://github.com/holoviz/datashader.git@v0.12.2a0#egg=datashader
+-r requirements-base.txt
+-r requirements-post.txt

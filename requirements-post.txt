@@ -1,0 +1,11 @@
+cartopy
+ipython
+matplotlib
+netCDF4
+pandas
+scipy
+xarray
+panel
+jupyterlab
+pip @ git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
+pip @ git+https://github.com/holoviz/datashader.git@v0.12.2a0#egg=datashader

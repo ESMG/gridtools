@@ -1,5 +1,11 @@
 # Change Log
 
+# 2021-05-28
+
+ - Revamped requirements for possibly a two stage install for pip?
+ - python setup.py develop mostly works; still some workarounds needed
+ - Providing install info for specific compute clusters: python3 -m venv on UAF:chinook
+
 # 2021-05-26
 
  - Fix remote saving to correct directory as shown in the application
