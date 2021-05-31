@@ -1,36 +1,13 @@
 import os
 from setuptools import find_packages, setup
 import gridtools
+import pdb
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open('requirements-base.txt') as f:
-    requiredBase = f.read().splitlines()
-
-with open('requirements-post.txt') as f:
-    requiredPost = f.read().splitlines()
-
-required = requiredBase + requiredPost
-requiredPackages = []
-# Process any package lines like:
-# numpypi@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
-# Change to:
-# pip@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
-# Allows python setup.py develop and python -m pip install -e . to work
-for rPkg in required:
-    # Ignore package comments
-    if rPkg.find('#') == 0:
-        continue
-    atRef = rPkg.find('@')
-    if atRef > -1:
-        pkgName = rPkg[0:atRef]
-        eggName = 'egg=%s' % (pkgName)
-        if rPkg.find(eggName) > -1:
-            nPkg = 'pip@%s' % (rPkg[atRef+1:])
-            requiredPackages.append(nPkg)
-    else:
-        requiredPackages.append(rPkg)
+with open('requirements.txt') as f:
+    requiredPackages = f.read().splitlines()
 
 setup(
     name="gridtools", # Replace with your own username

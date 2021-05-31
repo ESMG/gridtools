@@ -48,9 +48,9 @@ jobs:
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
-          conda env create -f=conda/gridTools_export.yml
+          conda env create -q -f conda/gridTools_export.yml
           conda activate gridTools
-          python -m pip install .
+          python -m pip install -q -e .
 
       # Run tests
       - name: Tests

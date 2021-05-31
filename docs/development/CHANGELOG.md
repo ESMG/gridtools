@@ -1,7 +1,18 @@
 # Change Log
 
+# 2021-05-30
+
+ - Consolidate requirements lists again
+ - github CI: use quiet mode for conda and pip to make output less verbose
+ - We have a complete python venv build for UAF:chinook cluster
+ - numba requires a modern compiler
+ - A couple of dependencies require openssl: nodejs particularly
+ - libtiff is required by proj
+ - Do not use python setup.py: this is a legacy installation method
+
 # 2021-05-28
 
+ - The answer is use python -m pip; do not use python setup.py
  - Revamped requirements for possibly a two stage install for pip?
  - python setup.py develop mostly works; still some workarounds needed
  - Providing install info for specific compute clusters: python3 -m venv on UAF:chinook
