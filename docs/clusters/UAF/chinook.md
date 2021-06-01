@@ -8,11 +8,9 @@ export PKG_CONFIG_PATH=${LOCAL_SW_PATH}/lib/pkgconfig
 export PATH=${LOCAL_SW_PATH}/bin:${PATH}
 export LD_LIBRARY_PATH=${LOCAL_SW_PATH}/lib64:${LOCAL_SW_PATH}/lib:${LD_LIBRARY_PATH}
 
-## binutils 2.34
-
-Required for nodejs.  Unpack tarball inside gcc-9.3.0.
-
 ## gcc 9.3.0
+
+Newer compiler required for python numba module.
 
 wget https://bigsearcher.com/mirrors/gcc/releases/gcc-9.3.0/gcc-9.3.0.tar.gz
 tar xzf gcc-9.3.0.tar.gz
@@ -26,6 +24,10 @@ cd objdir
 make -j 16 >& make.log
 make install
 LIBDIR=/import/AKWATERS/jrcermakiii/local/libexec/gcc/x86_64-pc-linux-gnu/9.3.0
+
+## binutils 2.34
+
+Newer assembler required for nodejs.  Unpack tarball inside gcc-9.3.0.
 
 ## tiff 4.3.0
 
@@ -58,8 +60,6 @@ cd Python-3.8.10
 ./configure --prefix=/import/AKWATERS/jrcermakiii/local LDFLAGS='-L/import/AKWATERS/jrcermakiii/local/lib64'
 make -j 16 >& make.log
 make install
-
-Just enough to get venv
 
 ## nodejs 14.17.0
 Apply fix to node.gypi:
@@ -103,3 +103,53 @@ conda activate gridTools
 cd src/gridtools
 python -m pip install .
 ```
+
+# jupyter
+
+It is a couple step process to launch a jupyter session from
+the UAF:chinook cluster.
+
+## Start an interactive node via srun
+
+Connect to any head node.
+
+```
+srun -p t1small --nodes=1 --exclusive --pty /bin/bash
+```
+
+Ensure the enviroment is set to run gridtools and start jupyter lab.
+
+Use the IP address to start jupyter lab.
+
+```
+jupyter lab --ip=10.50.50.4 --no-browser
+```
+
+Copy the http://127.0.0.1:8888/... link for use below.
+
+Find the IP address of the interactive node and put into
+`COMPUTE_NODE` on your local machine from
+a separate shell.
+
+```
+export COMPUTE_NODE=10.50.50.4
+```
+
+## Forward port 8888
+
+From any head node to your local machine.
+
+```
+ssh -A -X -Y -L 8888:${COMPUTE_NODE}:8888 jrcermakiii@chinook04.rcs.alaska.edu
+```
+
+Once connected, paste the link that was copied above into a browser on
+your local machine.
+
+If also using dask, forward port 8787 also.
+
+```
+ssh -A -X -Y -L 8888:${COMPUTE_NODE}:8888 8787:${COMPUTE_NODE}:8787 jrcermakiii@chinook04.rcs.alaska.edu
+```
+
+
