@@ -16,7 +16,7 @@ grids in an iterative or interactive (application) form.
 Python notebooks:
  * [mkGridIterative.ipynb](examples/mkGridIterative.ipynb)
  * [mkGridInteractive.ipynb](examples/mkGridInteractive.ipynb)
-   * The [gridtools application tutorial](docs/manual/gridtoolsAppTutorial.ipynb)
+   * The [gridtools application tutorial](docs/manual/gridtoolAppTutorial.ipynb)
 
 Python scripts:
  * [examples](examples)
