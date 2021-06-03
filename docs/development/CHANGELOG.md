@@ -1,5 +1,22 @@
 # Change Log
 
+# 2021-06-03
+
+ - Release 0.1.1
+   - Installation and tutorial (PR#3)
+   - Start use of github action workflows
+   - Start implementation of some pytests
+   - Add CONTRIBUTING.md stub
+   - Update main README.md
+   - Gridtools library is now installable via pip
+   - Move all mybinder.org materials into a binder directory
+   - Add the quiet flag to postBuild pip install
+   - Add `gridTools_explicit_linux-aarch64.txt` for use with conda on Raspberry Pi
+   - Remove mkGridInteractive.ipynb from root tree
+   - Move tutorials into doc folder and update README.md to link to them
+   - Update tutorial links so they will work after publication to main branch
+ - Update todos
+
 # 2021-05-18
 
  - Finish out documentation updates for PR#1
@@ -42,7 +59,7 @@
  - Update examples to use refactored installable library
  - Update mybinder.org to see if that still works with refactored library
  - Refactored library: from gridutils import GridUtils becomes from gridtools.gridutils import GridUtils, etc
- - Add .swp to .gitignore 
+ - Add .swp to .gitignore
  - Move installable library to 0.2 milestones
  - Remove LIBROOT dependency for library
  - setup.py installs the datashader requirement

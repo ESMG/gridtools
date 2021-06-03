@@ -11,11 +11,12 @@ details about this repository can be found below.  For usage of
 the GridUtils library, please visit the [user manual](docs/manual/GridUtils.md).
 
 Various examples are available to demonstrate manipulation of new and existing
-grids in an iterative or interactive form.
+grids in an iterative or interactive (application) form.
 
 Python notebooks:
- * mkGridIterative.ipynb
- * mkGridInteractive.ipynb
+ * [mkGridIterative.ipynb](examples/mkGridIterative.ipynb)
+ * [mkGridInteractive.ipynb](examples/mkGridInteractive.ipynb)
+   * The [gridtools application tutorial](docs/manual/gridtoolAppTutorial.ipynb)
 
 Python scripts:
  * [examples](examples)
@@ -45,7 +46,7 @@ The [example](examples) python scripts can also be run with ipython.
  
 These prefer notebook files (ipynb).  Please see the
 mkGridIterative.ipynb notebook for a hands on way to access the grid
-generation library.  
+generation library.
 
 A simple graphical user interface (GUI) was built and is available using the
 mkGridInteractive.ipynb notebook.
@@ -86,7 +87,8 @@ above:
 # Installation
 
 If you plan to use the grid generation software on your system, you
-need to peform the following steps.
+need to peform the following steps or follow the
+[local installation tutorial](docs/manual/local_installation_tutorial.ipynb).
 
 ## Step 1
 
@@ -112,8 +114,8 @@ environment (venv).
 or [clone](https://github.com/ESMG/gridtools.git) the
 [ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
 
-You may use any of the typical installation methods to install the grid
-tool library.
+The `python setup.py install` method is now considered a legacy installation
+method.  Please use the `python -m pip install` method.
 
 ### pip
 
@@ -122,18 +124,11 @@ $ cd gridtools
 $ python -m pip install .
 ```
 
-### setup.py
-
-```
-$ cd gridtools
-$ python setup.py install
-```
-
 # Workarounds
 
 These are the current workarounds that are required for the grid
 toolset package.  You may need to perform these steps once if you
-plan to install a copy of the grid generation software. 
+plan to install a copy of the grid generation software.
 
 NOTE: These workarounds should be automatically installed with
 an installation of gridtools.
@@ -202,6 +197,8 @@ to upkeep of a manual index.
     * [MOM6ROMS](docs/grids/MOM6ROMS.md): Important things between MOM6 and ROMS grids
     * [ROMS](docs/grids/ROMS.md): ROMS grids
   * [manual](docs/manual/GridUtils.md): User manual for the GridUtils library
+    * [Installation tutorial](docs/manual/local_installation_tutorial.ipynb)
+    * [Gridtools application tutorial](docs/manual/gridtoolAppTutorial.ipynb)
   * [resources](docs/resources)
     * [Bathymetry](docs/resources/Bathymetry)
 

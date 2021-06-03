@@ -7,7 +7,7 @@ Direct code contributions should be made by creating a
 
 Developers with `commit` access to this repository
 should develop on a branch using the name `exp/`.
-When finished, send a **pull request** to the 
+When finished, send a **pull request** to the
 `dev` branch for inclusion.
 
 As milestones are reached, a pull request from

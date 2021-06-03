@@ -13,9 +13,9 @@ def test_ibcao_wgs84():
     # create the projection from lon/lat to x/y
     proj = Transformer.from_crs(crs.geodetic_crs, crs)
 
-    yy = [  
-        -2902500.0, 
-        -2902500.0, 
+    yy = [
+        -2902500.0,
+        -2902500.0,
         2902500.00,
         2902500.00
     ]
