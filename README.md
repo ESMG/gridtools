@@ -11,11 +11,12 @@ details about this repository can be found below.  For usage of
 the GridUtils library, please visit the [user manual](docs/manual/GridUtils.md).
 
 Various examples are available to demonstrate manipulation of new and existing
-grids in an iterative or interactive form.
+grids in an iterative or interactive (application) form.
 
 Python notebooks:
- * mkGridIterative.ipynb
- * mkGridInteractive.ipynb
+ * [mkGridIterative.ipynb](examples/mkGridIterative.ipynb)
+ * [mkGridInteractive.ipynb](examples/mkGridInteractive.ipynb)
+   * The [gridtools application tutorial](docs/manual/gridtoolsAppTutorial.ipynb)
 
 Python scripts:
  * [examples](examples)
@@ -86,7 +87,8 @@ above:
 # Installation
 
 If you plan to use the grid generation software on your system, you
-need to peform the following steps.
+need to peform the following steps or follow the
+[local installation tutorial](docs/manual/local_installation_tutorial.ipynb).
 
 ## Step 1
 
@@ -195,6 +197,8 @@ to upkeep of a manual index.
     * [MOM6ROMS](docs/grids/MOM6ROMS.md): Important things between MOM6 and ROMS grids
     * [ROMS](docs/grids/ROMS.md): ROMS grids
   * [manual](docs/manual/GridUtils.md): User manual for the GridUtils library
+    * [Installation tutorial](docs/manual/local_installation_tutorial.ipynb)
+    * [Gridtools application tutorial](docs/manual/gridtoolAppTutorial.ipynb)
   * [resources](docs/resources)
     * [Bathymetry](docs/resources/Bathymetry)
 

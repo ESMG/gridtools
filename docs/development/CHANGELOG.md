@@ -10,7 +10,11 @@
    - Update main README.md
    - Gridtools library is now installable via pip
    - Move all mybinder.org materials into a binder directory
+   - Add the quiet flag to postBuild pip install
    - Add `gridTools_explicit_linux-aarch64.txt` for use with conda on Raspberry Pi
+   - Remove mkGridInteractive.ipynb from root tree
+   - Move tutorials into doc folder and update README.md to link to them
+   - Update tutorial links so they will work after publication to main branch
  - Update todos
 
 # 2021-05-18
