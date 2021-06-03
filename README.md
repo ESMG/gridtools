@@ -45,7 +45,7 @@ The [example](examples) python scripts can also be run with ipython.
  
 These prefer notebook files (ipynb).  Please see the
 mkGridIterative.ipynb notebook for a hands on way to access the grid
-generation library.  
+generation library.
 
 A simple graphical user interface (GUI) was built and is available using the
 mkGridInteractive.ipynb notebook.
@@ -112,8 +112,8 @@ environment (venv).
 or [clone](https://github.com/ESMG/gridtools.git) the
 [ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
 
-You may use any of the typical installation methods to install the grid
-tool library.
+The `python setup.py install` method is now considered a legacy installation
+method.  Please use the `python -m pip install` method.
 
 ### pip
 
@@ -122,18 +122,11 @@ $ cd gridtools
 $ python -m pip install .
 ```
 
-### setup.py
-
-```
-$ cd gridtools
-$ python setup.py install
-```
-
 # Workarounds
 
 These are the current workarounds that are required for the grid
 toolset package.  You may need to perform these steps once if you
-plan to install a copy of the grid generation software. 
+plan to install a copy of the grid generation software.
 
 NOTE: These workarounds should be automatically installed with
 an installation of gridtools.

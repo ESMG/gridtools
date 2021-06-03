@@ -2,22 +2,10 @@
 
 ## Milestones
 
- - [X] Version 0.1
-   - [X] Simple polar grid generation
-   - [X] Clean up documentation
-   - [X] Generify current examples
-   - [X] Test examples for LCC grid generation
-   - [X] Test examples for regular Mercator grid generation
-   - [X] Test examples for stereographic grid generation
-   - [X] Test application for LCC grid generation
-   - [X] Test application for regular Mercator grid generation
-   - [X] Test application for stereographic grid generation
-   - [X] Tackle critical TODO items
-   - [X] Publish initial commit to ESMG
-   - [X] Ensure mybinder.org works with the published github commit
- - [ ] Version 0.2
+ - [X] Version 0.1.1
+   - [X] Installation and usage tutorials
    - [X] Make library installable via pip or setup.py
-   - [X] Specific installation instructions
+ - [ ] Version 0.2
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
    - [ ] Creation of all needed files to run a MOM6 simulation
@@ -42,8 +30,6 @@
 # TASKS
 
  - [ ] general documentation
-   - [X] grid parameters
-   - [X] plot parameters
    - [ ] enable sphinx as the documentation generator
    - [ ] link to readthedocs
  - [ ] grid creation/editor
@@ -71,34 +57,29 @@
      - [X] Gridutils initializes with proj GRS80
      - [X] Allow user control
  - [ ] grid mask editor (land, etc)
+     - [ ] leverage MOM_shared_initialization.F90:apply_topography_edits_from_file()
  - [ ] integration of bathymetric sources and apply to grids
    - [ ] https://github.com/nikizadehgfdl/ocean_model_topog_generator
    - [ ] xesmf regridder
+   - [ ] If masks are updated, allow for updates to exchange grids
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] include a dump of conda environment in the grid file (nc)
  - [ ] Add option to use Alistair's numpypi package as a configurable option in gridtools
- - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
- - [X] xarray \_FillValue needs to be turned off somehow
- - [X] place display(dashboard) as a separate notebook cell
  - [ ] on load of a grid
    - [ ] calculate R
    - [ ] calculate tilt (may not be possible)
    - [ ] update any tool metadata that is appropriate for that grid
    - [ ] parse and utilize any available proj string; must be a global or variable attribute
- - [X] Create an application method within the GridUtils() class; GridTools().app()
  - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [X] create a setup.py to allow gridtools to be installable via pip
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
        the supergrid.
 
 # TODO
 
- - [X] Further consolidate matplotlib plotting code
-   - [X] Refactor plotting code.  It is mostly the same except for setting the projection.
  - [ ] Plotting
    - [X] Grid
    - [X] Gridboxes
@@ -145,6 +126,7 @@
 
 # WISH
 
+ - [ ] Redo conda export filenames to include platform.
  - [ ] Add an activity spinner to indicate the notebook is busy
  - [ ] Compute angle_dy for testing of grid conformality.  Theoretically, we can do this check for all grid
        and supergrid cells.

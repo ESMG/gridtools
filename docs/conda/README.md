@@ -60,7 +60,7 @@ $ conda create --name gridTools --file conda/gridTools_explicit.txt
 Sometimes the conda resolution can take a very long time to run.
 Setting an automatic timeout is recommended if building a custom
 conda enviroment.  This can be done using the `timeout` feature
-of UNIX `time` command.  
+of UNIX `time` command.
 
 In this example, the timeout is set to 5 minutes to allow resolution
 of the environment.
