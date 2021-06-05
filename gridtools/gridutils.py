@@ -453,7 +453,7 @@ class GridUtils:
             self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
         except:
             self.grid.attrs['conda_env'] = "Conda environment not found."
-                        
+
         try:
             os.system("conda list --explicit > package_versions.txt")
             self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
@@ -462,15 +462,15 @@ class GridUtils:
                 self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
             except:
                 self.grid.attrs['conda_env'] = "Conda environment not found."
-        
+
+            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
+
         try:
             response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
-            self.grid.attrs['software_version'] =  print(response.json()["name"])         
+            self.grid.attrs['software_version'] =  print(response.json()["name"])
         except:
             self.grid.attrs['software_version'] = ""
-        
-        
-        
+
         try:
             self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
         except:

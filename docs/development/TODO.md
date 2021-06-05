@@ -2,22 +2,11 @@
 
 ## Milestones
 
- - [X] Version 0.1
-   - [X] Simple polar grid generation
-   - [X] Clean up documentation
-   - [X] Generify current examples
-   - [X] Test examples for LCC grid generation
-   - [X] Test examples for regular Mercator grid generation
-   - [X] Test examples for stereographic grid generation
-   - [X] Test application for LCC grid generation
-   - [X] Test application for regular Mercator grid generation
-   - [X] Test application for stereographic grid generation
-   - [X] Tackle critical TODO items
-   - [X] Publish initial commit to ESMG
-   - [X] Ensure mybinder.org works with the published github commit
- - [ ] Version 0.2
+ - [X] Version 0.1.1
+   - [X] Installation and usage tutorials
    - [X] Make library installable via pip or setup.py
-   - [ ] Create specific installation instructions
+   - [X] Create specific installation instructions
+ - [ ] Version 0.2
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
    - [ ] Creation of all needed files to run a MOM6 simulation
@@ -47,8 +36,6 @@
  - [ ] Sponge data preparation
    - [ ] Current scripts generate u,v fields on h-points; this needs to be changed to C-grid u/v-points instead
  - [ ] general documentation
-   - [X] grid parameters
-   - [X] plot parameters
    - [ ] enable sphinx as the documentation generator
    - [ ] link to readthedocs
  - [ ] grid creation/editor
@@ -95,24 +82,18 @@
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
- - [X] xarray \_FillValue needs to be turned off somehow
- - [X] place display(dashboard) as a separate notebook cell
  - [ ] on load of a grid
    - [ ] calculate R
    - [ ] calculate tilt (may not be possible)
    - [ ] update any tool metadata that is appropriate for that grid
    - [ ] parse and utilize any available proj string; must be a global or variable attribute
- - [X] Create an application method within the GridUtils() class; GridTools().app()
  - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [X] create a setup.py to allow gridtools to be installable via pip
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
        the supergrid.
 
 # TODO
 
- - [X] Further consolidate matplotlib plotting code
-   - [X] Refactor plotting code.  It is mostly the same except for setting the projection.
  - [ ] Plotting
    - [X] Grid
    - [X] Gridboxes

@@ -25,8 +25,8 @@ from subprocess import PIPE
 #                        DeprecationWarning, module='docutils.io')
 
 # For __version__ add + to check if we are installing from a github repo
-__version__ = '0.1.0+'
-__released__ = '0.1.0'  # used when Sphinx builds its own docs
+__version__ = '0.1.1+'
+__released__ = '0.1.1'  # used when Sphinx builds its own docs
 
 #: Version info for better programmatic use.
 #:
@@ -36,7 +36,7 @@ __released__ = '0.1.0'  # used when Sphinx builds its own docs
 #:
 #: .. versionadded:: 1.2
 #:    Before version 1.2, check the string ``sphinx.__version__``.
-version_info = (0, 1, 0, 'alpha', 0)
+version_info = (0, 1, 1, 'alpha', 0)
 
 package_dir = path.abspath(path.dirname(__file__))
 
