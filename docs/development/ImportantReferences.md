@@ -31,6 +31,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://github.com/raphaeldussin/regrid_weights_bedmachine_gebco/blob/master/create_grids.py
 
 ## Bookmarks
+ * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
  * https://cfconventions.org/standard-names.html
  * https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
@@ -104,3 +105,6 @@ These are people, references and bookmarks that provided useful information to m
  * https://github.com/nsidc/mapx
    * The NSIDC mapx library and associated binary tools for gridding/reprojection.
 
+ * GraphQL - data I/O; might be a new beginning vs openDAP
+   * https://graphql.org/code/#languages
+   * https://github.com/graphql-python/graphene/blob/master/setup.py
