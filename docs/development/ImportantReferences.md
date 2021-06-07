@@ -25,10 +25,17 @@ These are people, references and bookmarks that provided useful information to m
 ## Bookmarks
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+ * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
+ * https://docs.github.com/en/actions/quickstart
+ * https://pypi.org/classifiers/
+ * https://docs.github.com/en/github/writing-on-github/autolinked-references-and-urls
+ * https://docs.pytest.org/en/6.2.x/getting-started.html
+ * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://geohackweek.github.io/nDarrays/09-masking/
  * https://github.com/binder-examples/conda
+ * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/SciTools/cartopy/issues/787
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
  * http://mathworld.wolfram.com
@@ -38,11 +45,11 @@ These are people, references and bookmarks that provided useful information to m
  * https://matplotlib.org/stable/tutorials/colors/colormaps.html
  * https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py
  * https://panel.holoviz.org/gallery/index.html
-
  * https://pangeo-xesmf.readthedocs.io/en/latest/notebooks/Compare_algorithms.html
  * https://rabernat.github.io/research_computing/xarray.html
  * https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html
  * https://realpython.com/python-bindings-overview/
+ * https://rietta.com/blog/github-merge-types/
  * https://scitools.org.uk/cartopy/docs/latest/index.html
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
  * https://scitools.org.uk/cartopy/docs/latest/gallery/effects_of_the_ellipse.html

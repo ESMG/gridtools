@@ -2,31 +2,25 @@
 
 ## Milestones
 
- - [ ] Version 0.1
-   - [X] Simple polar grid generation
-   - [X] Clean up documentation
-   - [X] Generify current examples
-   - [X] Test examples for LCC grid generation
-   - [X] Test examples for regular Mercator grid generation
-   - [X] Test examples for stereographic grid generation
-   - [X] Test application for LCC grid generation
-   - [X] Test application for regular Mercator grid generation
-   - [X] Test application for stereographic grid generation
-   - [X] Tackle critical TODO items
-   - [X] Publish initial commit to ESMG
-   - [ ] Ensure mybinder.org works with the published github commit
+ - [X] Version 0.1.1
+   - [X] Installation and usage tutorials
+   - [X] Make library installable via pip or setup.py
  - [ ] Version 0.2
+   - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] Allow import of ROMS grid for conversion to MOM6
-   - [ ] Enhanced grid/plot projection options
-   - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
-   - [ ] Leverage dask (expecially for binder.org)
+   - [ ] Creation of all needed files to run a MOM6 simulation
+   - [ ] Construct initial bathymetry grid for new grids
+   - [ ] Construct initial grid land mask for new grids
  - [ ] Verison 0.x
-   - [ ] Bathymetry and boundery condition support
+   - [ ] Leverage dask (expecially for binder.org)
+   - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
+   - [ ] Enhanced grid/plot projection options
+   - [ ] Allow import of ROMS grid for conversion to MOM6
+   - [ ] Boundery condition support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
-   - [ ] This library is installable via pip
    - [ ] This library is installable via conda
+   - [ ] Subset existing grids and infrastructure
 
 # BUGS
  - [ ] A nested dictionary will clobber other nested elements instead
@@ -36,8 +30,6 @@
 # TASKS
 
  - [ ] general documentation
-   - [X] grid parameters
-   - [X] plot parameters
    - [ ] enable sphinx as the documentation generator
    - [ ] link to readthedocs
  - [ ] grid creation/editor
@@ -65,33 +57,29 @@
      - [X] Gridutils initializes with proj GRS80
      - [X] Allow user control
  - [ ] grid mask editor (land, etc)
+     - [ ] leverage MOM_shared_initialization.F90:apply_topography_edits_from_file()
  - [ ] integration of bathymetric sources and apply to grids
    - [ ] https://github.com/nikizadehgfdl/ocean_model_topog_generator
    - [ ] xesmf regridder
+   - [ ] If masks are updated, allow for updates to exchange grids
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
- - [ ] Add option to use Alistair's numpypi package as a configurable option in toolsets
- - [ ] turn numpypi into a loadable package via pip
+ - [ ] include a dump of conda environment in the grid file (nc)
+ - [ ] Add option to use Alistair's numpypi package as a configurable option in gridtools
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
- - [X] xarray \_FillValue needs to be turned off somehow
- - [X] place display(dashboard) as a separate notebook cell
  - [ ] on load of a grid
    - [ ] calculate R
    - [ ] calculate tilt (may not be possible)
    - [ ] update any tool metadata that is appropriate for that grid
    - [ ] parse and utilize any available proj string; must be a global or variable attribute
- - [X] Create an application method within the GridUtils() class; GridTools().app()
  - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [ ] create a setup.py to allow this library to be installable via pip
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
        the supergrid.
 
 # TODO
 
- - [X] Further consolidate matplotlib plotting code
-   - [X] Refactor plotting code.  It is mostly the same except for setting the projection.
  - [ ] Plotting
    - [X] Grid
    - [X] Gridboxes
@@ -127,12 +115,18 @@
    - [ ] Reset appropriately when clearGrid() is called
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
    - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
+ - [ ] numpypi
+   - [ ] a test fails in test_trunc.py
  - [ ] Add testing harnesses.
-   - [ ] pytest: This will allow testing of core code via command line and iterative methods.
+   - [X] pytest: This will allow testing of core code via command line and iterative methods.
+   - [ ] pytest: Setup some simple projection tests: IBCAO, ....
+   - [ ] pytest: Refactor numpypi into structured tests under pytest
+   - [ ] pytest: allow certain tests to fail if a module is not available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
 
 # WISH
 
+ - [ ] Redo conda export filenames to include platform.
  - [ ] Add an activity spinner to indicate the notebook is busy
  - [ ] Compute angle_dy for testing of grid conformality.  Theoretically, we can do this check for all grid
        and supergrid cells.
@@ -154,6 +148,12 @@
        features of the library: help, debugging, etc.
  - [ ] Dask optimizations
    - [ ] IBCAO grid is too big for mybinder.org
+ - [ ] Subset any grid for running with MOM6
+   - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
+   - [ ] May be especially useful for debugging situations
+ - [ ] Allow gridtools to be used without xesmf and xgcm; enable module detection for available capabilities
+ - [ ] Update setup.py and other files with package dependencies
+   - Create a configuration script that would perform autosetup of gridtools library
  - [ ] Pull in BC and forcing fields from various sources
    - [ ] Delta method: "We extract 20-30 years of a future projection from several models, build an average of each forcing variable which we superpose on modern day climate.  It’s the so-called delta method.  It debiases climate projections relative to modern day (reanalysis constrained) dynamics, but adds the climate change signal on top of it (as a secular change/delta)."
    - [ ] CMIP/ESM
@@ -165,3 +165,4 @@
      - [ ] https://github.com/MackenzieBlanusa/OHC_CMIP6
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
+

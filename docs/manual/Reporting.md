@@ -21,6 +21,7 @@ What information is helpful:
    * Code may be submitted in the form of a github pull request
  * Other useful information
    * Windows or Unix/Linux (`uname -a`)
+   * If you using a modified conda environment, please send a summary of packages using `conda list --explicit`
    * Python and other module versions
      * Use the sysinfo module to provide python and module information.  See mkGridsExample2.py for an example of use.  The
        sysinfo module only works for conda based environments.

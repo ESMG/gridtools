@@ -28,7 +28,7 @@ the python object.  This also assumes the library has been installed
 and is accessible.
 
 ```
-from gridtools import GridUtils
+from gridtools.gridutils import GridUtils
 
 grd = GridUtils()
 ```
