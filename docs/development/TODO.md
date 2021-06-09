@@ -7,6 +7,7 @@
    - [X] Make library installable via pip or setup.py
    - [X] Create specific installation instructions
  - [ ] Version 0.2
+   - [X] Implement a basic data catalog for data management
    - [ ] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
    - [ ] Creation of all needed files to run a MOM6 simulation
@@ -15,7 +16,7 @@
  - [ ] Verison 0.x
    - [ ] Sponge data preparation
    - [ ] Subset existing grids and infrastructure
-   - [ ] Leverage dask (expecially for binder.org)
+   - [ ] Leverage dask (for users that lack access to large memory nodes)
    - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
    - [ ] Enhanced grid/plot projection options
    - [ ] Allow import of ROMS grid for conversion to MOM6
@@ -63,15 +64,24 @@
      - [X] Gridutils initializes with proj GRS80
      - [X] Allow user control
  - [ ] grid mask editor (land, etc)
+     - [ ] add routines for mask checking
+     - [ ] add routines for updating the exchange grid masks
+     - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
+           `MAXIMUM_DEPTH` MOM6/src/initialization parameters
  - [ ] integration of data sources
    - [ ] xesmf regridder for bathymetry sources
-   - [ ] option to create land_mask fraction
+   - [ ] option to create land mask fraction
    - [ ] option to use source grid as a supergrid for coarsening
  - [ ] integration of bathymetric sources and apply to grids
    - [ ] https://github.com/nikizadehgfdl/ocean\_model\_topog\_generator
    - [ ] fix native zero band columns in partitions
-   - [ ] flexible partitioning
-   - [ ] implement current hack as --fix-by-overlap-qh-grid-shift
+   - [ ] flexible partitioning / rework
+   - [ ] Investigate `get_indices1D()` function
+   - [ ] Rework detection of grid bounds
+   - [ ] Rework calculation of input grid points available vs grid points utilized
+   - [ ] Rework for use with periodic grids
+   - [ ] Include metadata for each partition: number of refinements, etc
+   - [ ] implement useFixByOverlapQHGridShift so a regular grid can be used without a shift
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] improve reproducibility
    - [ ] include a dump of conda environment in the grid file (nc)
@@ -155,6 +165,7 @@
    - [ ] Alternate version/software capture if conda and/or git is not available
    - [X] Added proj string to netCDF file
    - [ ] Tri polar grid description
+   - [ ] Update conda capture code so a temporary file is not necessary
  - [ ] Work with generic non-mapping reference systems for use with some of the sample MOM6 problems
  - [ ] Refactor any grid math into a gridmath library.  Any grid computation that can stand on its own
        should be moved into a separate gridmath library.

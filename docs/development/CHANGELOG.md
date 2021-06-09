@@ -1,6 +1,53 @@
 # Change Log
 
-<<<<<<< HEAD
+# 2021-06-08
+
+ - Integration of bathymetric roughness to allow for internal tide
+   parameterization to be used in a model run.
+ - Add a data catalogging system in the grid tools library.  The
+   catalog system can point to physical files or remote files.
+ - Move generic dataset operations into data source operations
+ - Keep grid operations separate from data source operations
+ - openDataset() for grids is now openGrid() followed by readGrid()
+ - We should keep better track of assembled code to reduce hours of
+   rediscovery should we to totally rewrite this library.
+ - Add a hook to enable passing a chunks argument to `open_dataset()`
+   for grids and data sources.
+ - Implement applying an existing land mask after getting the roughness
+   field instead of being combined with this function.
+ - Plotting of created fields will be done separately.
+ - Application of the ice9 algorithm will also be done separately.
+ - `MASKING_DEPTH` defines the land mask for MOM6.  All depths shallower
+   than `MINIMUM_DEPTH` but deeper than `MASKING_DEPTH` are rounded to
+   `MINIMUM_DEPTH`.  When the FMS coupler is involved, a separate land
+   mask is stored in the exchange grids.
+ - TODO: Create several routines for checking/updating masks.
+ - Collecting lots of TODOs for bathymetric roughness code.
+ - Using chunks with eval works but is not numpy fancy indexable.
+ - Delay evaluation of depth until the end to support chunks.
+ - variableMap will remap variables; evalMap will perform calculations
+   after the fact.  In our example, elevation was remapped to the needed
+   depth variable for input, then we invert the sign after processing.
+ - Add LICENSE.md similar to MOM6
+ - Noted quirk for xesmf
+
+# 2021-06-03
+
+ - Release 0.1.1
+   - Installation and tutorial (PR#3)
+   - Start use of github action workflows
+   - Start implementation of some pytests
+   - Add CONTRIBUTING.md stub
+   - Update main README.md
+   - Gridtools library is now installable via pip
+   - Move all mybinder.org materials into a binder directory
+   - Add the quiet flag to postBuild pip install
+   - Add `gridTools_explicit_linux-aarch64.txt` for use with conda on Raspberry Pi
+   - Remove mkGridInteractive.ipynb from root tree
+   - Move tutorials into doc folder and update README.md to link to them
+   - Update tutorial links so they will work after publication to main branch
+ - Update todos
+
 # 2021-05-30
 
  - Consolidate requirements lists again
@@ -41,24 +88,6 @@
  - Add netCDF4 to gridTools.yml base packages; xarray needs it to read netcdf version 4 files
  - Add a few informational links
  - Update to push exp/bathyV1
-=======
-# 2021-06-03
-
- - Release 0.1.1
-   - Installation and tutorial (PR#3)
-   - Start use of github action workflows
-   - Start implementation of some pytests
-   - Add CONTRIBUTING.md stub
-   - Update main README.md
-   - Gridtools library is now installable via pip
-   - Move all mybinder.org materials into a binder directory
-   - Add the quiet flag to postBuild pip install
-   - Add `gridTools_explicit_linux-aarch64.txt` for use with conda on Raspberry Pi
-   - Remove mkGridInteractive.ipynb from root tree
-   - Move tutorials into doc folder and update README.md to link to them
-   - Update tutorial links so they will work after publication to main branch
- - Update todos
->>>>>>> dev
 
 # 2021-05-18
 

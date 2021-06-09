@@ -1,11 +1,11 @@
 # General imports and definitions
-import os, sys, datetime, logging
+import os, re, sys, datetime, logging
 import cartopy, warnings, pdb, hashlib
 import numpy as np
 import xarray as xr
 from pyproj import CRS, Transformer
 import pandas as pd
-import requests
+import requests, urllib
 
 # Needed for panel.pane                
 from matplotlib.figure import Figure
@@ -37,6 +37,8 @@ class GridUtils:
         self.xrOpen = False
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        # Allow setting of chunk parameter for grids
+        self.xrChunks = None
         # Internal parameters
         self.usePaneMatplotlib = False
         self.msgBox = None
@@ -82,7 +84,8 @@ class GridUtils:
                 50: 'CRITICAL'
         }
 
-    # Utility functions
+    # utility operations utility functions
+    # Utility Operations Utility Functions
 
     def addMessage(self, msg):
         '''Append new message to message buffer.'''
@@ -413,7 +416,8 @@ class GridUtils:
                 
         self.verboseLevel = newLevel
 
-    # Grid operations
+    # grid operations grid routines
+    # Grid Operations Grid Routines
 
     def clearGrid(self):
         '''Call this when you want to erase the current grid.  This also
@@ -423,11 +427,12 @@ class GridUtils:
 
         # If there are file resources open, close them first.
         if self.xrOpen:
-            self.closeDataset()
+            self.closeGrid()
 
         self.xrFilename = None
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        self.xrChunks = None
         self.gridInfo = {}
         self.gridInfo['dimensions'] = {}
         self.clearGridParameters()
@@ -956,7 +961,7 @@ class GridUtils:
             msg = "WARNING: Grid generation failed."
             self.printMsg(msg, level=logging.WARNING)
                                 
-    # Original grid generation functions provided by Niki Zadeh
+    # Original grid generation functions from Niki Zadeh
 
     # Mercator
     def rotate_u(self, x , y, z, ux, uy, uz, theta):
@@ -1328,15 +1333,16 @@ class GridUtils:
         
         return lam_,phi_
 
-    # xarray Dataset operations
+    # xarray grid operations grid functions
+    # Xarray Grid Operations Grid Functions
     
-    def closeDataset(self):
+    def closeGrid(self):
         '''Closes and open dataset file pointer.'''
         if self.xrOpen:
             self.xrDS.close()
             self.xrOpen = False
             
-    def openDataset(self, inputFilename):
+    def openGrid(self, inputFilename):
         '''Open a grid file.  The file pointer is internal to the object.
         To access it, use: obj.xrDS or obj.grid'''
         # check if we have a vailid inputFilename
@@ -1346,10 +1352,13 @@ class GridUtils:
                 
         # If we have a file pointer and it is open, close it and re-open the new file
         if self.xrOpen:
-            self.closeDataset()
+            self.closeGrid()
             
         try:
-            self.xrDS = xr.open_dataset(inputFilename)
+            if self.xrChunks:
+                self.xrDS = xr.open_dataset(inputFilename, chunks=self.xrChunks)
+            else:
+                self.xrDS = xr.open_dataset(inputFilename)
             self.xrOpen = True
             self.xrFilename = inputFilename
         except:
@@ -1368,7 +1377,7 @@ class GridUtils:
         # if a dataset is being loaded via readGrid(local=), close any existing dataset
         if local:
             if self.xrOpen:
-                self.closeDataset()
+                self.closeGrid()
             self.xrOpen = True
             self.xrDS = local
             self.grid = local
@@ -1390,7 +1399,6 @@ class GridUtils:
             ncEncoding[ncVar] = {'_FillValue': None}
 
         return ncEncoding
-
     
     def saveGrid(self, filename=None, directory=None):
         '''
@@ -1411,6 +1419,8 @@ class GridUtils:
             msg = "Failed to write netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
     
+    # plot operations plot functions
+    # Plot Operations Plot Functions
     # Plotting specific functions
     # These functions should not care what grid is loaded. 
     # Plotting is affected by plotParameters and gridParameters.
@@ -1426,8 +1436,6 @@ class GridUtils:
         fig = Figure(figsize=figsize)
         
         return fig
-    
-    # insert plotGrid.ipynb here
     
     def plotGrid(self):
         '''Perform a plot operation.
@@ -1794,71 +1802,125 @@ class GridUtils:
         if not(subKey):
             self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
-    # External routines
+    # data source operations data source routines
+    # Data source operations Data source routines
 
-    def compute_bathymetric_roughness_h2(self, dsName, **kwargs):
-        '''This generates h2 and depth based on an algorithm described in:
+    def addDataSource(self, dataSource, delete=False):
+        '''Add a data source to the catalog.  See: datasource.addDataSource()'''
+        self.dataSourcesObj.addDataSource(dataSource, delete=delete)
 
-        Adcroft, A., 2013: Representation of topography by porous barriers and objective
-        interpolation of topographic data. Ocean Modelling, doi:10.1016/j.ocemod.2013.03.002.
-        (http://dx.doi.org/10.1016/j.ocemod.2013.03.002)
-
-        Optional fields that can be included:
-        h_std, h_min, h_max, wet, land and height fields.  The default names
-        for h2 and depth can be changed.
-
-        By default, this generates bathymetric roughness grids on Arakawa C h-points
-
-        Options after specification of the dataset source:
-            maxMb=300
-            h2Name='h2'
-            depthName='depth'
-            auxFields=['h_std', 'h_min', 'h_max', 'wet', 'land', 'height']
-            gridPoint='uv','q','h'
-            superGrid=False,True
-              if superGrid is True, gridPoint is ignored
-
-        For gridPoint, a diagram of a grid cells is:
-
-          q-----v-----q
-          |           |
-          u     h     u
-          |           |
-          q-----v-----q
-
-        Requests may be for one type only.
-          'h' h-point; grid center
-          'q' q-point; grid corners
-          'uv' u- and v-point; grid faces
-        If you want everything, set superGrid=True
-
-        Algorithm implementation notes:
-          * For the supergrid, four zero bands along longitude are returned
-            representing the four grid partitions.  This needs to be fixed
-            in the future.
-          * For h-points, h2 is created on the q-points and shifted by 1/2
-            a grid cell back to the h-points.  Accuracy of the roughness is
-            off by a 1/2 grid cell.
-          * Support for 'q' and 'uv' grid points are not supported.
-          * If the program is running out of memory, reduce the maxMb value.
-            This reduces the available memory footprint available to
-            this routine.  This will also reduce the number of available
-            refinements against the bathymetry data source.
+    def checkAvailableFields(self, dsData, varList):
+        '''Check for available fields in a data source.  If any field is missing,
+        issue a warning and return False.  If all variables are available, return
+        True.
         '''
 
-        return
+        allHere = True
+        dsVars = list(dsData.variables)
+        for varKey in varList:
+            if not(varKey in dsVars):
+                self.printMsg("WARNING: Requested variable (%s) was not found in dataset." % (varKey), level=logging.WARNING)
+                allHere = False
 
-    def generate_conservative_regrid(self, dsName, **kwargs):
-        '''Generates a grid from a data source using conservative regridding.'''
+        return allHere
 
-        return
+    def convertToMathExpression(self, sourceExpression):
+        '''Convert a source expression to a python expression for evaluation.
 
-    # Data source routines
-    # url can be parsed using
-    # zz = urllib.parse.urlparse('file:///home/cermak/mom6/bathy/gebco/GEBCO_2020.nc')
-    # print(zz)
-    # ParseResult(scheme='file', netloc='', path='/home/cermak/mom6/bathy/gebco/GEBCO_2020.nc', params='', query='', fragment='')
+           Ex: "-[elevation]" => "-dsData['elevation']"
+        '''
 
-    def useDataSources(self, dsObj):
+        # Recursively replace [] with dsData[]
+        reExp = '\[([a-zA-Z0-9_].*?)\]'
+        reCmp = re.compile(reExp)
+        srch = reCmp.search(sourceExpression)
+        limitIterations = 10
+        while srch and limitIterations > 0:
+            limitIterations = limitIterations - 1
+            varName = srch.groups()[0]
+            sourceExpression = sourceExpression.replace(srch.group(), "dsData['%s']" % (varName))
+            srch = reCmp.search(sourceExpression)
+
+        return sourceExpression
+
+    def openDataset(self, dsName):
+
+        dsObj = None
+        if dsName in self.dataSourcesObj.catalog.keys():
+            dsObj = self.dataSourcesObj.catalog[dsName]
+        else:
+            self.printMsg("ERROR: The datasource (%s) is not defined." % (dsName), level=logging.ERROR)
+            return
+
+        # Parse the url, what to pass to xarray open_dataset
+        # scheme='file' => path
+        # scheme='http', scheme='https' => dsObj['url']
+        dsUrl = urllib.parse.urlparse(dsObj['url'])
+        urlToOpen = None
+        if dsUrl.scheme in ['http','https']:
+            urlToOpen = dsObj['url']
+        if dsUrl.scheme == 'file':
+            urlToOpen = dsUrl.path
+
+        dsData = None
+        try:
+            if 'chunks' in dsObj.keys():
+                dsData = xr.open_dataset(urlToOpen, chunks=dsObj['chunks'])
+            else:
+                dsData = xr.open_dataset(urlToOpen)
+        except:
+            self.printMsg("ERROR: The datasource (%s) could not be opened." % (dsName), level=logging.ERROR)
+            return dsData
+
+        # Apply variableMap
+        if 'variableMap' in dsObj.keys():
+            dsVars = list(dsData.variables)
+            # Map variables from data source to library standard variables
+            for varTarget in dsObj['variableMap'].keys():
+                varSource = dsObj['variableMap'][varTarget]
+                if varSource in dsVars:
+                    if varSource != varTarget:
+                        dsData = dsData.rename({varSource: varTarget})
+
+        return dsData
+
+    def applyEvalMap(self, dsName, dsData):
+
+        dsObj = None
+        if dsName in self.dataSourcesObj.catalog.keys():
+            dsObj = self.dataSourcesObj.catalog[dsName]
+        else:
+            self.printMsg("ERROR: The datasource (%s) is not defined." % (dsName), level=logging.ERROR)
+            return
+
+        # Apply evalMap
+        if 'evalMap' in dsObj.keys():
+            # Perform evaluations
+            # If using chunks, evaluate later
+            # Evaluations will create additional fields
+            # if the name is unique, otherwise it will overwrite the field.
+            for varTarget in dsObj['evalMap'].keys():
+                mathExpression = self.convertToMathExpression(dsObj['evalMap'][varTarget])
+                dsData[varTarget] = eval(mathExpression)
+
+    def useDataSource(self, dsObj):
+        # Attach data source object to grid tools object
         self.dataSourcesObj = dsObj
+        # Attach grid tools object to data source object
+        dsObj.grdObj = self
+
+    # external operations external routines
+    # External Operations External Routines
+    # These routines are directly wired out to its counterparts
+
+    def computeBathymetricRoughness(self, dsName, **kwargs):
+        '''This generates h2 and other fields.  See: bathytools.compute_bathymetric_roughness_h2()'''
+        from . import bathyutils
+        return bathyutils.computeBathymetricRoughness(self, dsName, kwargs)
+
+    def generateConservativeRegrid(self, dsName, **kwargs):
+        '''Generates a grid from a data source using conservative regridding.'''
+        print("Empty function.")
+        return
+
 

@@ -1,0 +1,565 @@
+# Bathymetric tools
+# Implementations of bathometric grid generators
+#  - https://github.com/nikizadehgfdl/ocean_model_topog_generator
+#    - compute_bathymetric_roughness_h2(**opts)
+
+import hashlib, logging
+import numpy as np
+import xarray as xr
+import pdb
+
+from . import meshrefinement
+
+# Functions
+
+# Original functions from create_topog_refinedSampling.py
+
+def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
+    a_win = []
+    # TODO: xb==8 or other values are not completely supported
+    if ((xb == 4 or xb == 8) and yb == 1):
+        i1 = a.shape[1]//xb
+        i2 = 2*i1
+        i3 = 3*i1
+        i4 = a.shape[1]
+
+        j1 = a.shape[0]//yb
+
+        # If we are not using the super grid, we want to overlap
+        # the blocks to get rid of a zero band between the blocks
+        if not(useSupergrid):
+            print(" Extending blocks...")
+            a_win.append(a[0:j1,0:i1+1])
+            a_win.append(a[0:j1,i1:i2+1])
+            a_win.append(a[0:j1,i2:i3+1])
+            a_win.append(a[0:j1,i3:i4])
+        else:
+            a_win.append(a[0:j1,0:i1])
+            a_win.append(a[0:j1,i1:i2])
+            a_win.append(a[0:j1,i2:i3])
+            a_win.append(a[0:j1,i3:i4])
+
+        return a_win
+    else:
+        raise Exception('This routine can only make 2x2 blocks!')
+        ##Niki: Implement a better algo and lift this restriction
+
+def undo_break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
+    if (xb == 4 and yb == 1):
+        if not(useSupergrid):
+            ao = np.append(a[0][:,:-1], a[1], axis=1)
+            ao = np.append(ao[:,:-1]  , a[2], axis=1)
+            ao = np.append(ao[:,:-1]  , a[3], axis=1)
+            # Trim y+1,x and y,x+1
+            ao = ao[:-1,:-1]
+            #pdb.set_trace()
+        else:
+            ao = np.append(a[0], a[1], axis=1)
+            ao = np.append(ao  , a[2], axis=1)
+            ao = np.append(ao  , a[3], axis=1)
+        return ao
+    elif (xb == 8 and yb == 1):
+        ao = np.append(a[0], a[1], axis=1)
+        ao = np.append(ao  , a[2], axis=1)
+        ao = np.append(ao  , a[3], axis=1)
+        ao = np.append(ao  , a[4], axis=1)
+        ao = np.append(ao  , a[5], axis=1)
+        ao = np.append(ao  , a[6], axis=1)
+        ao = np.append(ao  , a[7], axis=1)
+        return ao
+    else:
+        raise Exception('This routine can only make 2x2 blocks!')
+        ##TODO: Implement a better algorithm and lift this restriction
+
+def get_indices1D_old(lon_grid, lat_grid, x, y):
+    """This function returns the j,i indices for the grid point closest to the input lon,lat coordinates."""
+    """It returns the j,i indices."""
+    lons=np.fabs(lon_grid-x)
+    lonm=np.where(lons==lons.min())
+    lats=np.fabs(lat_grid-y)
+    latm=np.where(lats==lats.min())
+    j0=latm[0][0]
+    i0=lonm[0][0]
+#    print("wanted: ",x,y)
+#    print("got:    ",lon_grid[i0] , lat_grid[j0])
+#    print(j0,i0)
+    return j0,i0
+
+def mdist(x1, x2):
+    """Returns positive distance modulo 360."""
+    return np.minimum(np.mod(x1-x2,360.), np.mod(x2-x1,360.) )
+
+def get_indices1D(lon_grid,lat_grid,x,y):
+    """This function returns the j,i indices for the grid point closest to the input lon,lat coordinates."""
+    """It returns the j,i indices."""
+#    lons=np.fabs(lon_grid-x)
+    lons=np.fabs(mdist(lon_grid,x))
+    lonm=np.where(lons==lons.min())
+    lats=np.fabs(lat_grid-y)
+    latm=np.where(lats==lats.min())
+    j0=latm[0][0]
+    i0=lonm[0][0]
+    print(" wanted: %f %f" % (x,y))
+    print(" got:    %f %f" % (lon_grid[i0] , lat_grid[j0]))
+    good = False
+    if(abs(x-lon_grid[i0]) < abs(lon_grid[1]-lon_grid[0])):
+        good = True
+        print("  good")
+    else:
+        print("  bad")
+    print(" j,i=",j0,i0)
+    return j0,i0,good
+
+def get_indices2D(lon_grid, lat_grid, x, y):
+    """This function returns the j,i indices for the grid point closest to the input lon,lat coordinates."""
+    """It returns the j,i indices."""
+    lons=np.fabs(lon_grid-x)
+    lonm=np.where(lons==lons.min())
+    lats=np.fabs(lat_grid-y)
+    latm=np.where(lats==lats.min())
+    j0=latm[0][0]
+    i0=lonm[1][0]
+#    print("wanted: ",x,y)
+#    print("got:    ",lon_grid[j0,i0] , lat_grid[j0,i0])
+#    print(j0,i0)
+    return j0,i0
+#Gibraltar
+#wanted:  32.0 -12.5
+#got:     31.9958333333 -12.5041666667
+#9299 25439
+#Gibraltar
+#wanted:  40.7 4.7
+#got:     40.6958333333 4.69583333333
+#11363 26483
+#Black sea
+#wanted:  44.0 36
+#got:     43.9958333333 36.0041666667
+#15120 26879
+
+def refine_by_repeat(x, rf):
+    xrf=np.repeat(np.repeat(x[:,:],rf,axis=0),rf,axis=1) #refine by repeating values
+    return xrf
+
+def extend_by_zeros(x, shape):
+    ext=np.zeros(shape)
+    ext[:x.shape[0],:x.shape[1]] = x
+    return ext
+
+# Copied with slight modifications
+def do_block(grd, part, lon, lat, topo_lons, topo_lats, topo_elvs, max_mb=500):
+    msg = ("Doing block number %d" % (part))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Target sub mesh shape: %s" % (str(lon.shape)))
+    grd.printMsg(msg, level=logging.INFO)
+
+    #target_mesh = GMesh.GMesh( lon=lon, lat=lat )
+    #target_mesh = GMesh.GMesh(lon=lon, lat=lat)
+    target_mesh = meshrefinement.MeshRefinement(lon=lon, lat=lat)
+    #target_mesh.shape = lon.shape
+    #target_mesh.ni = target_mesh.shape[0]
+    #target_mesh.nj = target_mesh.shape[1]
+    #print("  D:target_mesh.shape", target_mesh.shape)
+    #pdb.set_trace()
+
+    #plot()
+
+    # Indices in topographic data
+    ti,tj = target_mesh.find_nn_uniform_source(topo_lons, topo_lats)
+
+    #Sample every other source points
+    ##Niki: This is only for efficeincy and we want to remove the constraint for the final product.
+    ##Niki: But in some cases it may not work!
+    #tis,tjs = slice(ti.min(), ti.max()+1,2), slice(tj.min(), tj.max()+1,2)
+    #tis,tjs = slice(ti.min(), ti.max()+1,1), slice(tj.min(), tj.max()+1,1)
+    tis,tjs = slice(ti.min().data.tolist(), ti.max().data.tolist()+1,1),\
+        slice(tj.min().data.tolist(), tj.max().data.tolist()+1,1)
+    #print('  Slices j,i:', tjs, tis )
+    msg = ('Topographic grid slice: %s %s' % (str(tjs), str(tis)))
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Read elevation data
+    topo_elv = topo_elvs[tjs,tis]
+    # Extract appropriate coordinates
+    topo_lon = topo_lons[tis]
+    topo_lat = topo_lats[tjs]
+
+    msg = ('Topo shape: %s' % (str(topo_elv.shape)))
+    grd.printMsg(msg, level=logging.INFO)
+    #print('  topography longitude range:', topo_lon.min(), topo_lon.max())
+    #print('  topography latitude  range:', topo_lat.min(), topo_lat.max())
+    msg = ('Topography longitude range: %f %f' % (topo_lon.min(), topo_lon.max()))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ('Topography latitude  range: %f %f' % (topo_lat.min(), topo_lat.max()))
+    grd.printMsg(msg, level=logging.INFO)
+
+    #print("  Target     longitude range:", lon.min(), lon.max())
+    #print("  Target     latitude  range:", lat.min(), lat.max())
+    msg = ("Target     longitude range: %f %f" % (lon.min(), lon.max()))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Target     latitude  range: %f %f" % (lat.min(), lat.max()))
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Refine grid by 2 till all source points are hit
+    msg = ("Refining the target to hit all source points ...")
+    grd.printMsg(msg, level=logging.INFO)
+    #pdb.set_trace()
+    Glist = target_mesh.refine_loop(topo_lon, topo_lat, max_mb=max_mb);
+    hits = Glist[-1].source_hits(topo_lon, topo_lat)
+    msg = ("Non-hit ratio: %d%s%d" % (hits.size-hits.sum().astype(int)," / ",hits.size))
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Sample the topography on the refined grid
+    msg = ("Sampling the source points on target mesh ...")
+    grd.printMsg(msg, level=logging.INFO)
+    Glist[-1].sample_source_data_on_target_mesh(topo_lon, topo_lat, topo_elv)
+    msg = ("Sampling finished ...")
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Coarsen back to the original taget grid
+    msg = ("Coarsening back to the original target grid ...")
+    grd.printMsg(msg, level=logging.INFO)
+    for i in reversed(range(1,len(Glist))):   # 1, makes it stop at element 1 rather than 0
+        Glist[i].coarsenby2(Glist[i-1])
+
+    #pdb.set_trace()
+
+    msg = ("Roughness calculation via plane fit")
+    grd.printMsg(msg, level=logging.INFO)
+    #Roughness calculation by plane fitting
+    #Calculate the slopes of the planes on the coarsest (model) grid cells
+    G = Glist[0]
+    denom = (G.xxm-G.xm*G.xm)*(G.yym-G.ym*G.ym)-(G.xym-G.xm*G.ym)*(G.xym-G.xm*G.ym)
+    alphd = (G.xzm-G.xm*G.zm)*(G.yym-G.ym*G.ym)-(G.yzm-G.ym*G.zm)*(G.xym-G.xm*G.ym)
+    betad = (G.yzm-G.ym*G.zm)*(G.xxm-G.xm*G.xm)-(G.xzm-G.xm*G.zm)*(G.xym-G.xm*G.ym)
+    #alph = alphd/denom
+    #beta = betad/denom
+
+    rf = 2**(len(Glist)-1) #refinement factor
+    #Generate the refined arrays from coarse arrays by repeating the coarse elements rf times
+    #These arrays have the same values on finest mesh points inside each coarse cell by construction.
+    #They are being used to calculate the (least-square) distance of data points
+    #inside that cell from the fitted plane in that cell.
+    xmrf = refine_by_repeat(G.xm, rf)
+    ymrf = refine_by_repeat(G.ym, rf)
+    zmrf = refine_by_repeat(G.zm, rf)
+    alphdrf = refine_by_repeat(alphd, rf)
+    betadrf = refine_by_repeat(betad, rf)
+    denomrf = refine_by_repeat(denom, rf)
+    #The refined mesh has a shape of (2*nj-1,2*ni-1) rather than (2*nj,2*ni) and hence
+    #is missing the last row/column by construction!
+    #So, the finest mesh does not have (rf*nj,rf*ni) points but is smaller by ...
+    #Bring it to the same shape as (rf*nj,rf*ni) by padding with zeros.
+    #This is for algorithm convenience and we remove the contribution of them later.
+    xs = extend_by_zeros(Glist[-1].xm, zmrf.shape)
+    ys = extend_by_zeros(Glist[-1].ym, zmrf.shape)
+    zs = extend_by_zeros(Glist[-1].zm, zmrf.shape)
+    #Calculate the vertical distance D of each source point from the least-square plane
+    #Note that the least-square plane passes through the mean data point.
+    #The last rf rows and columns are for padding and denom is not zero on them.
+    #To avoid division by zero calculate denom*D instead
+    D_times_denom = denomrf*(zs-zmrf) - alphdrf*(xs-xmrf) - betadrf*(ys-ymrf)
+    #Calculate topography roughness as the standard deviation of D on each coarse (model) grid cell
+    #This is why we wanted to have a (nj*rf,ni*rf) shape arrays and padded with zeros above.
+    D_times_denom_coarse = np.reshape(D_times_denom,(G.xm.shape[0],rf,G.xm.shape[1],rf))
+    D_times_denom_coarse_std = D_times_denom_coarse.std(axis=(1,3))
+    D_std = np.zeros(G.zm.shape)
+    epsilon = 1.0e-20 #To avoid negative underflow
+    D_std[:,:] = D_times_denom_coarse_std[:,:]/(denom[:,:]+epsilon)
+    # Don't forget to chop off the zeros added before
+    #D_std = D_std[:-1,:-1]
+    #pdb.set_trace()
+
+    #print("")
+    #print("Writing ...")
+    #filename = 'topog_refsamp_BP.nc'+str(b)
+    #write_topog(Glist[0].height,fnam=filename,no_changing_meta=True)
+    #print("heights shape:", lons[b].shape,Hlist[b].shape)
+    return Glist[0].height, D_std, Glist[0].h_min, Glist[0].h_max, hits
+
+# Rebuilt from main() function
+def computeBathymetricRoughness(grd, dsName, kwargs):
+    '''This generates h2 and other fields and returns an xarray DataSet with the field.
+
+    Adcroft, A., 2013: Representation of topography by porous barriers and objective
+    interpolation of topographic data. Ocean Modelling, doi:10.1016/j.ocemod.2013.03.002.
+    (http://dx.doi.org/10.1016/j.ocemod.2013.03.002)
+
+    EXAMPLE:
+      Options after specification of the dataset source (dsName):
+        maxMb=8000
+        h2Name='h2'
+        depthName='depth'
+        auxFields=['hStd', 'hMin', 'hMax', 'depth']
+        gridPoint=['uv', 'q', 'h']
+        superGrid=[False, True]
+              if superGrid is True, gridPoint is ignored
+        useClipping=[False, True]
+        useFixByOverlapQHGridShift=[False, True]
+
+    OPTIONS:
+
+      maxMb specifies the maximum amount of RAM to provide to the grid
+        refinement routines.
+
+      The default name for h2 can be changed via h2Name.
+
+      Optional fields that can provided by this routine via auxFields:
+      h_std, h_min, h_max, and depth fields.  Provide a
+      python list [] to this parameter.
+
+      By default, this generates bathymetric roughness grids on Arakawa C h-points
+      but may be specified via gridPoint.
+
+      For gridPoint, a diagram of a grid cells is:
+
+        q-----v-----q
+        |           |
+        u     h     u
+        |           |
+        q-----v-----q
+
+      Requests may be for one type only.
+        'h' h-point; grid center
+        'q' q-point; grid corners
+        'uv' u- and v-point; grid faces
+        If you want everything, set superGrid=True
+
+      superGrid=True tells this routine to use the supergrid when calculating
+      the bathymetric roughness.  This will require more RAM.  The default
+      is False.
+
+      useClipping=True is useful for global grids that do not need the
+      overlapping column.  The default is False.
+
+      useFixByOverlapQHGridShift=True is useful for attempting to fill
+      a gap created by this routine at four partition boundaries.  See
+      note below.  The default is True.
+
+    IMPLEMENTATION NOTES:
+      * For the supergrid, four zero bands along longitude are returned
+          representing the four grid partitions.  This needs to be fixed
+          in the future.
+      * For h-points, h2 is created on the q-points and shifted by 1/2
+          a grid cell back to the h-points.  Accuracy of the roughness
+          and other resultant fields are off by a 1/2 grid cell.
+      * Support for 'q' and 'uv' grid points are not supported.
+      * If the program is running out of memory, reduce the maxMb value.
+          This reduces the available memory footprint available to
+          this routine.  This will also reduce the number of available
+          refinements against the bathymetry data source.
+    '''
+    # Provide defaults if a kwarg is not set
+    if not('superGrid' in kwargs.keys()):
+        kwargs['superGrid'] = False
+    useSupergrid = kwargs['superGrid']
+
+    if not('useClipping' in kwargs.keys()):
+        kwargs['useClipping'] = False
+
+    if not('h2Name' in kwargs.keys()):
+        kwargs['h2Name'] = 'h2'
+
+    if not('maxMb' in kwargs.keys()):
+        kwargs['maxMb'] = 8000
+    max_mb = kwargs['maxMb']
+
+    #TODO: Not using the supergrid implies useFixByOverlapQHGridShift
+    #if not('useFixByOverlapQHGridShift' in kwargs.keys()):
+    #    kwargs['useFixByOverlapQHGridShift'] = True
+
+    # Unimplemented or not fully implemented kwargs
+    if not('open_channels' in kwargs.keys()):
+        kwargs['open_channels'] = False
+
+    if not('gridPoint' in kwargs.keys()):
+        kwargs['gridPoint'] = 'h'
+
+    # Attempt to open the selected dataset
+    bathyData = grd.openDataset(dsName)
+    if not(bathyData):
+        grd.printMsg("ERROR: The datasource (%s) did not return a usable field." % (dsName), level=logging.ERROR)
+        return None
+
+    if not(grd.checkAvailableFields(bathyData, ['lat','lon','depth'])):
+        return None
+
+    # Collect data source data
+    # topo_ name is unfortunate, input data source could be bathymetric with depths
+    topo_lons = bathyData['lon']
+    topo_lats = bathyData['lat']
+    topo_elvs = bathyData['depth']
+
+    # Fix the topography to open some channels
+    # Not fully integrated
+    if(kwargs['open_channels']):
+        #Bosporus mouth at Marmara Sea (29.03,41.04)
+        j0,i0=15724,39483 #get_indices1D(topo_lons, topo_lats ,29.03, 41.04)
+        #One grid cell thick (not survived ice9)
+        #topo_elvs[j0,i0]=topo_elvs[j0,i0-1]
+        #topo_elvs[j0+1,i0+2]=topo_elvs[j0+1,i0+1]
+        #topo_elvs[j0+3,i0+3]=topo_elvs[j0+3,i0+2]
+        #wide channel
+        j2,i2=15756, 39492 #get_indices1D(topo_lons, topo_lats ,29.1, 41.3)
+        topo_elvs[j0-10:j2,i0-10:i2+10]=topo_elvs[j0,i0-1]
+
+        #Dardanells' constrict
+        j1,i1=15616, 39166 #get_indices1D(topo_lons, topo_lats ,26.39, 40.14)
+        topo_elvs[j1+1,i1]=topo_elvs[j1,i1]
+
+    # Set the target grid
+    target_grid = grd.grid
+    target_lon = grd.grid['x']
+    target_lat = grd.grid['y']
+
+    # Optionally, subset to just the grid instead of the supergrid
+    if not(kwargs['superGrid']):
+        # Subset to MOM6 regular grid
+        msg = ("Using regular grid instead of the supergrid.")
+        grd.printMsg(msg, level=logging.INFO)
+        grid_lon = target_grid['x'][1::2,1::2]
+        grid_lat = target_grid['y'][1::2,1::2]
+        # We use the q-points of the supergrid to provide an extra column
+        # to create an overlap in the partitions to cover over the gap the
+        # routine creates.
+        target_lon = target_grid['x'][::2,::2]
+        target_lat = target_grid['y'][::2,::2]
+
+    # x and y have shape (nyp,nxp). Topog does not need the last col for global grids (period in x).
+    # Useful for GLOBAL GRIDS!
+    if kwargs['useClipping']:
+        target_lon = target_lon[:,:-1]
+        target_lat = target_lat[:,:-1]
+
+    msg = ("Target mesh shape: %s" % (str(target_lon.shape)))
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Not fully understood
+    #   Allows interpolation to work on the grid center say if grid center is near 0 latitude (prime
+    #   meridian) or 180 latitude (dateline)
+    # Translate topo data to start at target_mesh.lon_m[0]
+    # Why/When? TODO: Investigate get_indices1D() function
+    jllc, illc, status1 = get_indices1D(topo_lons, topo_lats ,target_lon[0,0] ,target_lat[0,0])
+    jurc, iurc, status2 = get_indices1D(topo_lons, topo_lats ,target_lon[0,-1],target_lat[-1,0])
+    if(not status1 or not status2):
+        msg = ('Shifting topo data to start at target lon.')
+        grd.printMsg(msg, level=logging.INFO)
+        topo_lons = np.roll(topo_lons,-illc,axis=0) #Roll data longitude to right
+        topo_lons = np.where(topo_lons>=topo_lons[0] , topo_lons-360, topo_lons) #Rename (0,60) as (-300,-180)
+        topo_elvs = np.roll(topo_elvs,-illc,axis=1) #Roll data depth to the right by the same amount.
+
+    # TODO: This section needs to be reworked
+    msg = ('Topography grid array shapes: lon:%s lat:%s' % (str(topo_lons.shape),str(topo_lats.shape)))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ('Topography longitude range: %f %f' % (topo_lons.min(),topo_lons.max()))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ('Topography longitude range: %f %f' % (topo_lons[0],topo_lons[-1000]))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ('Topography latitude range:  %f %f' % (topo_lats.min(),topo_lats.max()))
+    grd.printMsg(msg, level=logging.INFO)
+    #print(' Is mesh uniform?', GMesh.is_mesh_uniform( topo_lons, topo_lats ) )
+    #print(' Is mesh uniform?', GMesh.is_mesh_uniform( topo_lons, topo_lats ).data.tolist() )
+    msg = ('Is mesh uniform?', meshrefinement.is_mesh_uniform( topo_lons, topo_lats ).data.tolist() )
+    ### Partition the Target grid into non-intersecting blocks
+    #This works only if the target mesh is "regular"! Niki: Find the mathematical buzzword for "regular"!!
+    #Is this a regular mesh?
+    # if( .NOT. is_mesh_regular() ) throw
+    msg = ('RAM allocation to refinements (Mb): %f' % (max_mb))
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Rework partitioning (dask opportunity)
+    # Niki: Why 4,1 partition?
+    xb = 4
+    yb = 1
+    lons = break_array_to_blocks(target_lon, xb, yb, useSupergrid=useSupergrid)
+    lats = break_array_to_blocks(target_lat, xb, yb, useSupergrid=useSupergrid)
+
+    # We must loop over the 4 partitions
+    # TODO: The number of points being collected and the number of hits algorithm does not
+    # compute things correctly due to issues with different bounding boxes.  This issue
+    # should be addressed with previous section.
+    Hlist=[]
+    Hstdlist=[]
+    Hminlist=[]
+    Hmaxlist=[]
+    for part in range(0,xb):
+        lon = lons[part]
+        lat = lats[part]
+        h, hstd, hmin, hmax, hits = do_block(grd, part, lon, lat, topo_lons, topo_lats, topo_elvs, max_mb=max_mb)
+        Hlist.append(h)
+        Hstdlist.append(hstd)
+        Hminlist.append(hmin)
+        Hmaxlist.append(hmax)
+
+    msg = ("Merging the blocks ...")
+    grd.printMsg(msg, level=logging.INFO)
+    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useSupergrid=useSupergrid)
+    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useSupergrid=useSupergrid)
+    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useSupergrid=useSupergrid)
+    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useSupergrid=useSupergrid)
+
+    #Niki: Why isn't h periodic in x?  I.e., height_refsamp[:,0] != height_refsamp[:,-1]
+    #ANS? For global grids, the column was potentially clipped.
+    # TODO: rework for periodic grids?
+    msg = ("Periodicity test  : %f %f" % (height_refsamp[0,0], height_refsamp[0,-1]))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Periodicity break : %f" % ((np.abs(height_refsamp[:,0] - height_refsamp[:,-1])).max()))
+    grd.printMsg(msg, level=logging.INFO)
+
+    # Non-supergrid hack
+    if not(kwargs['superGrid']):
+        # Subset to MOM6 regular grid
+        msg = ("Shifting q-points onto h-points of regular grid.")
+        grd.printMsg(msg, level=logging.INFO)
+        target_lon = target_grid['x'][1::2,1::2]
+        target_lat = target_grid['y'][1::2,1::2]
+
+    # Assemble grids
+    bathymetricRoughness = xr.Dataset()
+
+    h2Name = kwargs['h2Name']
+    bathymetricRoughness[h2Name] = (('ny','nx'), hstd_refsamp * hstd_refsamp)
+    bathymetricRoughness[h2Name].attrs['units'] = 'meters^2'
+    bathymetricRoughness[h2Name].attrs['standard_name'] =\
+            'Subgrid scale topography height variance at Arakawa C %s-points' % (kwargs['gridPoint'])
+    bathymetricRoughness[h2Name].attrs['sha256'] = hashlib.sha256( np.array( hstd_refsamp * hstd_refsamp ) ).hexdigest()
+
+    if 'hStd' in kwargs['auxFields']:
+        bathymetricRoughness['hStd'] = (('ny','nx'), hstd_refsamp)
+        bathymetricRoughness['hStd'].attrs['units'] = 'meters'
+        bathymetricRoughness['hStd'].attrs['standard_name'] =\
+                'Subgrid scale topography height standard deviation at Arakawa C %s-points' % (kwargs['gridPoint'])
+        bathymetricRoughness['hStd'].attrs['sha256'] = hashlib.sha256( np.array( hstd_refsamp ) ).hexdigest()
+
+    if 'hMin' in kwargs['auxFields']:
+        bathymetricRoughness['hMin'] = (('ny','nx'), hmin_refsamp)
+        bathymetricRoughness['hMin'].attrs['units'] = 'meters'
+        bathymetricRoughness['hMin'].attrs['standard_name'] =\
+                'Subgrid scale topography height standard deviation minimum at Arakawa C %s-points' % (kwargs['gridPoint'])
+        bathymetricRoughness['hMin'].attrs['sha256'] = hashlib.sha256( np.array( hmin_refsamp ) ).hexdigest()
+
+    if 'hMax' in kwargs['auxFields']:
+        bathymetricRoughness['hMax'] = (('ny','nx'), hmax_refsamp)
+        bathymetricRoughness['hMax'].attrs['units'] = 'meters'
+        bathymetricRoughness['hMax'].attrs['standard_name'] =\
+                'Subgrid scale topography height standard deviation maximum at Arakawa C %s-points' % (kwargs['gridPoint'])
+        bathymetricRoughness['hMax'].attrs['sha256'] = hashlib.sha256( np.array( hmax_refsamp ) ).hexdigest()
+
+    if 'depth' in kwargs['auxFields']:
+        # Do not invert the value here, it is done later!
+        bathymetricRoughness['depth'] = (('ny','nx'), height_refsamp)
+        bathymetricRoughness['depth'].attrs['units'] = 'meters'
+        bathymetricRoughness['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C %s-points' % (kwargs['gridPoint'])
+        bathymetricRoughness['depth'].attrs['sha256'] = hashlib.sha256( np.array( height_refsamp ) ).hexdigest()
+
+    bathymetricRoughness['x'] = (('ny','nx'), target_lon)
+    bathymetricRoughness['x'].attrs['units'] = 'degrees_east'
+    bathymetricRoughness['x'].attrs['standard_name'] = 'longitude'
+    bathymetricRoughness['x'].attrs['sha256'] = hashlib.sha256( np.array( target_lon ) ).hexdigest()
+
+    bathymetricRoughness['y'] = (('ny','nx'), target_lat)
+    bathymetricRoughness['y'].attrs['units'] = 'degrees_north'
+    bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
+    bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( target_lat ) ).hexdigest()
+
+    # Return finished dataset
+    return bathymetricRoughness
