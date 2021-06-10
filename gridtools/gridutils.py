@@ -1391,10 +1391,14 @@ class GridUtils:
         if localFilename:
             self.xrFilename = localFilename
 
-    def removeFillValueAttributes(self):
+    def removeFillValueAttributes(self, data=None):
 
         ncEncoding = {}
-        ncVars = list(self.grid.variables)
+        if data:
+            ncVars = list(data.variables)
+        else:
+            ncVars = list(self.grid.variables)
+
         for ncVar in ncVars:
             ncEncoding[ncVar] = {'_FillValue': None}
 
@@ -1555,7 +1559,8 @@ class GridUtils:
 
         return f, ax
 
-    # Grid parameter operations
+    # grid parameter operations grid parameter functions
+    # Grid Parameter Operations Grid Parameter Functions
 
     def clearGridParameters(self):
         '''Clear grid parameters.  This does not erase any grid data.'''
@@ -1844,13 +1849,22 @@ class GridUtils:
         return sourceExpression
 
     def openDataset(self, dsName):
+        '''Open a dataset using the data source catalog.  Optionally, load
+        a raw dataset using a prefix FILE: in the data source name.'''
+
+        if dsName.find('FILE:') == 0:
+            if not(os.path.isfile(dsName[5:])):
+                self.printMsg("ERROR: The datasource (%s) is was not found." % (dsName[5:]), level=logging.ERROR)
+                return None
+            dsData = xr.open_dataset(dsName[5:])
+            return dsData
 
         dsObj = None
         if dsName in self.dataSourcesObj.catalog.keys():
             dsObj = self.dataSourcesObj.catalog[dsName]
         else:
             self.printMsg("ERROR: The datasource (%s) is not defined." % (dsName), level=logging.ERROR)
-            return
+            return None
 
         # Parse the url, what to pass to xarray open_dataset
         # scheme='file' => path
@@ -1885,6 +1899,7 @@ class GridUtils:
         return dsData
 
     def applyEvalMap(self, dsName, dsData):
+        '''Apply constructed equations through python eval() to manipulate data source fields.'''
 
         dsObj = None
         if dsName in self.dataSourcesObj.catalog.keys():
@@ -1913,14 +1928,33 @@ class GridUtils:
     # External Operations External Routines
     # These routines are directly wired out to its counterparts
 
+    # bathyutils routines
+
+    def applyExistingLandMask(self, dsData, dsField, maskFile, maskField, **kwargs):
+        '''This modifies a given bathymetry using an existing land mask.'''
+        from . import bathyutils
+        return bathyutils.applyExistingLandMask(self, dsData, dsField, maskFile, maskField, kwargs)
+
     def computeBathymetricRoughness(self, dsName, **kwargs):
-        '''This generates h2 and other fields.  See: bathytools.compute_bathymetric_roughness_h2()'''
+        '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
         from . import bathyutils
         return bathyutils.computeBathymetricRoughness(self, dsName, kwargs)
 
-    def generateConservativeRegrid(self, dsName, **kwargs):
-        '''Generates a grid from a data source using conservative regridding.'''
-        print("Empty function.")
+    # meshutils routines
+
+    def generateGridByRefinement(self, dsName, **kwargs):
+        '''Generates a grid from a data source using refinement regridding.'''
+        from . import meshutils
+        return meshutils.generateGridByRefinement(self, dsName, kwargs)
+
+    def writeLandMask(self, dsData, dsField, outField, outFile, **kwargs):
+        '''Write a land mask based on provided information.'''
+        from . import meshutils
+        meshutils.writeLandMask(self, dsData, dsField, outField, outFile, **kwargs)
         return
 
-
+    def writeOceanMask(self, dsData, dsField, outField, outFile, **kwargs):
+        '''Write a ocean mask based on provided information.'''
+        from . import meshutils
+        meshutils.writeOceanMask(self, dsData, dsField, outField, outFile, **kwargs)
+        return

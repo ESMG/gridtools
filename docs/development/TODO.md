@@ -67,7 +67,7 @@
      - [ ] add routines for mask checking
      - [ ] add routines for updating the exchange grid masks
      - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
-           `MAXIMUM_DEPTH` MOM6/src/initialization parameters
+           `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
  - [ ] integration of data sources
    - [ ] xesmf regridder for bathymetry sources
    - [ ] option to create land mask fraction
@@ -82,6 +82,7 @@
    - [ ] Rework for use with periodic grids
    - [ ] Include metadata for each partition: number of refinements, etc
    - [ ] implement useFixByOverlapQHGridShift so a regular grid can be used without a shift
+   - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingLandMask()
  - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
  - [ ] improve reproducibility
    - [ ] include a dump of conda environment in the grid file (nc)
@@ -108,6 +109,7 @@
    - [X] Grid
    - [X] Gridboxes
    - [ ] Supergrid
+   - [ ] Fields (from data sources or script generated)
  - [ ] Add "Refresh Plot" buttons to other Plot tabs or figure out how to squeeze a single plot button into the layout
  - [ ] Do we have to declare everything in __init__ first or can be push all that to respective reset/clear functions?
  - [ ] refactor messaging/logging out of GridUtils into its own package so we can import printMsg/debugMsg as standalone calls
@@ -126,13 +128,13 @@
    instead of the center.
  - [ ] application
    - [ ] enable user configurable plot and widget sizes (hardcoded in __init__)
-   - [ ] enable user to change ellipsoid, R, x_0 and y_0 grid and plot parameters
-   - [ ] plotting: adjust satellite_height, for now it is fixed to the default
+   - [ ] enable user to change ellipsoid, R, `x_0` and `y_0` grid and plot parameters
+   - [ ] plotting: adjust `satellite_height`, for now it is fixed to the default
    - [ ] title is misleading; it should show the projections in use if different
  - [ ] Develop a GridUtils() function
    - [ ] Run `proj -le` and return the names or display the details
    - [ ] Populates the ellps field for the application
- - [ ] x_0 and y_0 are hard coded to be zero offsets.  The user can modify these values.
+ - [ ] `x_0` and `y_0` are hard coded to be zero offsets.  The user can modify these values.
  - [ ] Deploy use of self.gridMade (robTest:PR#1)
    - [ ] After success in makeGrid()
    - [ ] Successful load of grid from a file
@@ -140,19 +142,24 @@
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
    - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
  - [ ] numpypi
-   - [ ] a test fails in test_trunc.py
+   - [ ] a test fails in `test_trunc.py`
  - [ ] Add testing harnesses.
    - [X] pytest: This will allow testing of core code via command line and iterative methods.
    - [ ] pytest: Setup some simple projection tests: IBCAO, ....
    - [ ] pytest: Refactor numpypi into structured tests under pytest
    - [ ] pytest: allow certain tests to fail if a module is not available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
+ - [ ] gridtools.openDataset() should scan the dsName for a file:// or http: address maybe using
+       the parser to detect something that isn't a catalog.  This routine could be improved.
 
 # WISH
 
+ - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are there things
+       that we could use there instead of recreating many wheels.
+ - [ ] Allow gridtools to continue to operate with some disabled routines that use xesmf.
  - [ ] app:Save remote files; additional sanity checks
  - [ ] app:Add an activity spinner to indicate the notebook is busy
- - [ ] Compute angle_dy for testing of grid conformality.  Theoretically, we can do this check for all grid
+ - [ ] Compute `angle_dy` for testing of grid conformality.  Theoretically, we can do this check for all grid
        and supergrid cells.
  - [ ] tripolar grids: use FRE-NCtools via cython?
  - [ ] Bring in code that converts ROMS grids to MOM6 grids
@@ -194,3 +201,4 @@
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
  - [ ] triton node issue: python netCDF4 large file reading seems to hang nodes
+ - [ ] Add an Example 7a to demonstrate using existing files from Example 7.

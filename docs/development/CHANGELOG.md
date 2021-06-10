@@ -1,5 +1,22 @@
 # Change Log
 
+# 2021-06-09
+
+ - Implement saving of ocean and land masks using a specified
+   `MASKING_DEPTH`.
+ - Adding bathyutils.applyExistingLandMask()
+ - There is a better way to use complex expressions in
+   xarray.where().  Bookmark to gist added to important information.
+ - Add various TODOs.
+ - Example 7 works.  It should be cleaned up and Example 7a should be
+   created to demonstrate using existing files created by Example 7.
+ - gridutils.removeFillValueAttributes() add a data= parameter to
+   allow use outside of grids.
+ - gridutils: Add more comments to allow searching of large sections of code
+ - Add meshutils for generic routines that we don't really have a good place
+   for at the moment.  The first routines are writing a land and ocean mask
+   file based on a supplied field.
+
 # 2021-06-08
 
  - Integration of bathymetric roughness to allow for internal tide

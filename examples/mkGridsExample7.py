@@ -90,15 +90,15 @@ ds.addDataSource({
 })
 
 # Save data source catalog
-ds.saveCatalog('/home/cermak/mom6/configs/zOutput/catalog.json')
-ds.saveCatalog('/home/cermak/mom6/configs/zOutput/catalog.yaml')
+#ds.saveCatalog('/home/cermak/mom6/configs/zOutput/catalog.json')
+#ds.saveCatalog('/home/cermak/mom6/configs/zOutput/catalog.yaml')
 
 # Clear the catalog
-ds.clearCatalog()
+#ds.clearCatalog()
 
 # Re-read one of the catalog files above
-ds.loadCatalog('/home/cermak/mom6/configs/zOutput/catalog.yaml')
-ds.loadCatalog('/home/cermak/mom6/configs/zOutput/catalog.json')
+#ds.loadCatalog('/home/cermak/mom6/configs/zOutput/catalog.yaml')
+#ds.loadCatalog('/home/cermak/mom6/configs/zOutput/catalog.json')
 
 # Data sources cannot be in chunked mode for use in this routine
 bathyFields = grd.computeBathymetricRoughness('GEBCO_2020',
@@ -109,18 +109,30 @@ bathyFields = grd.computeBathymetricRoughness('GEBCO_2020',
 # The 'depth' field has to be requested as an auxFields
 grd.applyEvalMap('GEBCO_2020', bathyFields)
 
-bathyConservativeGrids = grd.generateConservativeRegrid('GEBCO_2020', sourceVariable='depth',
-        auxField=['land_mask'], nominal_depth=0.0)
+#bathyFields = grd.openDataset('FILE:/home/cermak/mom6/configs/zOutput/ocean_topog_Example7.nc')
 
-# Do something with the new fields and save to new files
+# Write ocean_mask.nc and land_mask.nc based on existing field
+grd.writeOceanMask(bathyFields, 'depth', 'ocean_mask',
+        '/home/cermak/mom6/configs/zOutput/ocean_mask_Example7.nc',
+        MASKING_DEPTH=0.0)
+grd.writeLandMask(bathyFields, 'depth', 'land_mask',
+        '/home/cermak/mom6/configs/zOutput/land_mask_Example7.nc',
+        MASKING_DEPTH=0.0)
 
-# Write ocean_topog.nc
+# Apply existing land mask which should not change anything
+# The minimum depth will modify a couple points.   We save the
+# new field as 'newDepth' to allow comparison with 'depth'.
+bathyFields['newDepth'] = grd.applyExistingLandMask(bathyFields, 'depth',
+        '/home/cermak/mom6/configs/zOutput/land_mask_Example7.nc', 'land_mask',
+        MASKING_DEPTH=0.0, MINIMUM_DEPTH=1000.0, MAXIMUM_DEPTH=-99999.0)
 
-# Write ocean_mask.nc and land_mask.nc that can be based on
-# ocean_topog.nc or the exchange grids or any existing field.
+#grd.updateExchangeGrids(bathFields, 'depth')
 
-grd.saveGrid(filename="/home/cermak/mom6/configs/zOutput/LLC_20x30_Example7.nc")
+# Write fields out to a file
+# TODO: provide a data source service hook?
+bathyFields.to_netcdf('/home/cermak/mom6/configs/zOutput/ocean_topog_Example7.nc',
+        encoding=grd.removeFillValueAttributes(data=bathyFields))
+
+grd.saveGrid(filename="/home/cermak/mom6/configs/zOutput/LCC_20x30_Example7.nc")
 
 # Do some plotting!
-
-pdb.set_trace()

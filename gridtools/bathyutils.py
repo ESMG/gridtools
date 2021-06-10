@@ -3,7 +3,7 @@
 #  - https://github.com/nikizadehgfdl/ocean_model_topog_generator
 #    - compute_bathymetric_roughness_h2(**opts)
 
-import hashlib, logging
+import os, hashlib, logging
 import numpy as np
 import xarray as xr
 import pdb
@@ -11,6 +11,109 @@ import pdb
 from . import meshrefinement
 
 # Functions
+
+def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, kwargs):
+    '''Modify a given bathymetry using a specified land mask.
+
+    Three depth parameters are available: (Units = meters)
+      MINIMUM_DEPTH: defaults to 0.0
+      MASKING_DEPTH: defaults to 0.0
+      MAXIMUM_DEPTH: defaults to maximum depth from data source
+        if not specified or is negative.
+
+    A negative MASKING_DEPTH or MAXIMUM_DEPTH is ignored.
+
+    If a depth is shallower than the MINIMUM_DEPTH but deeper than
+    the MASKING_DEPTH, the depth will be set to the MINIMUM_DEPTH.
+
+    Water points that will become masked by the existing land
+    mask will be set to the MASKING_DEPTH.
+
+    Other arguments:
+      TOPO_EDITS_FILE
+        Changed mask points in the MOM6 zEdits format will be
+        recorded to the specified filename. (Unimplemented)
+    '''
+
+    if not(os.path.isfile(maskFile)):
+        msg = ("ERROR: Existing mask file not found (%s)" % (maskFile))
+        grd.printMsg(msg, level=logging.ERROR)
+        return None
+
+    # Find input land mask field
+    maskData = xr.open_dataset(maskFile)
+    try:
+        originalLandMask = maskData[maskField]
+    except:
+        msg = ("ERROR: Mask file does not have requested field (%s)" % (maskField))
+        grd.printMsg(msg, level=logging.ERROR)
+        return
+
+    # Check for supplied depth field
+    try:
+        depthField = dsData[dsField]
+    except:
+        msg = ("ERROR: The depth field (%s) could not be found in the supplied field." % (dsField))
+        grd.printMsg(msg, level=logging.ERROR)
+        return
+
+    # Determine values from other possible arguments
+    minimum_depth = 0.0
+    masking_depth = 0.0
+    maximum_depth = -99999.0
+    if 'MINIMUM_DEPTH' in kwargs.keys():
+        minimum_depth = kwargs['MINIMUM_DEPTH']
+    if 'MAXIMUM_DEPTH' in kwargs.keys():
+        maximum_depth = kwargs['MAXIMUM_DEPTH']
+    if 'MASKING_DEPTH' in kwargs.keys():
+        masking_depth = kwargs['MASKING_DEPTH']
+
+    # As is done in MOM6, if maximum is negative, it is defined by the maximum of
+    # the 'depth' field passed.
+    if maximum_depth < 0.0:
+        maximum_depth = depthField.max().values.tolist()
+    # Negative values are set back to zero for MINIMUM_DEPTH and MASKING_DEPTH
+    if minimum_depth < 0.0:
+        minimum_depth = 0.0
+    if masking_depth < 0.0:
+        masking_depth = 0.0
+
+    # To use xr.where the data and mask have to be in the same Dataset()
+    workData = xr.Dataset()
+    workData['depth'] = depthField
+    workData['land_mask'] = originalLandMask
+    workData['land_mask'].attrs['masking_depth'] = masking_depth
+    workData['land_mask'].attrs['minimum_depth'] = minimum_depth
+    workData['land_mask'].attrs['maximum_depth'] = maximum_depth
+
+    # If the point is a land_mask point and
+    # depth is deeper than the masking_depth,
+    # make it land otherwise do not touch it.
+    # MOM6 RULE: A depth equal or shallower than MASKING_DEPTH is masked as land.
+    condExp = (workData['land_mask']==1) & (workData['depth'] > masking_depth)
+    # This returns the number of matching points
+    nPts = condExp.data.ravel().sum()
+    msg = ("Application of land mask changed %d grid points." % (nPts))
+    grd.printMsg(msg, level=logging.INFO)
+    workData['newDepth'] = xr.where(condExp, masking_depth, workData['depth'])
+
+    # Check ocean points
+    condExp = (workData['land_mask']==0) & (workData['newDepth'] < minimum_depth)
+    nPts = condExp.data.ravel().sum()
+    if nPts > 0:
+        msg = ("Application of MINIMUM_DEPTH changed %d grid points." % (nPts))
+        grd.printMsg(msg, level=logging.INFO)
+        workData['newDepth'] = xr.where(condExp, minimum_depth, workData['newDepth'])
+
+    condExp = (workData['land_mask']==0) & (workData['newDepth'] < masking_depth)
+    nPts = condExp.data.ravel().sum()
+    if nPts > 0:
+        msg = ("Application of MASKING_DEPTH changed %d grid points." % (nPts))
+        grd.printMsg(msg, level=logging.INFO)
+        workData['newDepth'] = xr.where(condExp, masking_depth, workData['newDepth'])
+
+    return workData['newDepth']
+
 
 # Original functions from create_topog_refinedSampling.py
 

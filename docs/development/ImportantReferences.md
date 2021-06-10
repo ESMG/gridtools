@@ -60,6 +60,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://edbennett.github.io/high-performance-python/11-dask/index.html
  * https://geohackweek.github.io/nDarrays/09-masking/
+ * https://gist.github.com/TomTom101/25e0e76f11a5da57523a60fb280005c1 (Multiple conditions on xarray Data Array)
  * https://github.com/binder-examples/conda
  * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/pydata/xarray/issues/2899
