@@ -72,6 +72,8 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, kwargs):
     # the 'depth' field passed.
     if maximum_depth < 0.0:
         maximum_depth = depthField.max().values.tolist()
+        msg = ("The (diagnosed) maximum depth of the ocean %f meters." % (maximum_depth))
+        grd.printMsg(msg, level=logging.INFO)
     # Negative values are set back to zero for MINIMUM_DEPTH and MASKING_DEPTH
     if minimum_depth < 0.0:
         minimum_depth = 0.0
@@ -112,6 +114,9 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, kwargs):
         grd.printMsg(msg, level=logging.INFO)
         workData['newDepth'] = xr.where(condExp, masking_depth, workData['newDepth'])
 
+    # Update hash for the new field
+    workData['newDepth'].attrs['sha256'] = hashlib.sha256( np.array( workData['newDepth'] ) ).hexdigest()
+
     return workData['newDepth']
 
 
@@ -131,7 +136,6 @@ def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
         # If we are not using the super grid, we want to overlap
         # the blocks to get rid of a zero band between the blocks
         if not(useSupergrid):
-            print(" Extending blocks...")
             a_win.append(a[0:j1,0:i1+1])
             a_win.append(a[0:j1,i1:i2+1])
             a_win.append(a[0:j1,i2:i3+1])

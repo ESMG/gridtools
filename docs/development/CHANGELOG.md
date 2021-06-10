@@ -1,5 +1,22 @@
 # Change Log
 
+# 2021-06-10
+
+ - Be sure to rehash the new 'depth' field in bathyutils.applyExistingLandMask()
+ - Add a MOM6 message indicating diagnosed maximum ocean depth.
+ - gridtools.openDataset() can now open a catalog data source or file or
+   OpenDAP end point.  Completely rewrote this routine again.
+ - Adopt prefixes for file specs.  See doc/development/Filespec.md  No
+   filespec prefix is assumed to be filenames.  Things should work
+   if regular filenames are used.  The only thing that will break is
+   the data source catalog references.  A / must be prefixed on the
+   entries.  We can do a soft ignore in the future to allow plain
+   names to work too.
+ - Add a fileutils library for generic gridtools operations that are
+   not field or grid based.
+ - Allow chunks option to be passed for grid and data sources.
+ - openGrid now uses openDataset again
+
 # 2021-06-09
 
  - Implement saving of ocean and land masks using a specified
@@ -13,7 +30,7 @@
  - gridutils.removeFillValueAttributes() add a data= parameter to
    allow use outside of grids.
  - gridutils: Add more comments to allow searching of large sections of code
- - Add meshutils for generic routines that we don't really have a good place
+ - Add meshutils for generic routines that we do not really have a good place
    for at the moment.  The first routines are writing a land and ocean mask
    file based on a supplied field.
 

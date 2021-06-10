@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 from pyproj import CRS, Transformer
 import pandas as pd
-import requests, urllib
+import requests, urllib.parse
 
 # Needed for panel.pane                
 from matplotlib.figure import Figure
@@ -17,6 +17,7 @@ from matplotlib.backends.backend_agg import FigureCanvas
 #  * ROMS to MOM6 grid conversion
 #  * Computation of MOM6 grid metrics
 from . import spherical
+from . import fileutils
 
 # GridUtils() application
 #from . import app
@@ -1342,32 +1343,31 @@ class GridUtils:
             self.xrDS.close()
             self.xrOpen = False
             
-    def openGrid(self, inputFilename):
-        '''Open a grid file.  The file pointer is internal to the object.
+    def openGrid(self, inputUrl, chunks=None):
+        '''Open a grid file.  The file pointer is internal to the gridtools object.
+
+	Specify with file:// or OpenDAP (http://, https://).
+
         To access it, use: obj.xrDS or obj.grid'''
-        # check if we have a vailid inputFilename
-        if not(os.path.isfile(inputFilename)):
-            self.printMsg("Dataset not found: %s" % (inputFilename), level=logging.INFO)
-            return
-                
+
         # If we have a file pointer and it is open, close it and re-open the new file
         if self.xrOpen:
             self.closeGrid()
             
         try:
-            if self.xrChunks:
-                self.xrDS = xr.open_dataset(inputFilename, chunks=self.xrChunks)
+            if chunks:
+                self.xrDS = self.openDataset(inputUrl, chunks=self.xrChunks)
             else:
-                self.xrDS = xr.open_dataset(inputFilename)
+                self.xrDS = self.openDataset(inputUrl)
             self.xrOpen = True
-            self.xrFilename = inputFilename
+            self.xrFilename = inputUrl
         except:
-            msg = "ERROR: Unable to load dataset: %s" % (inputFilename)
+            msg = "ERROR: Unable to load grid: %s" % (inputUrl)
             self.printMsg(msg, level=logging.ERROR)
             self.xrDS = None
             self.xrOpen = False
-            # Stop on error to load a file
-            self.debugMsg("")
+            # If in DEBUG mode, stop on error to load the inputUrl
+            self.debugMsg("DEBUG: Stopping on read error of grid file.")
             
     def readGrid(self, opts={'type': 'MOM6'}, local=None, localFilename=None):
         '''Read a grid.
@@ -1848,46 +1848,71 @@ class GridUtils:
 
         return sourceExpression
 
-    def openDataset(self, dsName):
-        '''Open a dataset using the data source catalog.  Optionally, load
-        a raw dataset using a prefix FILE: in the data source name.'''
+    def openDataset(self, dsName, chunks=None):
+        '''Open a dataset using the data source catalog or url that can
+        point to a raw dataset using a prefix file:// in the data source name.
+        The url can be an OpenDAP dataset: e.g.
+        https://opendap.jpl.nasa.gov/opendap/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_AMSR_OI/2011/001/20110101-NCDC-L4LRblend-GLOB-v01-fv02_0-AVHRR_AMSR_OI.nc.bz2
+	'''
 
-        if dsName.find('FILE:') == 0:
-            if not(os.path.isfile(dsName[5:])):
-                self.printMsg("ERROR: The datasource (%s) is was not found." % (dsName[5:]), level=logging.ERROR)
-                return None
-            dsData = xr.open_dataset(dsName[5:])
-            return dsData
+        dsUrl = urllib.parse.urlparse(dsName)
+        # At this point, we assume the dsName is a local filename
+        urlToOpen = dsName
 
-        dsObj = None
-        if dsName in self.dataSourcesObj.catalog.keys():
-            dsObj = self.dataSourcesObj.catalog[dsName]
-        else:
-            self.printMsg("ERROR: The datasource (%s) is not defined." % (dsName), level=logging.ERROR)
-            return None
-
-        # Parse the url, what to pass to xarray open_dataset
-        # scheme='file' => path
-        # scheme='http', scheme='https' => dsObj['url']
-        dsUrl = urllib.parse.urlparse(dsObj['url'])
-        urlToOpen = None
+        # OpenDAP
         if dsUrl.scheme in ['http','https']:
             urlToOpen = dsObj['url']
+            try:
+                dsData = xr.open_dataset(urlToOpen)
+            except:
+                self.printMsg("ERROR: The remote data source (%s) is was not found or could not be opened." % (urlToOpen), level=logging.ERROR)
+                return None
+            return dsData
+
+        # Local file spec
         if dsUrl.scheme == 'file':
             urlToOpen = dsUrl.path
+            if not(os.path.isfile(urlToOpen)):
+                self.printMsg("ERROR: The data source (%s) is was not found." % (urlToOpen), level=logging.ERROR)
+                return None
+            dsData = xr.open_dataset(urlToOpen)
+            return dsData
+
+        # Gridtools catalog entry
+        dsObj = {}
+        if dsUrl.scheme == 'ds':
+            dsName = dsUrl.path
+            if dsName in self.dataSourcesObj.catalog.keys():
+                dsObj = self.dataSourcesObj.catalog[dsName]
+            else:
+                self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
+                return None
+
+            # Parse the catalog url, what to pass to xarray open_dataset
+            # scheme='file' => path
+            # scheme='http', scheme='https' => dsObj['url']
+            dsUrl = urllib.parse.urlparse(dsObj['url'])
+            urlToOpen = None
+            if dsUrl.scheme in ['http','https']:
+                urlToOpen = dsObj['url']
+            if dsUrl.scheme == 'file':
+                urlToOpen = dsUrl.path
+            if 'chunks' in dsObj.keys():
+                if not(chunks):
+                    chunks = dsObj['chunks']
 
         dsData = None
         try:
-            if 'chunks' in dsObj.keys():
-                dsData = xr.open_dataset(urlToOpen, chunks=dsObj['chunks'])
+            if chunks:
+                dsData = xr.open_dataset(urlToOpen, chunks=chunks)
             else:
                 dsData = xr.open_dataset(urlToOpen)
         except:
-            self.printMsg("ERROR: The datasource (%s) could not be opened." % (dsName), level=logging.ERROR)
+            self.printMsg("ERROR: The data source (%s) could not be opened." % (dsName), level=logging.ERROR)
             return dsData
 
-        # Apply variableMap
-        if 'variableMap' in dsObj.keys():
+        # Apply variableMap if dataset was read from the data source catalog
+        if dsObj and 'variableMap' in dsObj.keys():
             dsVars = list(dsData.variables)
             # Map variables from data source to library standard variables
             for varTarget in dsObj['variableMap'].keys():
@@ -1899,13 +1924,25 @@ class GridUtils:
         return dsData
 
     def applyEvalMap(self, dsName, dsData):
-        '''Apply constructed equations through python eval() to manipulate data source fields.'''
+        '''Apply constructed equations through python eval() to manipulate data source fields.
+           Data source catalog entries must be prefixed with ds://.  If /GEBCO is defined
+           as a data source in the catalog, use: ds:///GEBCO.  All catalog entries start
+           with a slash.
+        '''
+
+        dsUrl = urllib.parse.urlparse(dsName)
+        dsEntry = None
+        if dsUrl.scheme != 'ds':
+            self.printMsg("ERROR: Data source catalog entries must have a ds:// prefix.", level=logging.ERROR)
+            return
+        else:
+            dsEntry = dsUrl.path
 
         dsObj = None
-        if dsName in self.dataSourcesObj.catalog.keys():
-            dsObj = self.dataSourcesObj.catalog[dsName]
+        if dsEntry in self.dataSourcesObj.catalog.keys():
+            dsObj = self.dataSourcesObj.catalog[dsEntry]
         else:
-            self.printMsg("ERROR: The datasource (%s) is not defined." % (dsName), level=logging.ERROR)
+            self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
             return
 
         # Apply evalMap

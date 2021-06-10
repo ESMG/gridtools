@@ -149,13 +149,16 @@
    - [ ] pytest: Refactor numpypi into structured tests under pytest
    - [ ] pytest: allow certain tests to fail if a module is not available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
- - [ ] gridtools.openDataset() should scan the dsName for a file:// or http: address maybe using
-       the parser to detect something that isn't a catalog.  This routine could be improved.
+ - [X] gridtools.openDataset() should scan the dsName for a file:// or
+       http: address maybe using the parser to detect something that
+       is not a catalog.  This routine could be improved.
 
 # WISH
 
- - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are there things
-       that we could use there instead of recreating many wheels.
+ - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
+       there things that we could use there instead of recreating many wheels.
+       There are lot of FRE-NCtool references in the ROMS to MOM6 conversion tool.
+ - [ ] Migrate to use of file:// or http://, https:// for file specifications.
  - [ ] Allow gridtools to continue to operate with some disabled routines that use xesmf.
  - [ ] app:Save remote files; additional sanity checks
  - [ ] app:Add an activity spinner to indicate the notebook is busy
@@ -176,7 +179,7 @@
  - [ ] Work with generic non-mapping reference systems for use with some of the sample MOM6 problems
  - [ ] Refactor any grid math into a gridmath library.  Any grid computation that can stand on its own
        should be moved into a separate gridmath library.
- - [ ] gridtools::makeGrid() will need a refactor to work with other grid types
+ - [ ] gridtools.makeGrid() will need a refactor to work with other grid types
  - [ ] write out all MOM6 ancillary files when writing a grid
  - [ ] refactor expansion/clipping of grid points when fitting grid
  - [ ] Add a notebook or two that demonstrates some of the esoteric API
