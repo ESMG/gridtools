@@ -155,6 +155,7 @@
 
 # WISH
 
+ - [ ] Teach grid tools to use "input.nml" to find grid related things for model runs.
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
        there things that we could use there instead of recreating many wheels.
        There are lot of FRE-NCtool references in the ROMS to MOM6 conversion tool.
@@ -162,13 +163,14 @@
  - [ ] Allow gridtools to continue to operate with some disabled routines that use xesmf.
  - [ ] app:Save remote files; additional sanity checks
  - [ ] app:Add an activity spinner to indicate the notebook is busy
- - [ ] Compute `angle_dy` for testing of grid conformality.  Theoretically, we can do this check for all grid
-       and supergrid cells.
+ - [ ] Compute `angle_dy` for testing of grid conformality.  Theoretically,
+       we can do this check for all grid and supergrid cells.
  - [ ] tripolar grids: use FRE-NCtools via cython?
  - [ ] Bring in code that converts ROMS grids to MOM6 grids
    - [ ] Allow conversion of MOM6 grids to ROMS grids
- - [ ] grid reading and plot parameter defaults should be dynamic with grid type declaration and potentially
-       split out into separate library modules? lib/gridTools/grids/{MOM6,ROMS,WRF}
+ - [ ] grid reading and plot parameter defaults should be dynamic with
+       grid type declaration and potentially split out into separate
+       library modules? lib/gridTools/grids/{MOM6,ROMS,WRF}
  - [ ] Place additional metadata into MOM6 grid files
    - [X] Grid parameters
    - [X] Software stack, git information
