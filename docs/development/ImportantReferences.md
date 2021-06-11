@@ -96,6 +96,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/21778118/counting-the-number-of-non-nan-elements-in-a-numpy-ndarray-in-python
+ * https://stackoverflow.com/questions/2654113/how-to-get-the-callers-method-name-in-the-called-method
  * https://stackoverflow.com/questions/29870629/pip-install-test-dependencies-for-tox-from-setup-py
  * https://stackoverflow.com/questions/32234156/how-to-unimport-a-python-module-which-is-already-imported
  * https://stackoverflow.com/questions/44412432/cartopy-zoom-in-to-a-region

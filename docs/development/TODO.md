@@ -8,11 +8,12 @@
    - [X] Create specific installation instructions
  - [ ] Version 0.2
    - [X] Implement a basic data catalog for data management
-   - [ ] Improve reproducibility of grids produced by the library
+   - [X] Improve reproducibility of grids produced by the library
    - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] Creation of all needed files to run a MOM6 simulation
-   - [ ] Construct initial bathymetry grid for new grids
-   - [ ] Construct initial grid land mask for new grids
+   - [ ] Creation of more of the needed files to run a MOM6 simulation
+   - [X] Construct initial bathymetry grid for new grids
+   - [X] Construct bathymetric roughness
+   - [ ] Construct initial grid ocean/land masks for new grids
  - [ ] Verison 0.x
    - [ ] Sponge data preparation
    - [ ] Subset existing grids and infrastructure
@@ -21,7 +22,7 @@
    - [ ] Enhanced grid/plot projection options
    - [ ] Allow import of ROMS grid for conversion to MOM6
    - [ ] Allow export of MOM6 grid to ROMS
-   - [ ] Boundery condition support
+   - [ ] Boundery condition grid creation and support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
    - [ ] This library is installable via conda
@@ -31,6 +32,8 @@
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
        `setGridParameters` to recursively update dictionary elements.
+ - [ ] Regular filenames should be usable everywhere that takes file or
+       data source arguments.
 
 # TASKS
 
@@ -69,9 +72,13 @@
      - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
            `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
  - [ ] integration of data sources
+   - [ ] generic regridder for creating boundary files from data sources
    - [ ] xesmf regridder for bathymetry sources
    - [ ] option to create land mask fraction
    - [ ] option to use source grid as a supergrid for coarsening
+   - [X] implemented as topoutils.TopoUtils.regridTopo()
+   - [ ] refactor function arguments into kwargs
+   - [ ] refactor print statements to use gridtools logging facility
  - [ ] integration of bathymetric sources and apply to grids
    - [ ] https://github.com/nikizadehgfdl/ocean\_model\_topog\_generator
    - [ ] fix native zero band columns in partitions

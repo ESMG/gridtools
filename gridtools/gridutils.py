@@ -17,10 +17,9 @@ from matplotlib.backends.backend_agg import FigureCanvas
 #  * ROMS to MOM6 grid conversion
 #  * Computation of MOM6 grid metrics
 from . import spherical
-from . import fileutils
 
-# GridUtils() application
-#from . import app
+# Other utilities
+from . import fileutils
 
 class GridUtils:
 
@@ -1881,9 +1880,9 @@ class GridUtils:
         # Gridtools catalog entry
         dsObj = {}
         if dsUrl.scheme == 'ds':
-            dsName = dsUrl.path
-            if dsName in self.dataSourcesObj.catalog.keys():
-                dsObj = self.dataSourcesObj.catalog[dsName]
+            dsPath = dsUrl.path
+            if dsPath in self.dataSourcesObj.catalog.keys():
+                dsObj = self.dataSourcesObj.catalog[dsPath]
             else:
                 self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
                 return None
@@ -1999,3 +1998,25 @@ class GridUtils:
         from . import meshutils
         meshutils.writeOceanMask(self, dsData, dsField, outField, outFile, **kwargs)
         return
+
+    # topoutils routines
+
+    def regridTopo(self, dsData, gridGeoLoc = "corner",
+        topoVarName = "elevation", coarsenInt = 10, method = 'conservative',
+        superGrid = True, periodic = True, gridDimX = None, gridDimY = None,
+        gridLatName = None, gridLonName = None, topoDimX = None, topoDimY = None,
+        topoLatName = None, topoLonName = None, convert_to_depth = True):
+        '''Generate a bathymetry and ocean mask for a given data source
+        topography or bathymetry.  See topoutils.TopoUtils.regridTopo().
+        '''
+        from . import topoutils
+
+        topoObj = topoutils.TopoUtils()
+        return topoObj.regridTopo(self, dsData, gridGeoLoc = gridGeoLoc,\
+            topoVarName = topoVarName, coarsenInt = coarsenInt, method = method,\
+            superGrid = superGrid, periodic = periodic,\
+            gridDimX = gridDimX, gridDimY = gridDimY,\
+            gridLatName = gridLatName, gridLonName = gridLonName,\
+            topoDimX = topoDimX, topoDimY = topoDimY,\
+            topoLatName = topoLatName, topoLonName = topoLonName,\
+            convert_to_depth = convert_to_depth)

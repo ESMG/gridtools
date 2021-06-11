@@ -2,10 +2,21 @@
 
 # 2021-06-10
 
+ - More TODOs.
+ - Added Example8 to demonstrate construction of depth/ocean mask grid
+   through gridtools library with new topoutils regridding method.
+ - Fix masking names for Example7.  ROMS to MOM6 calls the masking fields
+   `mask`.  If they are in the same file, we will have to put a prefix
+   on the field.
+ - Initial construction of topoutils.TopoUtils.regridTopo() is done.  Needs
+   testing.
+ - Found a way to get the prior function caller to assist debugging.  It
+   introduces a performance hit so we need to be careful about turning it
+   on.
  - Log an ERROR if we fail to evaluate any fields for a data source.
  - Add a note about using ... in python. Cute!
  - Rework Example7 with a common work directory.
- - Adding contributions from James to topoutils.py.
+ - Adding contribution from James to topoutils.py.
  - Bug in xesmf requires temporary reference to a git repo.
  - Be sure to rehash the new 'depth' field in bathyutils.applyExistingLandMask()
  - Add a MOM6 message indicating diagnosed maximum ocean depth.

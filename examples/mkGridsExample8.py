@@ -7,6 +7,13 @@ from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
 import pdb
 
+# This example exercises the routine written by
+# James Simkins to generate a ocean topography
+# and ocean mask with a ocean fraction.
+
+# We utilize the 20x30 example grid along the
+# California coast.
+
 # Setup a work directory
 #wrkDir = '/home/cermak/mom6/configs/zOutput'
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
@@ -16,7 +23,7 @@ grd = GridUtils()
 
 # We can turn on extra output from the module
 grd.printMsg("Setting print and logging messages to the DEBUG level.")
-logFilename = os.path.join(wrkDir, 'LCC_20x30.log')
+logFilename = os.path.join(wrkDir, 'LCC_20x30_Example8.log')
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -88,41 +95,15 @@ ds.addDataSource({
         }
 })
 
-# Save the catalog just for demonstration
-ds.saveCatalog(os.path.join(wrkDir, 'catalog.json'))
-ds.saveCatalog(os.path.join(wrkDir, 'catalog.yaml'))
+# Exercise topoutils.TopoUtils.regridTopo() function
 
-# Data sources cannot be in chunked mode for use in this routine
-bathyFields = grd.computeBathymetricRoughness('ds:///GEBCO_2020',
-        maxMb=99, superGrid=False, useClipping=False,
-        FixByOverlapQHGridShift=True, auxFields=['hStd', 'hMin', 'hMax', 'depth'])
-
-# This is needed to really convert the elevation field to depth
-# The 'depth' field has to be requested as an auxFields
-grd.applyEvalMap('ds:///GEBCO_2020', bathyFields)
-
-# Write ocean_mask.nc and land_mask.nc based on existing field
-grd.writeOceanMask(bathyFields, 'depth', 'mask',
-        os.path.join(wrkDir, 'ocean_mask_Example7.nc'),
-        MASKING_DEPTH=0.0)
-grd.writeLandMask(bathyFields, 'depth', 'mask',
-        os.path.join(wrkDir, 'land_mask_Example7.nc'),
-        MASKING_DEPTH=0.0)
-
-# Apply existing land mask which should not change anything
-# The minimum depth will modify a couple points.   We save the
-# new field as 'newDepth' to allow comparison with 'depth'.
-bathyFields['newDepth'] = grd.applyExistingLandMask(bathyFields, 'depth',
-        os.path.join(wrkDir, 'land_mask_Example7.nc'), 'mask',
-        MASKING_DEPTH=0.0, MINIMUM_DEPTH=1000.0, MAXIMUM_DEPTH=-99999.0)
-bathyFields['newDepth'].attrs['units'] = 'meters'
-bathyFields['newDepth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
+resultFields = grd.regridTopo('ds:///GEBCO_2020', topoVarName='depth')
 
 # Write fields out to a file
 # TODO: provide a data source service hook?
-bathyFields.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example7.nc'),
-        encoding=grd.removeFillValueAttributes(data=bathyFields))
+resultFields.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example8.nc'),
+        encoding=grd.removeFillValueAttributes(data=resultFields))
 
-grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example7.nc"))
+grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example8.nc"))
 
 # Do some plotting!
