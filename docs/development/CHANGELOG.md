@@ -2,6 +2,11 @@
 
 # 2021-06-10
 
+ - Log an ERROR if we fail to evaluate any fields for a data source.
+ - Add a note about using ... in python. Cute!
+ - Rework Example7 with a common work directory.
+ - Adding contributions from James to topoutils.py.
+ - Bug in xesmf requires temporary reference to a git repo.
  - Be sure to rehash the new 'depth' field in bathyutils.applyExistingLandMask()
  - Add a MOM6 message indicating diagnosed maximum ocean depth.
  - gridtools.openDataset() can now open a catalog data source or file or

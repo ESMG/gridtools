@@ -117,6 +117,7 @@ These are people, references and bookmarks that provided useful information to m
 
 ## Paywall Bookmarks
 
+ * https://medium.com/techtofreedom/3-uses-of-the-ellipsis-in-python-25795aac723d
  * https://towardsdatascience.com/10-examples-to-master-args-and-kwargs-in-python-6f1e8cc30749
 
 ## Python Packaging
@@ -125,12 +126,9 @@ These are people, references and bookmarks that provided useful information to m
 
 ## For Review Later
 
- * http://dsrs.atmos.umd.edu/DATA/aosc/greenland/code/MOM4SODA/MOM_TEST/src/tools/make_hgrid/make_hgrid.c
-   * Be aware, this may be Arakawa B grid code
-
  * https://github.com/nsidc/mapx
-   * The NSIDC mapx library and associated binary tools for gridding/reprojection.
+   * The NSIDC mapx library and associated tools for gridding/reprojection.
 
- * GraphQL - data I/O; might be a new beginning vs openDAP
+ * GraphQL - data I/O; might be a new beginning vs OpenDAP
    * https://graphql.org/code/#python
    * https://github.com/graphql-python/graphene/blob/master/setup.py

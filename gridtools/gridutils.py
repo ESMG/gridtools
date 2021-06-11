@@ -1953,7 +1953,11 @@ class GridUtils:
             # if the name is unique, otherwise it will overwrite the field.
             for varTarget in dsObj['evalMap'].keys():
                 mathExpression = self.convertToMathExpression(dsObj['evalMap'][varTarget])
-                dsData[varTarget] = eval(mathExpression)
+                try:
+                    dsData[varTarget] = eval(mathExpression)
+                except:
+                    msg = ("ERROR: Failed to apply evalMap to (%s)." % (varTarget))
+                    self.printMsg(msg, level=logging.ERROR)
 
     def useDataSource(self, dsObj):
         # Attach data source object to grid tools object
