@@ -2,6 +2,7 @@
 
 # 2021-06-11
 
+ - Add configuration file for ReadtheDocs site
  - Fix Example8 to set periodic=False
  - Initial sphinx setup is complete; need to test linkage to ReadTheDocs.
  - Adding Documentation.md to docs/development.
