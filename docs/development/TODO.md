@@ -9,11 +9,11 @@
  - [ ] Version 0.2
    - [X] Implement a basic data catalog for data management
    - [X] Improve reproducibility of grids produced by the library
-   - [ ] Estabish sphinx document generator and link to readthedocs
-   - [ ] Creation of more of the needed files to run a MOM6 simulation
+   - [X] Establish sphinx document generator and link to readthedocs
    - [X] Construct initial bathymetry grid for new grids
    - [X] Construct bathymetric roughness
    - [ ] Construct initial grid ocean/land masks for new grids
+   - [ ] Creation of more of the needed files to run a MOM6 simulation
  - [ ] Verison 0.x
    - [ ] Sponge data preparation
    - [ ] Subset existing grids and infrastructure
@@ -40,8 +40,9 @@
  - [ ] Sponge data preparation
    - [ ] Current scripts generate u,v fields on h-points; this needs to be changed to C-grid u/v-points instead
  - [ ] general documentation
-   - [ ] enable sphinx as the documentation generator
-   - [ ] link to readthedocs
+   - [X] enable sphinx as the documentation generator
+   - [X] link to readthedocs
+   - [ ] include local markdown files
  - [ ] grid creation/editor
    - [ ] grid metrics
      - [X] Spherical solution is complete via Niki's ROMS to MOM6 converter
@@ -100,7 +101,7 @@
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
- - [ ] on load of a grid
+ - [ ] on load of a grid into gridtool library
    - [ ] calculate R
    - [ ] calculate tilt (may not be possible)
    - [ ] update any tool metadata that is appropriate for that grid

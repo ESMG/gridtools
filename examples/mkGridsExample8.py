@@ -96,8 +96,7 @@ ds.addDataSource({
 })
 
 # Exercise topoutils.TopoUtils.regridTopo() function
-
-resultFields = grd.regridTopo('ds:///GEBCO_2020', topoVarName='depth')
+resultFields = grd.regridTopo('ds:///GEBCO_2020', topoVarName='depth', periodic=False)
 
 # Write fields out to a file
 # TODO: provide a data source service hook?

@@ -1,5 +1,14 @@
 # Change Log
 
+# 2021-06-11
+
+ - Fix Example8 to set periodic=False
+ - Initial sphinx setup is complete; need to test linkage to ReadTheDocs.
+ - Adding Documentation.md to docs/development.
+ - Sphinx requires a fully operational software stack to generate documentation.
+ - Adding sphinx/doxygen to documentation proceedures.  The documentation
+   will utilize a separate enviornmnet to keep things simple.
+
 # 2021-06-10
 
  - More TODOs.
