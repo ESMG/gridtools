@@ -34,6 +34,9 @@
        `setGridParameters` to recursively update dictionary elements.
  - [ ] Regular filenames should be usable everywhere that takes file or
        data source arguments.
+ - [ ] file:// spec does not honor relative paths.  There should be
+       generic support for relative and absolute paths for file:// and
+       ds:// file specs.
 
 # TASKS
 

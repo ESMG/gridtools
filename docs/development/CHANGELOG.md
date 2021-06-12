@@ -1,7 +1,13 @@
 # Change Log
 
+# 2021-06-12
+ 
+ - Numpy has a method to access the indexes that match grid points
+   for any value test.
+
 # 2021-06-11
 
+ - BUG: Relative paths do not work in the new filespec scheme.
  - Remove old Documentation.md file.
  - Do not install the binary TeX environment or the glibc anywhere near the
    conda gridTools environment.  The environment became tainted and began
