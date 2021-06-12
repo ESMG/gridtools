@@ -176,7 +176,7 @@ Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
 Until we can activate Sphinx to create our body of documentation we will have to resort
 to upkeep of a manual index.
 
-[Documentation](docs/Documentation.md)
+[Documentation](docs/development/Documentation.md)
   * [conda](docs/conda/README.md)
   * [development](docs/development)
     * [CHANGELOG](docs/development/CHANGELOG.md): Development log of changes
@@ -207,4 +207,5 @@ to upkeep of a manual index.
 This project is soliciting help in development.  Please contribute
 ideas or bug requests using the issues tab.  Code contributions can
 be sent via github's pull request process.  Code adoption will follow
-the [contribution](CONTRIBUTING.md) process.
+the [contribution](CONTRIBUTING.md) process.  Development can be
+discussed in the [MOM6 forum](https://bb.cgd.ucar.edu/cesm/forums/mom6.148/).

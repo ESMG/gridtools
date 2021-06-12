@@ -43,6 +43,7 @@
    - [X] enable sphinx as the documentation generator
    - [X] link to readthedocs
    - [ ] include local markdown files
+     - [ ] Hack on m2r2 python module for sphinx
  - [ ] grid creation/editor
    - [ ] grid metrics
      - [X] Spherical solution is complete via Niki's ROMS to MOM6 converter

@@ -2,6 +2,12 @@
 
 # 2021-06-11
 
+ - Remove old Documentation.md file.
+ - Do not install the binary TeX environment or the glibc anywhere near the
+   conda gridTools environment.  The environment became tainted and began
+   to segfault.  Only activate TeX when a PDF is needed.
+ - Markdown file processing is problematic.  A module m2r2 needs some work to
+   do things the way we want. Leaving it disabled for now.
  - Add configuration file for ReadtheDocs site
  - Fix Example8 to set periodic=False
  - Initial sphinx setup is complete; need to test linkage to ReadTheDocs.

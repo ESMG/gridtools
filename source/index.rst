@@ -5,9 +5,8 @@ Welcome to Gridtools library's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   app
-   gridutils
-   topoutils
+   api
+
 
 Indices and tables
 ==================

@@ -18,6 +18,9 @@ Installation of TeX is a little more cumbersome.
  * https://tug.org/texlive/quickinstall.html
  * https://eikonomega.medium.com/getting-started-with-sphinx-autodoc-part-1-2cebbbca5365
  * https://stackoverflow.com/questions/50564999/lib64-libc-so-6-version-glibc-2-14-not-found-why-am-i-getting-this-error
+ * https://thomas-cokelaer.info/tutorials/sphinx/docstring_python.html
+ * https://devguide.python.org/documenting/
+ * https://docs.python-guide.org/writing/documentation/
 
 # TeX
 
@@ -25,14 +28,17 @@ These are specific instructions for installation of TeX on the chinook@UAF clust
 Use only after activating the gridTools environment for conda.  This installs over
 7 GB of data.
 
+SPECIAL NOTE: Do not mix this software directly with the gridTool installation.
+Only activate it when you need to build the PDF.
+
 ```
 $ cd src/TeX
 $ wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 $ tar xzf install-tl-unx.tar.gz
 $ cd install-tl-20210611
 $ ./install-tl
-$ export TEXDIR=${CONDA_PREFIX}/texlive/2021
-$ export TEXMFHOME=${CONDA_PREFIX}/texmf
+$ export TEXDIR=/import/AKWATERS/jrcermakiii/local/texlive/2021
+$ export TEXMFHOME=${TEXDIR}/texmf
 ```
 
 The install may fail with some warnings:
@@ -55,15 +61,15 @@ Created a `latex.sh` to run after `conda activate gridTools`.  This allows insta
 of TeX within the conda environment.
 
 ```
-export TEXDIR=${CONDA_PREFIX}/texlive/2021
-export TEXMFHOME=${CONDA_PREFIX}/texmf
+export TEXDIR=/import/AKWATERS/jrcermakiii/local/texlive/2021
+export TEXMFHOME=${TEXDIR}/texmf
 # This updates the users PATH so TeX executables can be found
-export TEXPATH=${CONDA_PREFIX}/texlive/2021/bin/x86_64-linux
+export TEXPATH=${TEXDIR}/bin/x86_64-linux
 export PATH=${TEXPATH}:${PATH}
 export MANPATH=${TEXDIR}/texmf-dist/doc/man:${MANPATH}
 export INFOPATH=${TEXDIR}/texmf-dist/doc/info:${INFOPATH}
 # If glibc is needed
-export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${TEXDIR}/lib:${LD_LIBRARY_PATH}
 ```
 
 Activation sequence:
@@ -102,10 +108,9 @@ $ tar xzf glibc-2.14.tar.gz
 $ cd glibc-2.14
 $ mkdir build
 $ cd build
-$ ../configure --prefix=${CONDA_PREFIX}
+$ ../configure --prefix=${TEXDIR}
 $ make
 $ make install
-$ export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 ```
 
 ## MOM6 Manual
