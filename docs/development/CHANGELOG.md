@@ -1,5 +1,11 @@
 # Change Log
 
+# 2021-06-13
+
+ - computeGridMetrics comes in two forms: spherical and cartesian.
+ - Begin construction of makeSoloMosaic that does similar work to `make_solo_mosaic`.
+ - Attempts to build FRE-nctools on chinook have failed so far.
+
 # 2021-06-12
  
  - Numpy has a method to access the indexes that match grid points

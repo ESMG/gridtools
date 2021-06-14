@@ -416,8 +416,8 @@ class GridUtils:
                 
         self.verboseLevel = newLevel
 
-    # grid operations grid routines
-    # Grid Operations Grid Routines
+    # grid operations grid functions
+    # Grid Operations Grid Functions
 
     def clearGrid(self):
         '''Call this when you want to erase the current grid.  This also
@@ -438,8 +438,16 @@ class GridUtils:
         self.clearGridParameters()
         self.resetPlotParameters()
 
-    def computeGridMetrics(self):
-        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area.'''
+    def computeGridMetricsCartesian(self):
+        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a 
+        grid in cartesian coordinates.
+        '''
+        pass
+
+    def computeGridMetricsSpherical(self):
+        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a
+        grid in spherical coordinates.
+        '''
 
         self.grid.attrs['grid_version'] = "0.2"
         self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
@@ -953,7 +961,7 @@ class GridUtils:
             # Compute grid metrics
             if gridType == 'MOM6':
                 if gridMode == 2:
-                    self.computeGridMetrics()
+                    self.computeGridMetricsSpherical()
                 else:
                     msg = "NOTE: Grid metrics were not computed."
                     self.printMsg(msg, level=logging.INFO)
@@ -1421,6 +1429,39 @@ class GridUtils:
         except:
             msg = "Failed to write netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
+
+    def makeSoloMosaic(self, **kwargs):
+        '''
+        This replicates some of the processes of `make_solo_mosaic` from FRE-nctools.  A
+        grid must be created or read.  This function has the following keyword arguments
+        and default values in parentheses.
+
+        topographyField= xarray topographic field (None)
+        topographyFilename= filename used to write topographic field ("ocean_topog.nc")
+        mosaicFilename= filename for mosaic file ("ocean_mosaic.nc")
+        writeLandMask= boolean; set True to write land mask file (False)
+        landmaskFilename= filename used to write land mask ("land_mask.nc")
+        writeOceanMask= boolean; set True to write ocean mask file (False)
+        tileName= name to assing the solo tile ("tile1")
+        MINIMUM_DEPTH= minimum depth of ocean (0.0) [*]
+        MASKING_DEPTH= masking depth of ocean (0.0) [*]
+        MAXIMUM_DEPTH= maximum depth of ocean (-99999.0) [*]
+        writeExchangeGrids= boolean; set False to skip creation of these files (True)
+        overwrite= boolean; set True to overwrite existing files (False)
+        inputDirectory= absolute or relative path to write input files ("INPUT")
+        '''
+
+        # ROMS spherical grids are in lon,lat
+        # ROMS cartesian grids are in y,x
+
+        if len(self.grid.variables) == 0:
+            # No grid found
+            msg = ("ERROR: A grid first must be defined by reading and existing grid or creating a new grid.")
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        # Determine the type of grid: spherical or cartesian
+        
     
     # plot operations plot functions
     # Plot Operations Plot Functions
@@ -1682,7 +1723,8 @@ class GridUtils:
         else:
             self.printMsg("No grid parameters found.", level=logging.ERROR)
     
-    # Plot parameter operations
+    # plot parameter operations plot parameter routines
+    # Plot Parameter Operations Plot Parameter Routines
         
     def deletePlotParameters(self, pList, subKey=None):
         """This deletes a given list of plot parameters."""

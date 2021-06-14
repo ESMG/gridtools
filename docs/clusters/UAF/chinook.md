@@ -92,6 +92,43 @@ cd src/gridtools
 python -m pip install -e .
 ```
 
+# FRE-Tools installation
+
+## netcdf
+
+Requirements
+ * http://prdownloads.sourceforge.net/libpng/zlib-1.2.11.tar.gz?download
+ * https://support.hdfgroup.org/ftp/lib-external/szip/2.1.1/src/szip-2.1.1.tar.gz
+ * https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.7/src/hdf5-1.10.7.tar.gz
+
+Building
+```
+# See HDF5 dependency below
+$ export H5DIR=/home/jrcermakiii/workdir/local
+$ CPPFLAGS='-I${H5DIR}/include' LDFLAGS='-L${H5DIR}/lib' ./configure --prefix=${H5DIR} --enable-nczarr --enable-mmap --enable-byterange 
+```
+
+### zlib
+
+```
+$ ./configure --prefix=/home/jrcermakiii/workdir/local --enable-shared
+```
+ 
+### szip
+
+Normal build process.
+
+```
+$ ./configure --prefix=/home/jrcermakiii/workdir/local --enable-shared
+```
+
+### hdf5
+
+```
+$ export H5DIR=/home/jrcermakiii/workdir/local
+$ CPPFLAGS='-I${H5DIR}/include' LDFLAGS='-L${H5DIR}/lib' ./configure --with-zlib=${H5DIR} --with-szlib=${H5DIR} --prefix=${H5DIR} --enable-hl
+```
+
 ## ENVIRONMENT #2
 
 conda
