@@ -12,27 +12,41 @@ from . import meshrefinement
 
 # Functions
 
-def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, kwargs):
+def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
     '''Modify a given bathymetry using a specified land mask.
 
-    Three depth parameters are available: (Units = meters)
-      MINIMUM_DEPTH: defaults to 0.0
-      MASKING_DEPTH: defaults to 0.0
-      MAXIMUM_DEPTH: defaults to maximum depth from data source
-        if not specified or is negative.
+    :param grd: class object
+    :type grd: GridUtils
+    :param dsData: data source data object
+    :type dsData: xarray
+    :param dsField: data source fieldname
+    :type dsField: string
+    :param maskFile: filename
+    :type maskFile: string
+    :param maskField: field name in maskFile
+    :type maskField: string
+    :param \**kwargs:
+        See below
 
-    A negative MASKING_DEPTH or MAXIMUM_DEPTH is ignored.
+    :Keyword Arguments:
+        * *MINIMUM_DEPTH* (``float``) -- 
+          Minimum ocean depth. Default: 0.0
+        * *MASKING_DEPTH* (``float``) --
+          Ocean points equal or shallower are set to land mask. Default: 0.0
+        * *MAXIMUM_DEPTH* (``float``) --
+          Maximum depth of the ocean.  Defaults to maximum depth from data source if not specified or is negative.
+        * *TOPO_EDITS_FILE* (``string``) --
+          Changed mask points in the MOM6 zEdits format will be
+          recorded to the specified filename. (Unimplemented)
 
-    If a depth is shallower than the MINIMUM_DEPTH but deeper than
-    the MASKING_DEPTH, the depth will be set to the MINIMUM_DEPTH.
+    .. note::
+        A negative MASKING_DEPTH or MAXIMUM_DEPTH is ignored.
 
-    Water points that will become masked by the existing land
-    mask will be set to the MASKING_DEPTH.
+        If a depth is shallower than the MINIMUM_DEPTH but deeper than
+        the MASKING_DEPTH, the depth will be set to the MINIMUM_DEPTH.
 
-    Other arguments:
-      TOPO_EDITS_FILE
-        Changed mask points in the MOM6 zEdits format will be
-        recorded to the specified filename. (Unimplemented)
+        Water points that will become masked by the existing land
+        mask will be set to the MASKING_DEPTH.
     '''
 
     if not(os.path.isfile(maskFile)):
@@ -384,76 +398,78 @@ def do_block(grd, part, lon, lat, topo_lons, topo_lats, topo_elvs, max_mb=500):
     return Glist[0].height, D_std, Glist[0].h_min, Glist[0].h_max, hits
 
 # Rebuilt from main() function
-def computeBathymetricRoughness(grd, dsName, kwargs):
+def computeBathymetricRoughness(grd, dsName, **kwargs):
     '''This generates h2 and other fields and returns an xarray DataSet with the field.
 
-    Adcroft, A., 2013: Representation of topography by porous barriers and objective
-    interpolation of topographic data. Ocean Modelling, doi:10.1016/j.ocemod.2013.03.002.
-    (http://dx.doi.org/10.1016/j.ocemod.2013.03.002)
+    :param grd: class object
+    :type grd: GridUtils
+    :param dsName: data source name
+    :type dsName: string
+    :param \**kwargs:
+        See below
 
-    EXAMPLE:
-      Options after specification of the dataset source (dsName):
-        maxMb=8000
-        h2Name='h2'
-        depthName='depth'
-        auxFields=['hStd', 'hMin', 'hMax', 'depth']
-        gridPoint=['uv', 'q', 'h']
-        superGrid=[False, True]
-              if superGrid is True, gridPoint is ignored
-        useClipping=[False, True]
-        useFixByOverlapQHGridShift=[False, True]
+    :Keyword Arguments:
+        * *maxMb* (``int``) -- 
+          Memory limit for grid refinements. Default: 8000.0
+        * *h2Name* (``string``) --
+          The computed bathymetric roughness field name. Default: h2
+        * *depthName* (``string``) --
+          The bathymetry field name to use from data source. Default: depth
+        * *gridPoint* (``string``) --
+          Grid placement of bathymetric roughness values. See below. Default: h
+        * *auxFields* (``list``) --
+          Specify additional fields to include with bathymetric roughness. See below. Default: []
+        * *superGrid* (``boolean``) --
+          If ``True``, the bathymetric roughness grid returned is a super grid.  Otherwise, the ocean roughness is the same size as the current grid. Default: False
+        * *useClipping* (``boolean``) --
+          Use ``True`` if the current grid is periodic and should be clipped prior to computing the bathymetric roughness. Defualt: False
+        * *useFixByOverlapQHGridShift* (``boolean``) --
+          When using a regular grid, use overlapping grid technique to fill in partition boundaries.
+          See IMPLEMENTATION NOTES below. Default: True
 
-    OPTIONS:
+    This routine is based on a paper by Adcroft :cite:p:`Adcroft_2013` and python code from
+    `OMtopogen/create_topog_refinedSampling.py` :cite:p:`Zadeh_2020`.
 
-      maxMb specifies the maximum amount of RAM to provide to the grid
-        refinement routines.
+    .. note::
 
-      The default name for h2 can be changed via h2Name.
+      :auxFields:
+          h_std, h_min, h_max, and height fields. Ask for one or more additional fields by python list [] to auxFields.
+          Default is an empty list: []
 
-      Optional fields that can provided by this routine via auxFields:
-      h_std, h_min, h_max, and depth fields.  Provide a
-      python list [] to this parameter.
+      :gridPoint:
+          By default, this generates bathymetric roughness grids on Arakawa C h-points
+          but may be specified via gridPoint.
 
-      By default, this generates bathymetric roughness grids on Arakawa C h-points
-      but may be specified via gridPoint.
+          For gridPoint, a diagram of a grid cells is::
 
-      For gridPoint, a diagram of a grid cells is:
+              q-----v-----q
+              |           |
+              u     h     u
+              |           |
+              q-----v-----q
 
-        q-----v-----q
-        |           |
-        u     h     u
-        |           |
-        q-----v-----q
-
-      Requests may be for one type only.
-        'h' h-point; grid center
-        'q' q-point; grid corners
-        'uv' u- and v-point; grid faces
-        If you want everything, set superGrid=True
-
-      superGrid=True tells this routine to use the supergrid when calculating
-      the bathymetric roughness.  This will require more RAM.  The default
-      is False.
-
-      useClipping=True is useful for global grids that do not need the
-      overlapping column.  The default is False.
-
-      useFixByOverlapQHGridShift=True is useful for attempting to fill
-      a gap created by this routine at four partition boundaries.  See
-      note below.  The default is True.
+          Valid values for gridPoint are:
+              * 'h' h-point; grid center
+              * 'q' q-point; grid corners
+              * 'uv' u- and v-point; grid faces
+              
+      :superGrid:
+          If you want all supergrid points, set superGrid=True.  Setting
+          tells this routine to use the supergrid when calculating
+          the bathymetric roughness.  This will require more RAM. Default: False
 
     IMPLEMENTATION NOTES:
       * For the supergrid, four zero bands along longitude are returned
-          representing the four grid partitions.  This needs to be fixed
-          in the future.
+        representing the four grid partitions.  This needs to be fixed
+        in the future.
       * For h-points, h2 is created on the q-points and shifted by 1/2
-          a grid cell back to the h-points.  Accuracy of the roughness
-          and other resultant fields are off by a 1/2 grid cell.
+        a grid cell back to the h-points.  Accuracy of the roughness
+        and other resultant fields are off by a 1/2 grid cell.
       * Support for 'q' and 'uv' grid points are not supported.
       * If the program is running out of memory, reduce the maxMb value.
-          This reduces the available memory footprint available to
-          this routine.  This will also reduce the number of available
-          refinements against the bathymetry data source.
+        This reduces the available memory footprint available to
+        this routine.  This will also reduce the number of available
+        refinements against the bathymetry data source.
     '''
     # Provide defaults if a kwarg is not set
     if not('superGrid' in kwargs.keys()):

@@ -103,7 +103,8 @@ class GridUtils:
         return appObj.dashboard
 
     def application(self, app={}):
-        '''Convienence function to attach application items to GridUtil so it can update certain portions of the application.
+        '''Convienence function to attach application items to GridUtil so it can update certain portions
+        of the application::
 
             app = {
                 'messages': panel.widget.TextBox     # Generally a pointer to a panel widget for display of text
@@ -153,8 +154,8 @@ class GridUtils:
     def debugMsg(self, msg, level = -1):
         '''This function has a specific purpose to aid in debugging and
         activating pdb breakpoints.  NOTE: pdb breakpoints tend not to
-        work very well when running under the application.  It tends to
-        terminate the bokeh/tornado server.
+        work very well when running under the gridtools application.  It
+        tends to terminate the bokeh/tornado server.
 
         The debug level can be zero(0) and you can forcibly add a break
         point in the code by using `debugMsg(msg, level=3)` anywhere in
@@ -973,7 +974,7 @@ class GridUtils:
 
     # Mercator
     def rotate_u(self, x , y, z, ux, uy, uz, theta):
-        """Rotate by angle θ around a general axis (ux,uy,uz)."""
+        """Rotate by angle :math:`\\theta` around a general axis (ux,uy,uz)."""
         c=np.cos(theta)
         s=np.sin(theta)
 
@@ -1646,56 +1647,64 @@ class GridUtils:
     
         :param gridParameters: grid parameters to set or update
         :type gridParameters: dictionary
-        :param subkey: an entry in gridParameters that contains a dictionary of information to set or update
+        :param subKey: an entry in gridParameters that contains a dictionary of information to set or update
         :type subKey: string
         :return: none
         :rtype: none
         
         .. note::
             Core gridParameter list.  See other grid functions for other potential options.  
-            Defaults are marked with an asterisk(*) below.  See the user manual for more
+            Defaults are **bold**.  See the user manual for more
             details.
             
-                'centerUnits': Grid center point units ['degrees'(*), 'meters']
-                'centerX': Grid center in the j direction [float]
-                'centerY': Grid center in the i direction [float]
-                'dx': grid length in the j direction [float]
-                'dy': grid length in the i direction [float]
-                'dxUnits': grid length units ['degrees'(*), 'meters']
-                'dyUnits': grid length units ['degrees'(*), 'meters']
-                'nx': number of grid points along the j direction [integer]
-                'ny': number of grid points along the i direction [integer]
-                'tilt': degrees to rotate the grid [float, only available in LambertConformalConic]
-                'gridResolution': grid cell size in i and j direction [float]
-                'gridResolutionX': grid cell size in the j direction [float]
-                'gridResolutionY': grid cell size in the i direction [float]
-                'gridResoultionUnits': grid cell units in the i and j direction ['degrees'(*), 'meters']
-                'gridResoultionXUnits': grid cell units in the j direction ['degrees'(*), 'meters']
-                'gridResoultionYUnits': grid cell units in the i direction ['degrees'(*), 'meters']
+            **Primary keys**
 
-                
-                SUBKEY: 'projection' (mostly follows proj.org terminology)
-                    'name': Grid projection ['LambertConformalConic','Mercator','Stereographic']
-                    'lat_0': Latitude of projection center [degrees, 0.0(*)]
-                    'lat_1': First standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_2': Second standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_ts': Latitude of true scale. Defines the latitude where scale is not distorted.
-                              Takes precedence over k_0 if both options are used together.
-                              For stereographic, if not set, will default to lat_0.
-                    'lon_0': Longitude of projection center [degrees, 0.0(*)]
-                    'ellps': [GRS80(*)]
-                    'R': Radius of the sphere given in meters.
-                    'x_0': False easting (meters, 0.0(*))
-                    'y_0': False northing (meters, 0.0(*))
-                    'k_0': Depending on projection, this value determines the scale factor for natural origin or the ellipsoid (1.0(*))
-                
-                MOM6 specific options:
-                
-                'gridMode': 2 = supergrid(*); 1 = actual grid [integer, 1 or 2(*)]
+            * *centerUnits* (``string``) -- Grid center point units [**'degrees'**, 'meters']
+            * *centerX* (``float``) -- Grid center in the j direction
+            * *centerY* (``float``) -- Grid center in the i direction
+            * *dx* (``float``) -- grid length in the j direction
+            * *dy* (``float``) -- grid length in the i direction
+            * *dxUnits* (``string``) -- grid length units [**'degrees'**, 'meters']
+            * *dyUnits* (``string``) -- grid length units [**'degrees'**, 'meters']
+            * *nx* (``integer``) -- number of grid points along the j direction
+            * *ny* (``integer``) -- number of grid points along the i direction
+            * *tilt* (``float``) -- degrees to rotate the grid (*LambertConformalConic only*)
+            * *gridResolution* (``float``) -- grid cell size in i and j direction
+            * *gridResolutionX* (``float``) -- grid cell size in the j direction
+            * *gridResolutionY* (``float``) -- grid cell size in the i direction
+            * *gridResoultionUnits* (``string``) -- grid cell units in the i and j direction [**'degrees'**, 'meters']
+            * *gridResoultionXUnits* (``string``) -- grid cell units in the j direction [**'degrees'**, 'meters']
+            * *gridResoultionYUnits* (``string``) -- grid cell units in the i direction [**'degrees'**, 'meters']
 
-            Not to be confused with plotParameters which control how this grid or other
-            information is plotted.  For instance, the grid projection and the requested plot
-            can be in different projections.
+            **subKey 'projection'**
+
+            * *name* (``string``) -- Grid projection ['LambertConformalConic','Mercator','Stereographic']
+            * *lat_0* (``float degrees``) -- Latitude of projection center [**0.0**]
+            * *lat_1* (``float degrees``) -- First standard parallel (latitude) [**0.0**]
+            * *lat_2* (``float degrees``) -- Second standard parallel (latitude) [**0.0**]
+            * *lat_ts* (``float degrees``) -- Latitude of true scale. Defines the latitude where scale is not distorted.
+              Takes precedence over ``k_0`` if both options are used together.
+              For stereographic, if not set, will default to ``lat_0``.
+            * *lon_0* (``float degrees``) -- Longitude of projection center [**0.0**]
+            * *ellps* (``string``) -- See ``proj -le`` for a list of available ellipsoids [**'GRS80'**]
+            * *R'* (``float meters``) -- Radius of the sphere given in meters. If both R and ellps are given, R takes precedence.
+            * *x_0* (``float meters``) -- False easting [**0.0**]
+            * *y_0* (``float meters``) -- False northing [**0.0**]
+            * *k_0* (``float``) -- Depending on projection, this value determines the
+              scale factor for natural origin or the ellipsoid [**1.0**]
+
+            The subkey 'projection' mostly follows proj.org terminology for any giving projection.
+            See: `Lambert Conformal Conic <https://proj.org/operations/projections/lcc.html>`_,
+            `Mercator <https://proj.org/operations/projections/merc.html>`_ and
+            `Stereographic <https://proj.org/operations/projections/stere.html>`_ for more details.
+                
+            :MOM6 specific options:
+                * *gridMode* (``integer``) -- 2 = supergrid(*); 1 = actual grid [1 or **2**]
+
+        .. warning::
+            These options are similar to :func:`setPlotParameters` which control how this
+            grid or other information is plotted.  For instance, the **grid** projection and
+            the **plot** projection can be in *different* projections.
             
         """
         
@@ -1786,7 +1795,9 @@ class GridUtils:
             self.printMsg("No plot parameters found.", level=logging.INFO)
 
     def setPlotParameters(self, plotParameters, subKey=None):
-        """A generic method for setting plotting parameters using dictionary arguments.
+        """A generic method for setting plotting parameters using dictionary arguments.  These
+        parameters are applied to plots using the grid or any requested field.  The **grid**
+        projection may be different than the requested **plot** projection.
 
         :param plotParameters: plot parameters to set or update
         :type plotParameters: dictionary
@@ -1796,38 +1807,60 @@ class GridUtils:
         :rtype: none
         
         .. note::
-            Plot parameters persist for as long as the python object exists.
+            Plot parameters persist for as long as the python :class:`GridUtils` object exists.
 
             See the user manual for additional details.
             
-                'figsize': tells matplotlib the figure size [width, height in inches (5.0, 3.75)]
-                'extent': [x0, x1, y0, y1] map extent of given coordinate system (see extentCRS) [default is []]
-                    If no extent is given, [], then set_global() is used. 
-                    REF: https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html
-                'extentCRS': cartopy crs [cartopy.crs.PlateCarree()] 
-                    You must have the cartopy.crs module loaded to change this setting.
-                'showGrid': show the grid outline [True(*)/False]
-                'showGridCells': show the grid cells [True/False(*)]
-                'showSupergrid': show the MOM6 supergrid cells [True/False(*)]
-                'title': add a title to the plot [None(*)]
-                'iColor': matplotlib color for i vertices ['k'(*) black]
-                'jColor': matplotlib color for j vertices ['k'(*) black]
-                'iLinewidth': matplotlib linewidth for i vertices [points: 1.0(*)]
-                'jLinewidth': matplotlib linewidth for j vertices [points: 1.0(*)]
+            **Primary keys**
 
-                SUBKEY: 'projection' (mostly follows proj.org terminology)
-                    'name': Grid projection ['LambertConformalConic','Mercator','Stereographic']
-                    'lat_0': Latitude of projection center [degrees, 0.0(*)]
-                    'lat_1': First standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_2': Second standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_ts': Latitude of true scale. 
-                    'lon_0': Longitude of projection center [degrees, 0.0(*)]
-                    'ellps': See proj -le for a list of available ellipsoids [GRS80(*)]
-                    'R': Radius of the sphere given in meters.  If both R and ellps are given, R takes precedence.
-                    'x_0': False easting (meters, 0.0(*))
-                    'y_0': False northing (meters, 0.0(*))
-                    'k_0': Depending on projection, this value determines the scale factor for natural origin or the ellipsoid (1.0(*))
+            * *figsize* (``(float inches, float inches)`` -- matplotlib figure size [width, height (**5.0, 3.75**)]
+            * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see extentCRS) [**[]**]
+              If no extent is given, **[]**, then the global extent ``set_global()`` is used. 
+              See `matplotlib geoaxes <https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html>`_.
+            * *extentCRS* (``cartopy.crs method``) -- cartopy crs [**cartopy.crs.PlateCarree()**] 
+              You must have the cartopy.crs module loaded to change this setting.
+              See `Cartopy projection list <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html>`_.
+            * *showGrid* (``boolean``) -- show the grid outline [**True**]
+            * *showGridCells* (``boolean``) -- show the grid cells [**False**]
+            * *showSupergrid* (``boolean``) -- show the MOM6 supergrid cells [**False**]
+            * *title* (``string``) -- add a title to the plot [**None**]
+            * *iColor* (``string``) -- matplotlib color for i vertices [**'k'** (black)]
+            * *jColor* (``string``) -- matplotlib color for j vertices [**'k'** (black)]
+            * *iLinewidth* (``float points``) -- matplotlib linewidth for i vertices [**1.0**]
+            * *jLinewidth* (``float points``) -- matplotlib linewidth for j vertices [**1.0**]
+
+            Line width in matplotlib is generally defined by a numerical value over the default
+            dots per inch (dpi).  The nominal dpi value is 72 dots per inch.  A line width of
+            one (1.0) is 1/72nd of an inch at 72 dpi. A good discussion between
+            `dpi and figure size <https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size>`_
+            can be found on a stackoverflow post.
+
+            **subKey 'projection'**
+
+            * *name* (``string``) -- Grid projection ['LambertConformalConic','Mercator','Stereographic']
+            * *lat_0* (``float degrees``) -- Latitude of projection center [**0.0**]
+            * *lat_1* (``float degrees``) -- First standard parallel (latitude) [**0.0**]
+            * *lat_2* (``float degrees``) -- Second standard parallel (latitude) [**0.0**]
+            * *lat_ts* (``float degrees``) -- Latitude of true scale. Defines the latitude where scale is not distorted.
+              Takes precedence over ``k_0`` if both options are used together.
+              For stereographic, if not set, will default to ``lat_0``.
+            * *lon_0* (``float degrees``) -- Longitude of projection center [**0.0**]
+            * *ellps* (``string``) -- See ``proj -le`` for a list of available ellipsoids [**'GRS80'**]
+            * *R* (``float meters``) -- Radius of the sphere given in meters. If both R and ellps are given, R takes precedence.
+            * *x_0* (``float meters``) -- False easting [**0.0**]
+            * *y_0* (``float meters``) -- False northing [**0.0**]
+            * *k_0* (``float``) -- Depending on projection, this value determines the
+              scale factor for natural origin or the ellipsoid [**1.0**]
                 
+            The subkey 'projection' mostly follows proj.org terminology for any giving projection.
+            See: `Lambert Conformal Conic <https://proj.org/operations/projections/lcc.html>`_,
+            `Mercator <https://proj.org/operations/projections/merc.html>`_ and
+            `Stereographic <https://proj.org/operations/projections/stere.html>`_ for more details.
+
+        .. warning::
+            These options are similar to :func:`setGridParameters` which controls the representation
+            of the grid.  In this library, it is possible that the **grid** projection and
+            the **plot** projection can be in *different* projections.
         """
         
         # For now pass all keys into the plot parameter dictionary.  Sanity checking is done

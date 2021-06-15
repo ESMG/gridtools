@@ -46,7 +46,8 @@
    - [X] enable sphinx as the documentation generator
    - [X] link to readthedocs
    - [ ] include local markdown files
-     - [ ] Hack on m2r2 python module for sphinx
+     - [ ] Use m2r2 to create a one way connection and compile local .md files into
+           .rst files for use in the sphinx documentation.
  - [ ] grid creation/editor
    - [ ] grid metrics
      - [X] Spherical solution is complete via Niki's ROMS to MOM6 converter
@@ -77,7 +78,7 @@
      - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
            `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
  - [ ] integration of data sources
-   - [ ] generic regridder for creating boundary files from data sources
+   - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources
    - [ ] option to create land mask fraction
    - [ ] option to use source grid as a supergrid for coarsening

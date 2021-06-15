@@ -1,9 +1,24 @@
-# Change Log
+# Changelog
+
+# 2021-06-14
+
+ - Add remaining modules to RTD documentation.
+ - RTD docstrings: https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
+ - Fix all the current documentation warnings.
+ - Fix some latex math.  Use double slash in math expressions.
+ - Add sysinfo.runCommand() to consolidate the ability to capture
+   output from running commands from the library.
+ - sysinfo.sysInfo() class has a grd= argument that allows connecting
+   the logging portion of the library.
+ - Ongoing expansion of documentation.
+ - Add bibtex to sphinx documentation process.
+ - bibliography.rst: Sample entry for a paper and a github repo.
 
 # 2021-06-13
 
  - computeGridMetrics comes in two forms: spherical and cartesian.
- - Begin construction of makeSoloMosaic that does similar work to `make_solo_mosaic`.
+ - Begin construction of makeSoloMosaic that does similar work to
+   `make_solo_mosaic`.
  - Attempts to build FRE-nctools on chinook have failed so far.
 
 # 2021-06-12

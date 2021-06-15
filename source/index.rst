@@ -6,7 +6,8 @@ Welcome to Gridtools library's documentation!
    :caption: Contents:
 
    api
-
+   bibliography
+  
 
 Indices and tables
 ==================

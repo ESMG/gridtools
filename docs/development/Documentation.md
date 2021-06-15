@@ -15,12 +15,13 @@ Installation of TeX is a little more cumbersome.
 
 ## Bookmarks
 
- * https://tug.org/texlive/quickinstall.html
- * https://eikonomega.medium.com/getting-started-with-sphinx-autodoc-part-1-2cebbbca5365
- * https://stackoverflow.com/questions/50564999/lib64-libc-so-6-version-glibc-2-14-not-found-why-am-i-getting-this-error
- * https://thomas-cokelaer.info/tutorials/sphinx/docstring_python.html
  * https://devguide.python.org/documenting/
  * https://docs.python-guide.org/writing/documentation/
+ * https://eikonomega.medium.com/getting-started-with-sphinx-autodoc-part-1-2cebbbca5365
+ * https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
+ * https://stackoverflow.com/questions/50564999/lib64-libc-so-6-version-glibc-2-14-not-found-why-am-i-getting-this-error
+ * https://thomas-cokelaer.info/tutorials/sphinx/docstring_python.html
+ * https://tug.org/texlive/quickinstall.html
 
 # TeX
 

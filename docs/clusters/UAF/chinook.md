@@ -92,6 +92,12 @@ cd src/gridtools
 python -m pip install -e .
 ```
 
+# sphinx
+
+For some reason sphinx cannot build documentation using `latexpdf` after
+a `clean`.  Please run `make html` first and then `make latexpdf` will
+succeed.
+
 # FRE-Tools installation
 
 ## netcdf

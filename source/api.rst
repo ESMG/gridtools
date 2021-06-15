@@ -6,5 +6,12 @@ API
    :caption: Contents:
 
    app
+   bathyutils
+   datasource
+   fileutils
    gridutils
+   meshrefinement
+   meshutils
+   spherical
+   sysinfo
    topoutils

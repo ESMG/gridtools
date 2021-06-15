@@ -37,9 +37,9 @@ class TopoUtils:
         finer resolution than the grid file. It is also assumed that the
         topography values are defined at the cell centers.
 
-        We recommend using GEBCO2020 topography dataset for the topography
-        file. It can be found here:
-          https://www.gebco.net/data_and_products/gridded_bathymetry_data/
+        We recommend using
+        `GEBCO2020 topography dataset <https://www.gebco.net/data_and_products/gridded_bathymetry_data/>`_
+        for the topography file.
 
         Parameters:
           gridFile: Path to netCDF gridFile        ==> grd: grid class object

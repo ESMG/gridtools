@@ -9,16 +9,10 @@ These are people, references and bookmarks that provided useful information to m
      https://github.com/jr3cermak/numpypi/tree/dev#40b7b0d6a33aabc5da6cf7bb188ce25345985f83
 
 ## James Simkins
- * Conservative regridding
-   https://github.com/jsimkins2/esm_lab/blob/main/bathyTools/examples/xesmf_regrid_ex.py
+ * Conservative regridding (:cite:p:`Simkins_2021`)
 
 ## Mehmet Ilicak; Alistair Adcroft; Matthew Harrison
- * ROMS to MOM6 grid converter
- * https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/convert_ROMS_grid_to_MOM6.py
- * https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/Spherical.py
-
-   Last update from:
-     https://github.com/ESMG/pyroms/tree/python3#cd0fe39075825f97a7caf64e2c4c5a19f23302fd
+ * ROMS to MOM6 grid converter (:cite:p:`Ilicak_2020`)
 
 ## Niki Zadeh
  * Lambert Conformal Conic grid generation provided by:
@@ -44,9 +38,11 @@ These are people, references and bookmarks that provided useful information to m
  * Commit:16c85a9c544d54808abaaec223aa834a8c46d6fd
 
 ## Bookmarks
+ * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
  * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
  * https://cfconventions.org/standard-names.html
  * https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
+ * https://devguide.python.org/documenting/
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
  * https://docs.github.com/en/actions/quickstart
@@ -66,6 +62,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://github.com/pydata/xarray/issues/2899
  * https://github.com/SciTools/cartopy/issues/787
  * https://guides.github.com/features/mastering-markdown/
+ * https://www.jertype.com/upgrading-glibc/
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
  * http://mathworld.wolfram.com
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/image_masked.html
@@ -76,20 +73,28 @@ These are people, references and bookmarks that provided useful information to m
  * https://matthewrocklin.com/blog/work/2017/07/03/scaling
  * https://mpi4py.readthedocs.io/en/stable/tutorial.html
  * https://nsidc.org/support/42415620-Mapx-Map-Transformations-Library
+ * https://numpy.org/devdocs/reference/generated/numpy.argwhere.html#numpy.argwhere
+ * https://numpy.org/devdocs/reference/generated/numpy.nonzero.html#numpy.nonzero
+ * https://numpy.org/doc/stable/reference/generated/numpy.stack.html#numpy.stack
  * https://panel.holoviz.org/gallery/index.html
  * https://pangeo-xesmf.readthedocs.io/en/latest/large_problems_on_HPC.html#technical-point-mpi4py-considerations
  * https://pangeo-xesmf.readthedocs.io/en/latest/notebooks/Compare_algorithms.html
+ * https://pybtex.org/
  * https://pypi.org/classifiers/
  * https://pyyaml.org/wiki/PyYAMLDocumentation
  * https://rabernat.github.io/research_computing/xarray.html
  * https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html
  * https://realpython.com/python-bindings-overview/
+ * https://realpython.com/python-kwargs-and-args/#unpacking-with-the-asterisk-operators
  * https://researchcomputing.princeton.edu/support/knowledge-base/mpi4py
  * https://rietta.com/blog/github-merge-types/
  * https://scitools.org.uk/cartopy/docs/latest/index.html
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
  * https://scitools.org.uk/cartopy/docs/latest/gallery/effects_of_the_ellipse.html
  * https://softwareengineering.stackexchange.com/questions/329348/classes-vs-modules-in-python
+ * https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
+ * https://sphinxcontrib-bibtex.readthedocs.io/en/latest/quickstart.html
+ * https://stackoverflow.com/questions/1137161/what-is-the-correct-way-to-document-a-kwargs-parameter
  * https://stackoverflow.com/questions/2486145/python-check-if-url-to-jpg-exists
  * https://stackoverflow.com/questions/2654113/how-to-get-the-callers-method-name-in-the-called-method
  * https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
@@ -101,6 +106,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://stackoverflow.com/questions/29870629/pip-install-test-dependencies-for-tox-from-setup-py
  * https://stackoverflow.com/questions/32234156/how-to-unimport-a-python-module-which-is-already-imported
  * https://stackoverflow.com/questions/44412432/cartopy-zoom-in-to-a-region
+ * https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size
  * https://stackoverflow.com/questions/51357691/python-logging-only-for-own-imported-modules
  * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://unidata.github.io/MetPy/latest/examples/Four_Panel_Map.html
