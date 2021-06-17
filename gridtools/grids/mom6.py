@@ -86,7 +86,8 @@ class MOM6:
         **Keyword arguments**:
 
             * *tileName* (``string``) -- name to assign to the solo tile. Default: "tile1"
-            * *inputDirectory* (``string``) -- absolute or relative path to write model input files.
+            * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
+            * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory.
               Default: "./" which refers to the "INPUT" directory.
             * *supergridName* (``string``) -- name to assign to the supergrid filename. Default: "ocean_hgrid.nc"
             * *topographyFilename* (``string``) -- filename used to write topographic field. Default: "ocean_topog.nc"
@@ -100,7 +101,8 @@ class MOM6:
         
         # Check and set any defaults to kwargs
         util.checkArgument(kwargs, 'tileName', "tile1")
-        util.checkArgument(kwargs, 'inputDirectory', "./")
+        util.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        util.checkArgument(kwargs, 'relativeToINPUTDir', "./")
         util.checkArgument(kwargs, 'supergridFilename', "ocean_hgrid.nc")
         util.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
         util.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
@@ -114,9 +116,9 @@ class MOM6:
 
         self.mom6_grid['filenames'] = dict()
 
-        # Always use './' as the directory for files, since FMS always runs from the
+        # Always use './' as the directory for files, since FMS always initializes from the
         # "INPUT" directory
-        self.mom6_grid['filenames']['directory']            = kwargs['inputDirectory']
+        self.mom6_grid['filenames']['directory']            = kwargs['relativeToINPUTDir']
 
         self.mom6_grid['filenames']['supergrid']            = kwargs['supergridFilename']
         self.mom6_grid['filenames']['topography']           = kwargs['topographyFilename']
@@ -309,11 +311,11 @@ class MOM6:
 
         #   hgridfiles = mosaic_ds.createVariable('gridfiles', 'c', ('ntiles', 'string',))
         #   hgridfiles[0, :len(mom6_grid['filenames']['supergrid'])] = mom6_grid['filenames']['supergrid']
-        ds['gridfiles'] = (('ntiles', 'string'), [kwargs['oceanGridFilename']])
+        ds['gridfiles'] = (('ntiles',), [kwargs['oceanGridFilename']])
 
         #   hgridtiles = mosaic_ds.createVariable('gridtiles', 'c', ('ntiles', 'string',))
         #   hgridtiles[0, :len(mom6_grid['netcdf_info']['tile_str'])] = mom6_grid['netcdf_info']['tile_str']
-        ds['gridtiles'] = (('ntiles', 'string'), [kwargs['tileName']]
+        ds['gridtiles'] = (('ntiles',), [kwargs['tileName']]
 
         # Global attributes
         self._add_global_attributes(mosaic_ds)
@@ -424,7 +426,7 @@ class MOM6:
         ]
 
         # Calculate cell_grid area (if needed) - this happens if
-        # this is called separately from the ROMS to MOM6 conversion.
+        # this is called separately from the ROMS to MOM6 conversion tool.
         if not(self.initMOM6):
             self.setup_MOM6_grid(**kwargs)
             # Copy supergrid area to internal variable
@@ -451,47 +453,74 @@ class MOM6:
 
             filename_key = '%s_%s_exchange' % (name1, name2)
             filename = mom6_grid['filenames'][filename_key]
-            if 
+            # Define target file
+            destinationFile = os.path.join(kwargs['inputDirectory'], filename)
+            if os.path.isfile(destinationFile) and not(kwargs['overwrite']):
+                msg = ("WARNING: File (%s) exists, use overwrite=True to allow overwriting." % (destinationFile))
+                grd.printMsg(msg, logging.WARNING)
+                continue
 
-        with netCDF4.Dataset(filename, 'w', format='NETCDF3_CLASSIC') as exchange_ds:
-            exchange_ds.createDimension('string', mom6_grid['netcdf_info']['string_length'])
-            exchange_ds.createDimension('ncells', ncells)
-            exchange_ds.createDimension('two', 2)
+            #with netCDF4.Dataset(filename, 'w', format='NETCDF3_CLASSIC') as exchange_ds:
+            #   exchange_ds.createDimension('string', mom6_grid['netcdf_info']['string_length'])
+            #   exchange_ds.createDimension('ncells', ncells)
+            #   exchange_ds.createDimension('two', 2)
 
-            contact_str = '{0}_mosaic:{2}::{1}_mosaic:{2}'.format(name1, name2, mom6_grid['netcdf_info']['tile_str'])
-            hcontact = exchange_ds.createVariable('contact', 'c', ('string',))
-            hcontact.standard_name = 'grid_contact_spec'
-            hcontact.contact_type = 'exchange'
-            hcontact.parent1_cell = 'tile1_cell'
-            hcontact.parent2_cell = 'tile2_cell'
-            hcontact.xgrid_area_field = 'xgrid_area'
-            hcontact.distant_to_parent1_centroid = 'tile1_distance'
-            hcontact.distant_to_parent2_centroid = 'tile2_distance'
-            hcontact[0:len(contact_str)] = contact_str
+            contact_str = '{0}_mosaic:{2}::{1}_mosaic:{2}'.format(name1, name2, kwargs['tileName'])
+            #   hcontact = exchange_ds.createVariable('contact', 'c', ('string',))
+            #   hcontact.standard_name = 'grid_contact_spec'
+            #   hcontact.contact_type = 'exchange'
+            #   hcontact.parent1_cell = 'tile1_cell'
+            #   hcontact.parent2_cell = 'tile2_cell'
+            #   hcontact.xgrid_area_field = 'xgrid_area'
+            #   hcontact.distant_to_parent1_centroid = 'tile1_distance'
+            #   hcontact.distant_to_parent2_centroid = 'tile2_distance'
+            #   hcontact[0:len(contact_str)] = contact_str
+            ds['contact'] = contact_str
+            ds['contact'].attrs['standard_name'] = 'grid_contact_spec'
+            ds['contact'].attrs['contact_type'] = 'exchange'
+            ds['contact'].attrs['parent1_cell'] = 'tile1_cell'
+            ds['contact'].attrs['parent2_cell'] = 'tile2_cell'
+            ds['contact'].attrs['xgrid_area_field'] = 'xgrid_area'
+            ds['contact'].attrs['distant_to_parent1_centroid'] = 'tile1_distance'
+            ds['contact'].attrs['distant_to_parent2_centroid'] = 'tile2_distance'
 
-            htile1_cell = exchange_ds.createVariable('tile1_cell', 'i', ('ncells', 'two'))
-            htile1_cell.standard_name = 'parent_cell_indices_in_mosaic1'
-            htile1_cell[:] = tile_cells
+            #   htile1_cell = exchange_ds.createVariable('tile1_cell', 'i', ('ncells', 'two'))
+            #   htile1_cell.standard_name = 'parent_cell_indices_in_mosaic1'
+            #   htile1_cell[:] = tile_cells
+            ds['tile1_cell'] = (('ncells', 'two'), tile_cells)
+            ds['tile1_cell'].attrs['standard_name'] = 'parent_cell_indices_in_mosaic1'
 
-            htile2_cell = exchange_ds.createVariable('tile2_cell', 'i', ('ncells', 'two'))
-            htile2_cell.standard_name = 'parent_cell_indices_in_mosaic2'
-            htile2_cell[:] = tile_cells
+            #   htile2_cell = exchange_ds.createVariable('tile2_cell', 'i', ('ncells', 'two'))
+            #   htile2_cell.standard_name = 'parent_cell_indices_in_mosaic2'
+            #   htile2_cell[:] = tile_cells
+            ds['tile2_cell'] = (('ncells', 'two'), tile_cells)
+            ds['tile2_cell'].attrs['standard_name'] = 'parent_cell_indices_in_mosaic2'
 
-            hxgrid_area = exchange_ds.createVariable('xgrid_area', 'd', ('ncells',))
-            hxgrid_area.standard_name = 'exchange_grid_area'
-            hxgrid_area.units = 'm2'
-            hxgrid_area[:] = xgrid_area
+            #   hxgrid_area = exchange_ds.createVariable('xgrid_area', 'd', ('ncells',))
+            #   hxgrid_area.standard_name = 'exchange_grid_area'
+            #   hxgrid_area.units = 'm2'
+            #   hxgrid_area[:] = xgrid_area
+            ds['xgrid_area'] = (('ncells'), xgrid_area)
+            ds['xgrid_area'].attrs['standard_name'] = 'exchange_grid_area'
+            ds['xgrid_area'].attrs['units'] = 'm2'
 
-            htile1_dist = exchange_ds.createVariable('tile1_distance', 'd', ('ncells', 'two'))
-            htile1_dist.standard_name = 'distance_from_parent1_cell_centroid'
-            htile1_dist[:] = tile_dist
+            #   htile1_dist = exchange_ds.createVariable('tile1_distance', 'd', ('ncells', 'two'))
+            #   htile1_dist.standard_name = 'distance_from_parent1_cell_centroid'
+            #   htile1_dist[:] = tile_dist
+            ds['tile1_distance'] = (('ncells', 'two'), tile_dist)
+            ds['tile1_distance'].attrs['standard_name'] = 'distance_from_parent1_cell_centroid'
 
-            htile2_dist = exchange_ds.createVariable('tile2_distance', 'd', ('ncells', 'two'))
-            htile2_dist.standard_name = 'distance_from_parent2_cell_centroid'
-            htile2_dist[:] = tile_dist
+            #   htile2_dist = exchange_ds.createVariable('tile2_distance', 'd', ('ncells', 'two'))
+            #   htile2_dist.standard_name = 'distance_from_parent2_cell_centroid'
+            #   htile2_dist[:] = tile_dist
+            ds['tile2_distance'] = (('ncells', 'two'), tile_dist)
+            ds['tile2_distance'].attrs['standard_name'] = 'distance_from_parent2_cell_centroid'
 
             # Global attributes
-            self._add_global_attributes(exchange_ds)
+            self._add_global_attributes(ds)
+
+            ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds,\
+                stringVars={'contact': 255}))
 
         return
 
@@ -502,18 +531,32 @@ class MOM6:
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
 
-        def add_string_var_1d(fid, var_name, standard_name, value):
+        def add_string_var_1d(ds, var_name, standard_name, value, strVarMap):
             """Creates and stores values for a 1-dimensional string variable."""
-            id_var = fid.createVariable(var_name, 'c', ('string',))
-            id_var.standard_name = standard_name
-            id_var[0:len(value)] = value
+            #    id_var = fid.createVariable(var_name, 'c', ('string',))
+            #    id_var.standard_name = standard_name
+            #    id_var[0:len(value)] = value
+            strVarMap[var_name] = 255
+            ds[var_name] = value
+            ds[var_name].attrs['standard_name'] = standard_name
 
-        def add_string_var_2d(fid, var_name, dim_name, standard_name, value):
+        def add_string_var_2d(ds, var_name, dim_name, standard_name, value, strVarMap):
             """Creates and stores values for a 2-dimensional string variable, for
             which the first dimension has length 1."""
-            id_var = fid.createVariable(var_name, 'c', (dim_name, 'string'))
-            id_var.standard_name = standard_name
-            id_var[0, 0:len(value)] = value
+            #    id_var = fid.createVariable(var_name, 'c', (dim_name, 'string'))
+            #    id_var.standard_name = standard_name
+            #    id_var[0, 0:len(value)] = value
+            strVarMap[var_name] = 255
+            ds[var_name] = ((dim_name,), [value])
+            ds[var_name].attrs['standard_name'] = standard_name
+
+        # Accumulate string variables for encoding
+        strVarMap = dict()
+
+        # Initialize mom6_grid[] (if needed) - this happens if
+        # this is called separately from the ROMS to MOM6 conversion tool.
+        if not(self.initMOM6):
+            self.setup_MOM6_grid(**kwargs)
 
         # Define target file
         destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['couplerMosaicFilename'])
@@ -524,35 +567,38 @@ class MOM6:
 
         ds = xr.Dataset()
 
-        with netCDF4.Dataset('mosaic.nc', 'w', format='NETCDF3_CLASSIC') as mosaic_ds:
-            mosaic_ds.createDimension('string', mom6_grid['netcdf_info']['string_length'])
-            mosaic_ds.createDimension('nfile_aXo', 1)
-            mosaic_ds.createDimension('nfile_aXl', 1)
-            mosaic_ds.createDimension('nfile_lXo', 1)
+        #with netCDF4.Dataset('mosaic.nc', 'w', format='NETCDF3_CLASSIC') as mosaic_ds:
+        #    mosaic_ds.createDimension('string', mom6_grid['netcdf_info']['string_length'])
+        #    mosaic_ds.createDimension('nfile_aXo', 1)
+        #    mosaic_ds.createDimension('nfile_aXl', 1)
+        #    mosaic_ds.createDimension('nfile_lXo', 1)
 
-            # same mosaic file for all three -- just like when "make_solo_mosaic" is used
+        # same mosaic file for all three -- just like when "make_solo_mosaic" is used
     
-            add_string_var_1d(mosaic_ds, 'atm_mosaic_dir',  'directory_storing_atmosphere_mosaic', mom6_grid['filenames']['directory'])
-            add_string_var_1d(mosaic_ds, 'atm_mosaic_file', 'atmosphere_mosaic_file_name',         mom6_grid['filenames']['mosaic'])
-            add_string_var_1d(mosaic_ds, 'atm_mosaic',      'atmosphere_mosaic_name',              'atmos_mosaic')
+        add_string_var_1d(ds, 'atm_mosaic_dir',  'directory_storing_atmosphere_mosaic', mom6_grid['filenames']['directory'], strVarMap)
+        add_string_var_1d(ds, 'atm_mosaic_file', 'atmosphere_mosaic_file_name',         mom6_grid['filenames']['mosaic']   , strVarMap)
+        add_string_var_1d(ds, 'atm_mosaic',      'atmosphere_mosaic_name',              'atmos_mosaic'                     , strVarMap)
     
-            add_string_var_1d(mosaic_ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       mom6_grid['filenames']['directory'])
-            add_string_var_1d(mosaic_ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               mom6_grid['filenames']['mosaic'])
-            add_string_var_1d(mosaic_ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic')
+        add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       mom6_grid['filenames']['directory'],  strVarMap)
+        add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               mom6_grid['filenames']['mosaic']   ,  strVarMap)
+        add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
     
-            add_string_var_1d(mosaic_ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      mom6_grid['filenames']['directory'])
-            add_string_var_1d(mosaic_ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              mom6_grid['filenames']['mosaic'])
-            add_string_var_1d(mosaic_ds, 'ocn_mosaic',      'ocean_mosaic_name',                   'ocean_mosaic')
+        add_string_var_1d(ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      mom6_grid['filenames']['directory'],  strVarMap)
+        add_string_var_1d(ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              mom6_grid['filenames']['mosaic']   ,  strVarMap)
+        add_string_var_1d(ds, 'ocn_mosaic',      'ocean_mosaic_name',                   'ocean_mosaic'                     ,  strVarMap)
     
-            add_string_var_1d(mosaic_ds, 'ocn_topog_dir',   'directory_storing_ocean_topog',       mom6_grid['filenames']['directory'])
-            add_string_var_1d(mosaic_ds, 'ocn_topog_file',  'ocean_topog_file_name',               mom6_grid['filenames']['topography'])
+        add_string_var_1d(ds, 'ocn_topog_dir',   'directory_storing_ocean_topog',       mom6_grid['filenames']['directory'],  strVarMap)
+        add_string_var_1d(ds, 'ocn_topog_file',  'ocean_topog_file_name',               mom6_grid['filenames']['topography'], strVarMap)
     
-            add_string_var_2d(mosaic_ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', mom6_grid['filenames']['atmos_ocean_exchange'])
-            add_string_var_2d(mosaic_ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', mom6_grid['filenames']['atmos_land_exchange'])
-            add_string_var_2d(mosaic_ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', mom6_grid['filenames']['land_ocean_exchange'])
+        add_string_var_2d(ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
+        add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
+        add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
     
-            # Global attributes
-            self._add_global_attributes(mosaic_ds)
+        # Global attributes
+        self._add_global_attributes(ds)
+
+        ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds,\
+            stringVars=strVarMap))
 
         return
 

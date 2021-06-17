@@ -2,6 +2,8 @@
 
 # 2021-06-16
 
+ - Initial coding of ROMS to MOM6 converter and writing out a solo
+   mosaic for a new grid is complete.  Now to begin testing.
  - Reformat keyword arguments.
  - MOM6 default tileName = tile1
  - Add grid geometry type to tile variable: cartesian or spherical

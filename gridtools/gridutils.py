@@ -520,13 +520,13 @@ class GridUtils:
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
-        self.grid.dx.attrs['standard_name'] = 'grid_edge_x_distance'
-        self.grid.dx.attrs['units'] = 'meters'
-        self.grid.dx.attrs['sha256'] = hashlib.sha256( np.array( self.grid['dx'] ) ).hexdigest()
+        self.grid['dx'].attrs['standard_name'] = 'grid_edge_x_distance'
+        self.grid['dx'].attrs['units'] = 'meters'
+        self.grid['dx'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['dx'] ) ).hexdigest()
         self.grid['dy'] = (('ny' , 'nxp'), R * spherical.angle_through_center( (lat[1:, :],lon[1:, :]), (lat[:-1,:  ],lon[:-1,:  ]) ))
-        self.grid.dy.attrs['standard_name'] = 'grid_edge_y_distance'
-        self.grid.dy.attrs['units'] = 'meters'
-        self.grid.dy.attrs['sha256'] = hashlib.sha256( np.array( self.grid['dy'] ) ).hexdigest()
+        self.grid['dy'].attrs['standard_name'] = 'grid_edge_y_distance'
+        self.grid['dy'].attrs['units'] = 'meters'
+        self.grid['dy'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['dy'] ) ).hexdigest()
 
         # Scaling by latitude?
         cos_lat = np.cos(np.radians(lat))
@@ -541,13 +541,13 @@ class GridUtils:
         self.grid['angle_dx'] = (('nyp', 'nxp'), angle_dx)
         #self.grid.angle_dx.attrs['standard_name'] = 'grid_vertex_x_angle_WRT_geographic_east'
         #self.grid.angle_dx.attrs['units'] = 'degrees_east'
-        self.grid.angle_dx.attrs['units'] = 'radians'
-        self.grid.angle_dx.attrs['sha256'] = hashlib.sha256( np.array( angle_dx ) ).hexdigest()
+        self.grid['angle_dx'].attrs['units'] = 'radians'
+        self.grid['angle_dx'].attrs['sha256'] = hashlib.sha256( np.array( angle_dx ) ).hexdigest()
 
         self.grid['area'] = (('ny','nx'), R * R * spherical.quad_area(lat, lon))
-        self.grid.area.attrs['standard_name'] = 'grid_cell_area'
-        self.grid.area.attrs['units'] = 'm2'
-        self.grid.area.attrs['sha256'] = hashlib.sha256( np.array( self.grid['area'] ) ).hexdigest()
+        self.grid['area'].attrs['standard_name'] = 'grid_cell_area'
+        self.grid['area'].attrs['units'] = 'm2'
+        self.grid['area'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['area'] ) ).hexdigest()
 
         return
 
@@ -746,13 +746,13 @@ class GridUtils:
                     (nxp, nyp) = lonGrid.shape
 
                     self.grid['x'] = (('nyp','nxp'), lonGrid)
-                    self.grid.x.attrs['standard_name'] = 'geographic_longitude'
-                    self.grid.x.attrs['units'] = 'degrees_east'
-                    self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
+                    self.grid['x'].attrs['standard_name'] = 'geographic_longitude'
+                    self.grid['x'].attrs['units'] = 'degrees_east'
+                    self.grid['x'].attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                     self.grid['y'] = (('nyp','nxp'), latGrid)
-                    self.grid.y.attrs['standard_name'] = 'geographic_latitude'
-                    self.grid.y.attrs['units'] = 'degrees_north'
-                    self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
+                    self.grid['y'].attrs['standard_name'] = 'geographic_latitude'
+                    self.grid['y'].attrs['units'] = 'degrees_north'
+                    self.grid['y'].attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                     newGridCreated = True
 
@@ -1568,8 +1568,8 @@ class GridUtils:
                 return
 
         # Generic longitude check
-        if self.grid.x.attrs['units'] == 'degrees_east':
-            self.grid.x.values = np.where(self.grid.x.values>180, self.grid.x.values-360, self.grid.x.values)
+        if self.grid['x'].attrs['units'] == 'degrees_east':
+            self.grid['x'].values = np.where(self.grid['x'].values>180, self.grid['x'].values-360, self.grid['x'].values)
 
         #Duplicate
         #self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
