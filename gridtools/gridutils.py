@@ -1,5 +1,5 @@
 # General imports and definitions
-import os, re, sys, datetime, logging
+import os, re, sys, datetime, logging, importlib
 import cartopy, warnings, pdb, hashlib
 import numpy as np
 import xarray as xr
@@ -20,10 +20,11 @@ from . import spherical
 
 # Other utilities
 from . import fileutils
+from . import utils
 
 class GridUtils:
 
-    def __init__(self, app={}):
+    def __init__(self, app=dict()):
         # Constants
         self.PI_180 = np.pi/180.
         # Adopt GRS80 ellipse from proj
@@ -46,9 +47,9 @@ class GridUtils:
         # Grid parameters
         # Locals
         self.gridMade = False
-        self.gridInfo = {}
-        self.gridInfo['dimensions'] = {}
-        self.gridInfo['gridParameters'] = {}
+        self.gridInfo = dict()
+        self.gridInfo['dimensions'] = dict()
+        self.gridInfo['gridParameters'] = dict()
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
         # Defaults
         self.plotParameterDefaults = {
@@ -102,8 +103,8 @@ class GridUtils:
         self.applicationObj = appObj
         return appObj.dashboard
 
-    def application(self, app={}):
-        '''Convienence function to attach application items to GridUtil so it can update certain portions
+    def application(self, app=dict()):
+        '''Convienence function to attach application items to GridUtils() so it can update certain portions
         of the application::
 
             app = {
@@ -367,14 +368,19 @@ class GridUtils:
             module.
 
             The available levels are:
-
-            Level     Numeric value
-            CRITICAL  50
-            ERROR     40
-            WARNING   30
-            INFO      20
-            DEBUG     10
-            NOTSET    0
+                +----------+---------------+
+                | Level    | Numeric value |
+                +----------+---------------+
+                | CRITICAL | 50            |
+                +----------+---------------+
+                | ERROR    | 40            |
+                +----------+---------------+
+                | WARNING  | 30            |
+                +----------+---------------+
+                | INFO     | 20            |
+                +----------+---------------+
+                | DEBUG    | 10            |
+                +----------+---------------+
         '''
         if type(newLevel) == str:
             try:
@@ -401,13 +407,19 @@ class GridUtils:
             module.
 
             The available levels are:
-
-            Level     Numeric value
-            CRITICAL  50
-            ERROR     40
-            WARNING   30
-            INFO      20
-            DEBUG     10
+                +----------+---------------+
+                | Level    | Numeric value |
+                +----------+---------------+
+                | CRITICAL | 50            |
+                +----------+---------------+
+                | ERROR    | 40            |
+                +----------+---------------+
+                | WARNING  | 30            |
+                +----------+---------------+
+                | INFO     | 20            |
+                +----------+---------------+
+                | DEBUG    | 10            |
+                +----------+---------------+
         '''
         if type(newLevel) == str:
             try:
@@ -434,8 +446,8 @@ class GridUtils:
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
         self.xrChunks = None
-        self.gridInfo = {}
-        self.gridInfo['dimensions'] = {}
+        self.gridInfo = dict()
+        self.gridInfo['dimensions'] = dict()
         self.clearGridParameters()
         self.resetPlotParameters()
 
@@ -586,7 +598,7 @@ class GridUtils:
 
         return projString
 
-    def makeGrid(self):
+    def makeGrid(self, setFilename=None):
         '''Using supplied grid parameters, populate a grid in memory.'''
 
         # New grid created flag
@@ -634,6 +646,15 @@ class GridUtils:
                 msg = 'ERROR: Grid parameter centerY must be -90.0 to +90.0.'
                 self.printMsg(msg, level=logging.ERROR)
                 return
+
+        # The centerUnits will determine the geometry type for the grid
+        if centerUnits == 'degrees':
+            geometryType = 'spherical'
+        else:
+            geometryType = 'cartesian'
+
+        # For MOM6, we set a default tile name
+        tileName = self.getGridParameter('tileName', default='tile1')
 
         # Review dx and dy: these must be set
         dx = self.getGridParameter('dx', default='Error')
@@ -943,6 +964,10 @@ class GridUtils:
             newGridCreated = True
 
         if newGridCreated:
+            # Fill in a tile name and geometry
+            self.grid['tile'] = tileName
+            self.grid.tile['geometry'] = geometryType
+
             # Generate a proj string
             try:
                 projString = self.formProjString(self.gridInfo['gridParameters'])
@@ -969,8 +994,13 @@ class GridUtils:
         else:
             msg = "WARNING: Grid generation failed."
             self.printMsg(msg, level=logging.WARNING)
+
+        # If the grid was just created, the user can provide using setFilename
+        if setFilename:
+            self.xrFilename = setFilename
                                 
     # Original grid generation functions from Niki Zadeh
+    # Replace above comment with attribution in each function to mark lineage
 
     # Mercator
     def rotate_u(self, x , y, z, ux, uy, uz, theta):
@@ -1350,11 +1380,102 @@ class GridUtils:
         if self.xrOpen:
             self.xrDS.close()
             self.xrOpen = False
+
+    def convertGrid(self, target, **kwargs):
+        '''Convert current grid to another grid type.
+
+        :param target: name of new grid format
+        :type target: string
+        :return: none
+        :rtype: none
+
+        Supported grid conversions:
+            +--------+--------+---------------------------------------------------+
+            | SOURCE | TARGET | CODE CITATIONS                                    |
+            +--------+--------+---------------------------------------------------+
+            | ROMS   | MOM6   | :cite:p:`Ilicak_2020_ROMS_to_MOM6`                |
+            +--------+--------+---------------------------------------------------+
+        '''
+
+        # Define the two paramters we need to perform a conversion
+        sourceGrid = None
+        targetGrid = None
+
+        if not('type' in self.gridInfo.keys()):
+            msg = ('ERROR: No current grid defined.  Please create or read a grid before converting.')
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        # Match source grids first, then the available targets
+        if self.gridInfo['type'] == 'ROMS':
+            sourceGrid = self.gridInfo['type']
+            if target in ['MOM6']:
+                targetGrid = target
+
+        if not(sourceGrid) or not(targetGrid):
+            msg = ('ERROR: The source grid (%s) is not supported or is incompatible with the target grid (%s).' %\
+                (sourceGrid, target))
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        # Import source and target grid module types
+        sourceGridModule = sourceGrid.lower()
+        targetGridModule = targetGrid.lower()
+        
+        try:
+            mdlSource = importlib.import_module('gridtools.grids.%s' % (sourceGridModule))
+        except:
+            msg = ('ERROR: Failed to load grid module for %s.' % (sourceGrid))
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        try:
+            mdlTarget = importlib.import_module('gridtools.grids.%s' % (targetGridModule))
+        except:
+            msg = ('ERROR: Failed to load grid module for %s.' % (targetGrid))
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        # Create a templating mechanism later, for now perform direct calls into each
+        # model type based on current grid type and target.
+
+        # ROMS to MOM6: :cite:p:`Ilicak_2020_ROMS_to_MOM6`
+        if sourceGrid == 'ROMS' and targetGrid == 'MOM6':
+            # Obtain respective class objects so we can access the full
+            # suite of class functions.
+            roms = mdlSource.ROMS()
+            mom6 = mdlTarget.MOM6()
+            # roms_grid = read_ROMS_grid(roms_grid_filename)
+            roms.read_ROMS_grid(self)
+            # roms_grid = trim_ROMS_grid(roms_grid)
+            roms.trim_ROMS_grid()
+            # mom6_grid = convert_ROMS_to_MOM6(mom6_grid, roms_grid)
+            mom6.setup_MOM6_grid(**kwargs)
+            mom6.convert_ROMS_to_MOM6(roms.getGrid())
+            # mom6_grid = approximate_MOM6_grid_metrics(mom6_grid)
+            mom6.approximate_MOM6_grid_metrics()
+
+            # Replace the grid
+            self.grid = mom6.getGrid()
+            self.gridInfo['type'] = targetGrid
+
+            # write_MOM6_supergrid_file(mom6_grid)
+            # write_MOM6_topography_file(mom6_grid)
+            # write_MOM6_solo_mosaic_file(mom6_grid)
+            # write_MOM6_land_mask_file(mom6_grid)
+            # write_MOM6_ocean_mask_file(mom6_grid)
+            # write_MOM6_exchange_grid_file(mom6_grid, 'atmos',  'land')
+            # write_MOM6_exchange_grid_file(mom6_grid, 'atmos', 'ocean')
+            # write_MOM6_exchange_grid_file(mom6_grid,  'land', 'ocean')
+            # write_MOM6_coupler_mosaic_file(mom6_grid)
+            msg = ('INFO: Successful conversion of grid (%s => %s).' % (sourceGrid, targetGrid))
+            self.printMsg(msg, level=logging.INFO)
+            return
             
     def openGrid(self, inputUrl, chunks=None):
         '''Open a grid file.  The file pointer is internal to the gridtools object.
 
-	Specify with file:// or OpenDAP (http://, https://).
+	Specify with file: or OpenDAP (http://, https://) or ds:.
 
         To access it, use: obj.xrDS or obj.grid'''
 
@@ -1380,7 +1501,8 @@ class GridUtils:
     def readGrid(self, opts={'type': 'MOM6'}, local=None, localFilename=None):
         '''Read a grid.
         
-        This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc)
+        This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc).
+        This routine does not verify the read grid vs. type of grid specified.
         '''
         # if a dataset is being loaded via readGrid(local=), close any existing dataset
         if local:
@@ -1391,17 +1513,32 @@ class GridUtils:
             self.grid = local
         else:
             if self.xrOpen:
-                if opts['type'] == 'MOM6':
-                    # Save grid metadata
-                    self.gridInfo['type'] = opts['type']
-                    self.grid = self.xrDS
+                # Save grid metadata
+                self.gridInfo['type'] = opts['type']
+                self.grid = self.xrDS
         
         if localFilename:
             self.xrFilename = localFilename
 
-    def removeFillValueAttributes(self, data=None):
+    def removeFillValueAttributes(self, data=None, stringVars=None):
+        '''Helper function to format the netCDF file to emulate the
+        current styles.
 
-        ncEncoding = {}
+        :param data: variables to format
+        :type data: xarray
+        :param stringVars: dictionary of string variables and lengths
+        :type stringVars: dict()
+        :return: netCDF encoding
+        :rtype: dict()
+
+        For *data*, the ``_FillValue`` is masked. 
+        
+        For *stringVars*, supply a string length.  e.g. ``{'tile': 255}``
+        This will result in an encoding of ``{'dtype': 'S255', 'char_dim_name': 'string'}``.
+
+        '''
+
+        ncEncoding = dict()
         if data:
             ncVars = list(data.variables)
         else:
@@ -1409,6 +1546,10 @@ class GridUtils:
 
         for ncVar in ncVars:
             ncEncoding[ncVar] = {'_FillValue': None}
+
+        for ncVar in stringVars.keys():
+            if ncVar in ncVars:
+                ncEncoding[ncVar] = {'dtype': 'S%d' % (stringVars[ncVar]), 'char_dim_name': 'string'}
 
         return ncEncoding
     
@@ -1420,9 +1561,20 @@ class GridUtils:
             if directory:
                 filename = os.path.join(directory, filename)
             self.xrFilename = filename
-            if self.grid.x.attrs['units'] == 'degrees_east':
-                self.grid.x.values = np.where(self.grid.x.values>180, self.grid.x.values-360, self.grid.x.values)
-            self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+        else:
+            if not(self.xrFilename):
+                msg = ("ERROR: Save grid failed.  A grid filename was not specified.")
+                grd.printMsg(msg, logging.ERROR)
+                return
+
+        # Generic longitude check
+        if self.grid.x.attrs['units'] == 'degrees_east':
+            self.grid.x.values = np.where(self.grid.x.values>180, self.grid.x.values-360, self.grid.x.values)
+
+        #Duplicate
+        #self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+
+        # Save the grid here
         try:
             self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
             msg = "Successfully wrote netCDF file to %s" % (self.xrFilename)
@@ -1433,27 +1585,69 @@ class GridUtils:
 
     def makeSoloMosaic(self, **kwargs):
         '''
-        This replicates some of the processes of `make_solo_mosaic` from FRE-nctools.  A
-        grid must be created or read.  This function has the following keyword arguments
-        and default values in parentheses.
+        This replicates some of the processes of ``make_solo_mosaic`` from :cite:p:`GFDL_MSG_2021_FRE_nctools`.
+        This routine is also based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
 
-        topographyField= xarray topographic field (None)
-        topographyFilename= filename used to write topographic field ("ocean_topog.nc")
-        mosaicFilename= filename for mosaic file ("ocean_mosaic.nc")
-        writeLandMask= boolean; set True to write land mask file (False)
-        landmaskFilename= filename used to write land mask ("land_mask.nc")
-        writeOceanMask= boolean; set True to write ocean mask file (False)
-        tileName= name to assing the solo tile ("tile1")
-        MINIMUM_DEPTH= minimum depth of ocean (0.0) [*]
-        MASKING_DEPTH= masking depth of ocean (0.0) [*]
-        MAXIMUM_DEPTH= maximum depth of ocean (-99999.0) [*]
-        writeExchangeGrids= boolean; set False to skip creation of these files (True)
-        overwrite= boolean; set True to overwrite existing files (False)
-        inputDirectory= absolute or relative path to write input files ("INPUT")
+        A grid must be created or read.  This function has the following keyword arguments
+        and default values.  This is a MOM6 specific function to write out various files depending on
+        arguments passed.
+
+        **Keyword arguments**:
+
+            * *topographyField* (``xarray``) -- topographic field to be used with the grid. REQUIRED. Default: None
+            * *topographyFilename* (``string``) -- filename used to write topographic field. Default: "ocean_topog.nc"
+            * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
+            * *oceanGridFilename* (``string``) -- filename for ocean grid file. Default: "ocean_hgrid.nc"
+            * *writeLandMask* (``boolean``) -- set True to write land mask file. Default: False
+            * *landmaskFilename* (``string``) -- filename used to write the land mask. Default: "land_mask.nc"
+            * *writeOceanMask* (``boolean``) -- set True to write ocean mask file. Default: False
+            * *oceanmaskFilename* (``string``) -- filename used to write the ocean mask. Default: "ocean_mask.nc"
+            * *tileName* (``string``) -- name to assign to the solo tile. Default: "tile1"
+            * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
+            * *MASKING_DEPTH* (``float``) -- masking depth of ocean in meters. Default: 0.0
+            * *MAXIMUM_DEPTH* (``float``) -- maximum depth of ocean in meters. Default: -99999.0
+            * *writeCouplerMosaic* (``boolean``) -- set False to skip creation of coupler mosaic file. Default: True
+            * *couplerMosaicFilename* (``string``) -- set False to skip creation of coupler mosaic file. Default: "mosaic.nc"
+            * *writeExchangeGrids* (``boolean``) -- set False to skip creation of exchange grids. Default: True
+            * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
+            * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
+            * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
+
+        .. note::
+            Using the defaults, this routine will write the following files to the ``INPUT`` directory with
+            one tile named ``tile1``:
+
+                * ``mosaic.nc``
+                * ``ocean_mosaic.nc``
+                * ``ocean_topog.nc``
+                * ``atmos_mosaic_tile1Xland_mosaic_tile1.nc``
+                * ``atmos_mosaic_tile1Xocean_mosaic_tile1.nc``
+                * ``land_mosaic_tile1Xocean_mosaic_tile1.nc``
+
+            If any of these files exist, the file will **NOT** be replaced and a warning will be issued.
+
+            For *oceanGridFile*, if the filename is not provided, the routine will attempt to use
+            the name provided when the grid was read.  The filename may need to be set if the grid
+            was just constructed using the library.
         '''
 
-        # ROMS spherical grids are in lon,lat
-        # ROMS cartesian grids are in y,x
+        # Check and set any defaults to kwargs
+        util.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        util.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
+        util.checkArgument(kwargs, 'writeLandMask', False)
+        util.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
+        util.checkArgument(kwargs, 'writeOceanMask', False)
+        util.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
+        util.checkArgument(kwargs, 'tileName', "tile1")
+        util.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
+        util.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
+        util.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0) 
+        util.checkArgument(kwargs, 'writeExchangeGrids', True)
+        util.checkArgument(kwargs, 'writeCouplerMosaic', True)
+        util.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
+        util.checkArgument(kwargs, 'overwrite', False)
+        util.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        util.checkArgument(kwargs, 'relativeToINPUTDir', "./")
 
         if len(self.grid.variables) == 0:
             # No grid found
@@ -1461,8 +1655,19 @@ class GridUtils:
             self.printMsg(msg, level=logging.ERROR)
             return
 
-        # Determine the type of grid: spherical or cartesian
-        
+        mdl = importlib.import_module('gridtools.grids.mom6')
+        mom6 = mdl.MOM6()
+        # Supergrid is stored via GridUtils.saveGrid()
+        mom6.write_MOM6_topography_file(self, **kwargs)
+        mom6.write_MOM6_solo_mosaic_file(self, **kwargs)
+        if kwargs['writeLandMask']:
+            mom6.write_MOM6_land_mask_file(self, **kwargs)
+        if kwargs['writeOceanMask']:
+            mom6.write_MOM6_ocean_mask_file(self, **kwargs)
+        if kwargs['writeExchangeGrids']:
+            mom6.write_MOM6_exchange_grids(self, **kwargs)
+        if kwargs['writeCouplerMosaic']:
+            mom6.write_MOM6_coupler_mosaic_file(self, **kwargs)
     
     # plot operations plot functions
     # Plot Operations Plot Functions
@@ -1605,7 +1810,7 @@ class GridUtils:
 
     def clearGridParameters(self):
         '''Clear grid parameters.  This does not erase any grid data.'''
-        self.gridInfo['gridParameters'] = {}
+        self.gridInfo['gridParameters'] = dict()
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
     def deleteGridParameters(self, gList, subKey=None):
@@ -1924,7 +2129,7 @@ class GridUtils:
 
     def openDataset(self, dsName, chunks=None):
         '''Open a dataset using the data source catalog or url that can
-        point to a raw dataset using a prefix file:// in the data source name.
+        point to a raw dataset using a prefix file: in the data source name.
         The url can be an OpenDAP dataset: e.g.
         https://opendap.jpl.nasa.gov/opendap/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_AMSR_OI/2011/001/20110101-NCDC-L4LRblend-GLOB-v01-fv02_0-AVHRR_AMSR_OI.nc.bz2
 	'''
@@ -1953,7 +2158,7 @@ class GridUtils:
             return dsData
 
         # Gridtools catalog entry
-        dsObj = {}
+        dsObj = dict()
         if dsUrl.scheme == 'ds':
             dsPath = dsUrl.path
             if dsPath in self.dataSourcesObj.catalog.keys():
@@ -1999,15 +2204,15 @@ class GridUtils:
 
     def applyEvalMap(self, dsName, dsData):
         '''Apply constructed equations through python eval() to manipulate data source fields.
-           Data source catalog entries must be prefixed with ds://.  If /GEBCO is defined
-           as a data source in the catalog, use: ds:///GEBCO.  All catalog entries start
+           Data source catalog entries must be prefixed with ds:.  If GEBCO is defined
+           as a data source in the catalog, use: ds:GEBCO.  All catalog entries start
            with a slash.
         '''
 
         dsUrl = urllib.parse.urlparse(dsName)
         dsEntry = None
         if dsUrl.scheme != 'ds':
-            self.printMsg("ERROR: Data source catalog entries must have a ds:// prefix.", level=logging.ERROR)
+            self.printMsg("ERROR: Data source catalog entries must have a ds: prefix.", level=logging.ERROR)
             return
         else:
             dsEntry = dsUrl.path
@@ -2082,7 +2287,7 @@ class GridUtils:
         gridLatName = None, gridLonName = None, topoDimX = None, topoDimY = None,
         topoLatName = None, topoLonName = None, convert_to_depth = True):
         '''Generate a bathymetry and ocean mask for a given data source
-        topography or bathymetry.  See topoutils.TopoUtils.regridTopo().
+        topography or bathymetry.  See :func:`gridtools.topoutils.TopoUtils.regridTopo`.
         '''
         from . import topoutils
 

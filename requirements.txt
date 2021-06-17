@@ -16,6 +16,8 @@ matplotlib
 netCDF4
 pandas
 scipy
+sphinx
+sphinxcontrib-bibtex
 xarray
 panel
 jupyterlab

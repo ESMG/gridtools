@@ -48,7 +48,7 @@ class SysInfo:
         # Load conda environment information
         stdin, stdout, errcode =\
             conda.cli.python_api.run_command(conda.cli.python_api.Commands.LIST, "--export")
-        itemList = {}
+        itemList = dict()
         for strItem in stdin.split("\n"):
             #print(strItem)
             if len(strItem) > 0:
@@ -83,7 +83,7 @@ class SysInfo:
 
     def resetVersionData(self):
         self.versionDataLoaded = False
-        self.versionData = {}
+        self.versionData = dict()
 
     def runCommand(self, cmdString):
         '''

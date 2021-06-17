@@ -22,6 +22,7 @@
    - [ ] Enhanced grid/plot projection options
    - [ ] Allow import of ROMS grid for conversion to MOM6
    - [ ] Allow export of MOM6 grid to ROMS
+     - [ ] implement ROMS.extend_ROMS_grid()
    - [ ] Boundery condition grid creation and support
    - [ ] Grid filling options (flooding)
    - [ ] Grid mask editor
@@ -34,9 +35,11 @@
        `setGridParameters` to recursively update dictionary elements.
  - [ ] Regular filenames should be usable everywhere that takes file or
        data source arguments.
- - [ ] file:// spec does not honor relative paths.  There should be
+ - [X] file:// spec does not honor relative paths.  There should be
        generic support for relative and absolute paths for file:// and
-       ds:// file specs.
+       ds:// file specs.  Discovered that the argument after (//) is
+       a network specification.  (ds:/ == ds:///)  Relative paths
+       should start right after the colon(:).
 
 # TASKS
 
@@ -168,6 +171,8 @@
 
 # WISH
 
+ - [ ] Support for multiple tiles
+ - [ ] Harmonize filename operations in functions
  - [ ] Teach grid tools to use "input.nml" to find grid related things for model runs.
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
        there things that we could use there instead of recreating many wheels.
@@ -187,6 +192,7 @@
  - [ ] Place additional metadata into MOM6 grid files
    - [X] Grid parameters
    - [X] Software stack, git information
+     - [ ] Update to utils.get_git_repo_version_info()
    - [ ] Alternate version/software capture if conda and/or git is not available
    - [X] Added proj string to netCDF file
    - [ ] Tri polar grid description
@@ -218,5 +224,9 @@
      - [ ] https://github.com/MackenzieBlanusa/OHC_CMIP6
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
- - [ ] triton node issue: python netCDF4 large file reading seems to hang nodes
+ - [X] triton node issue: python netCDF4 large file reading seems to hang nodes
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
+
+# QUESTIONS
+
+ - [ ] ntiles,1 is written in write_MOM6_topography_file, but does not seem to be used in MOM6

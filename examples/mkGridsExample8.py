@@ -82,8 +82,8 @@ grd.useDataSource(ds)
 # to be in brackets.  If the key is new, a new field will be
 # created with the given expression.
 ds.addDataSource({
-    '/GEBCO_2020': {
-            'url' : 'file:///import/AKWATERS/jrcermakiii/bathy/gebco/GEBCO_2020.nc',
+    'GEBCO_2020': {
+            'url' : 'file:/import/AKWATERS/jrcermakiii/bathy/gebco/GEBCO_2020.nc',
             'variableMap' : {
                     'lat': 'lat',
                     'lon': 'lon',
@@ -96,7 +96,7 @@ ds.addDataSource({
 })
 
 # Exercise topoutils.TopoUtils.regridTopo() function
-resultFields = grd.regridTopo('ds:///GEBCO_2020', topoVarName='depth', periodic=False)
+resultFields = grd.regridTopo('ds:GEBCO_2020', topoVarName='depth', periodic=False)
 
 # Write fields out to a file
 # TODO: provide a data source service hook?

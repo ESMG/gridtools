@@ -10,12 +10,12 @@ class DataSource:
         # Catalog:
         #   {'tag': {
         #       'url': '',
-        #       'varMap': {},
-        #       'dimMap': {}
+        #       'varMap': dict(),
+        #       'dimMap': dict()
         #       'xRef': None,
         #       'xArgs': None,
         #     }
-        self.catalog = {}
+        self.catalog = dict()
         self._default_catalogEntry = {
                 'url': None,
                 'variableMap': None,
@@ -45,9 +45,9 @@ class DataSource:
         '''This removes any empty/null values from the catalog prior to
         saving or printing the values.
         '''
-        cleanCat = {}
+        cleanCat = dict()
         for catKey in catalog.keys():
-            cleanCat[catKey] = {}
+            cleanCat[catKey] = dict()
             for refKey in catalog[catKey].keys():
                 if catalog[catKey][refKey]:
                     cleanCat[catKey][refKey] = catalog[catKey][refKey]
@@ -56,7 +56,7 @@ class DataSource:
 
     def clearCatalog(self):
         '''This clears the current catalog.'''
-        self.catalog = {}
+        self.catalog = dict()
         return
 
     def loadCatalog(self, inFile, append=True, overwrite=False):

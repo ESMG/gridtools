@@ -1,5 +1,32 @@
 # Changelog
 
+# 2021-06-16
+
+ - Reformat keyword arguments.
+ - MOM6 default tileName = tile1
+ - Add grid geometry type to tile variable: cartesian or spherical
+ - Add proper string encoding to gridutils.removeFillValueAttributes.
+ - Continue adding routines to mom6 and roms modules.
+
+# 2021-06-15
+
+ - Replace {} with dict()
+ - Porting of ROMS to MOM6 grids will go hand in hand with general 
+   solo mosaic creation routines.
+ - Created ROMS and MOM6 specific classes for dealing with their own grids
+ - Add sphinxcontrib-bibtex to requirements.txt file to see if we fix RTD build failure
+ - Add reference to FRE-nctools.
+ - Add a generic utils module for generic functions.
+ - gridutils.readGrid() does not need to do anything but note the grid type
+   in gridInfo['type'].
+ - urllib.parse: double slash denotes the next argument is a network
+   specification.  We can use file:/filename for absolute and relative paths.
+   We need to rework documentation so we can specify data sources more explicitly.
+   These are equivalent (ds:/GEBCO_2020) = (ds:///GEBCO_2020).  A relative
+   path would be ds:GEBCO_2020.  It would be an implementation decision
+   if ds:/GEBCO_2020 == ds:GEBCO_2020.
+ - Simplify Example 8 a little bit with file spec discovery.
+
 # 2021-06-14
 
  - Add remaining modules to RTD documentation.

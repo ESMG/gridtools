@@ -28,7 +28,8 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
     :param \**kwargs:
         See below
 
-    :Keyword Arguments:
+    **Keyword arguments**:
+
         * *MINIMUM_DEPTH* (``float``) -- 
           Minimum ocean depth. Default: 0.0
         * *MASKING_DEPTH* (``float``) --
@@ -408,7 +409,8 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     :param \**kwargs:
         See below
 
-    :Keyword Arguments:
+    **Keyword arguments**:
+
         * *maxMb* (``int``) -- 
           Memory limit for grid refinements. Default: 8000.0
         * *h2Name* (``string``) --
@@ -428,7 +430,7 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
           See IMPLEMENTATION NOTES below. Default: True
 
     This routine is based on a paper by Adcroft :cite:p:`Adcroft_2013` and python code from
-    `OMtopogen/create_topog_refinedSampling.py` :cite:p:`Zadeh_2020`.
+    `OMtopogen/create_topog_refinedSampling.py` :cite:p:`Zadeh_2020_ocean_model_topog_generator`.
 
     .. note::
 

@@ -15,3 +15,5 @@ API
    spherical
    sysinfo
    topoutils
+   utils
+   grids

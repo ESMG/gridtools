@@ -98,6 +98,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://stackoverflow.com/questions/2486145/python-check-if-url-to-jpg-exists
  * https://stackoverflow.com/questions/2654113/how-to-get-the-callers-method-name-in-the-called-method
  * https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
+ * https://stackoverflow.com/questions/4076239/finding-out-the-name-of-the-original-repository-you-cloned-from-in-git
  * https://stackoverflow.com/questions/6999621/how-to-use-extent-in-matplotlib-pyplot-imshow
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
@@ -112,6 +113,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://unidata.github.io/MetPy/latest/examples/Four_Panel_Map.html
  * https://www.anomaly.net.au/blog/running-pre-and-post-install-jobs-for-your-python-packages/
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
+ * https://www.earthdatascience.org/courses/intro-to-earth-data-science/open-reproducible-science/get-started-open-reproducible-science/
  * https://www.git-tower.com/learn/git/faq/delete-remote-branch/
  * https://www.kite.com/python/answers/how-to-hide-a-figure-from-being-shown-in-matplotlib-in-python
  * https://www.mathsisfun.com/geometry/interior-angles-polygons.html
