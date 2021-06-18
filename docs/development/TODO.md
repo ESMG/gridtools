@@ -198,6 +198,12 @@
    - [ ] Tri polar grid description
    - [ ] Update conda capture code so a temporary file is not necessary
  - [ ] Work with generic non-mapping reference systems for use with some of the sample MOM6 problems
+   - [ ] MOM6-examples: double_gyre
+     - [ ] https://github.com/NOAA-GFDL/MOM6-examples/blob/dev/gfdl/ocean_only/double_gyre/Visualizing%20and%20animating%20sea-surface%20height.ipynb
+     - [ ] https://gist.github.com/adcroft/2a2b91d66625fd534372
+   - [ ] MOM6 dumbbell: https://github.com/NOAA-GFDL/MOM6/search?q=dumbbell
+     - [ ] Support for grid field and plotting
+     - [ ] Learn about field preparation and sponges
  - [ ] Refactor any grid math into a gridmath library.  Any grid computation that can stand on its own
        should be moved into a separate gridmath library.
  - [ ] gridtools.makeGrid() will need a refactor to work with other grid types
@@ -226,7 +232,9 @@
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
  - [X] triton node issue: python netCDF4 large file reading seems to hang nodes
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
+ - [ ] Update all references to field to either variable or grid depending on context.
 
 # QUESTIONS
 
- - [ ] ntiles,1 is written in write_MOM6_topography_file, but does not seem to be used in MOM6
+ - [ ] ntiles,1 is written in write_MOM6_topography_file, is this required for MOM6?
+ - [ ] is there a reason to keep zeroed land mask depths in the ROMS to MOM6 converter?

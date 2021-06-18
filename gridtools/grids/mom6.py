@@ -3,10 +3,12 @@ Generic class and utility funtions for handling MOM6 grids.
 '''
 
 import hashlib, logging, os
-from .. import utils
 import numpy
 import numpy as np
 import xarray as xr
+
+from .. import utils
+from .. import spherical
 
 class MOM6:
 
@@ -72,7 +74,7 @@ class MOM6:
         ds['area'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['area'] ) ).hexdigest()
         ds['angle_dx'] = (('nyp','nxp'), self.mom6_grid['supergrid']['angle'])
         ds['angle_dx'].attrs['units'] = 'radians'
-        ds['angle_dx'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['angle_dx'] ) ).hexdigest()
+        ds['angle_dx'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['angle'] ) ).hexdigest()
 
         self._add_global_attributes(ds)
 
@@ -90,7 +92,7 @@ class MOM6:
             * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory.
               Default: "./" which refers to the "INPUT" directory.
             * *supergridName* (``string``) -- name to assign to the supergrid filename. Default: "ocean_hgrid.nc"
-            * *topographyFilename* (``string``) -- filename used to write topographic field. Default: "ocean_topog.nc"
+            * *topographyFilename* (``string``) -- filename used to write topographic grid. Default: "ocean_topog.nc"
             * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
             * *landmaskFilename* (``string``) -- filename used to write the land mask. Default: "land_mask.nc"
             * *oceanmaskFilename* (``string``) -- filename used to write the ocean mask. Default: "ocean_mask.nc"
@@ -100,14 +102,14 @@ class MOM6:
         '''
         
         # Check and set any defaults to kwargs
-        util.checkArgument(kwargs, 'tileName', "tile1")
-        util.checkArgument(kwargs, 'inputDirectory', "INPUT")
-        util.checkArgument(kwargs, 'relativeToINPUTDir', "./")
-        util.checkArgument(kwargs, 'supergridFilename', "ocean_hgrid.nc")
-        util.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
-        util.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
-        util.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
-        util.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
+        utils.checkArgument(kwargs, 'tileName', "tile1")
+        utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+        utils.checkArgument(kwargs, 'supergridFilename', "ocean_hgrid.nc")
+        utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        utils.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
+        utils.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
+        utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
 
         self.tile_str = kwargs['tileName']
         self.atmos_tile = 'atmos_mosaic_' + self.tile_str
@@ -181,17 +183,19 @@ class MOM6:
             self.mom6_grid['supergrid'][field][1::2, ::2] = roms_grid[ 'u' ][field] # between e/w
             self.mom6_grid['supergrid'][field][ ::2,1::2] = roms_grid[ 'v' ][field] # between n/s
 
+        # Create an ocean and land mask, any land mask depths are zeroed out.
         # 0 = land, 1 = water, but sometimes some huge number indicates
         # "missing" values, which we'll assume to be water
         mask = roms_grid['rho']['mask']
-        mask[mask != 0] = 1
+        #mask[mask != 0] = 1
+        mask = np.where(mask != 0, 1, 0)
         self.mom6_grid['cell_grid']['depth'] = roms_grid['rho']['h'] * mask
         self.mom6_grid['cell_grid']['ocean_mask'] = mask
         self.mom6_grid['cell_grid']['land_mask'] = numpy.logical_not(mask)
 
         return
 
-    def approxmate_MOM6_grid_metrics(self):
+    def approximate_MOM6_grid_metrics(self):
         '''Fill in missing MOM6 supergrid metrics by computing best guess values.
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
@@ -219,7 +223,7 @@ class MOM6:
     # FILE WRITING FUNCTIONS / OUTPUT
 
     def write_MOM6_topography_file(self, grd, **kwargs):
-        """Save the MOM6 ocean topography field in a separate file.
+        """Save the MOM6 ocean topography grid in a separate file.
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
@@ -241,10 +245,10 @@ class MOM6:
         #    topog_ds.createDimension('ny', ny)
         #    topog_ds.createDimension('ntiles', 1)
 
-        ds['depth'] = (('ny', 'nx'), kwargs['topographyField'])
+        ds['depth'] = (('ny', 'nx'), kwargs['topographyGrid'])
         ds['depth'].attrs['units'] = 'meters'
         ds['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
-        ds['depth'].attrs['sha256'] = hashlib.sha256( np.array( kwargs['topographyField'] ) ).hexdigest()
+        ds['depth'].attrs['sha256'] = hashlib.sha256( np.array( kwargs['topographyGrid'] ) ).hexdigest()
 
         #    # Variables & Values
         #    hdepth = topog_ds.createVariable('depth', 'f4', ('ny','nx',))
@@ -315,10 +319,10 @@ class MOM6:
 
         #   hgridtiles = mosaic_ds.createVariable('gridtiles', 'c', ('ntiles', 'string',))
         #   hgridtiles[0, :len(mom6_grid['netcdf_info']['tile_str'])] = mom6_grid['netcdf_info']['tile_str']
-        ds['gridtiles'] = (('ntiles',), [kwargs['tileName']]
+        ds['gridtiles'] = (('ntiles',), [kwargs['tileName']])
 
         # Global attributes
-        self._add_global_attributes(mosaic_ds)
+        self._add_global_attributes(ds)
 
         ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds,\
             stringVars={'mosaic': 255, 'gridlocation': 255, 'gridfiles': 255, 'gridtiles': 255}))
@@ -452,7 +456,7 @@ class MOM6:
             # write out exchange grid file
 
             filename_key = '%s_%s_exchange' % (name1, name2)
-            filename = mom6_grid['filenames'][filename_key]
+            filename = self.mom6_grid['filenames'][filename_key]
             # Define target file
             destinationFile = os.path.join(kwargs['inputDirectory'], filename)
             if os.path.isfile(destinationFile) and not(kwargs['overwrite']):
@@ -575,24 +579,24 @@ class MOM6:
 
         # same mosaic file for all three -- just like when "make_solo_mosaic" is used
     
-        add_string_var_1d(ds, 'atm_mosaic_dir',  'directory_storing_atmosphere_mosaic', mom6_grid['filenames']['directory'], strVarMap)
-        add_string_var_1d(ds, 'atm_mosaic_file', 'atmosphere_mosaic_file_name',         mom6_grid['filenames']['mosaic']   , strVarMap)
+        add_string_var_1d(ds, 'atm_mosaic_dir',  'directory_storing_atmosphere_mosaic', self.mom6_grid['filenames']['directory'], strVarMap)
+        add_string_var_1d(ds, 'atm_mosaic_file', 'atmosphere_mosaic_file_name',         self.mom6_grid['filenames']['mosaic']   , strVarMap)
         add_string_var_1d(ds, 'atm_mosaic',      'atmosphere_mosaic_name',              'atmos_mosaic'                     , strVarMap)
     
-        add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       mom6_grid['filenames']['directory'],  strVarMap)
-        add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               mom6_grid['filenames']['mosaic']   ,  strVarMap)
+        add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
+        add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
         add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
     
-        add_string_var_1d(ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      mom6_grid['filenames']['directory'],  strVarMap)
-        add_string_var_1d(ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              mom6_grid['filenames']['mosaic']   ,  strVarMap)
+        add_string_var_1d(ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      self.mom6_grid['filenames']['directory'],  strVarMap)
+        add_string_var_1d(ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
         add_string_var_1d(ds, 'ocn_mosaic',      'ocean_mosaic_name',                   'ocean_mosaic'                     ,  strVarMap)
     
-        add_string_var_1d(ds, 'ocn_topog_dir',   'directory_storing_ocean_topog',       mom6_grid['filenames']['directory'],  strVarMap)
-        add_string_var_1d(ds, 'ocn_topog_file',  'ocean_topog_file_name',               mom6_grid['filenames']['topography'], strVarMap)
+        add_string_var_1d(ds, 'ocn_topog_dir',   'directory_storing_ocean_topog',       self.mom6_grid['filenames']['directory'],  strVarMap)
+        add_string_var_1d(ds, 'ocn_topog_file',  'ocean_topog_file_name',               self.mom6_grid['filenames']['topography'], strVarMap)
     
-        add_string_var_2d(ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
-        add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
-        add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
+        add_string_var_2d(ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', self.mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
+        add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', self.mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
+        add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
     
         # Global attributes
         self._add_global_attributes(ds)
@@ -609,9 +613,9 @@ class MOM6:
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
-        ds.attrs['grid_version'] = mom6_grid['netcdf_info']['grid_version']
-        ds.attrs['code_version'] = mom6_grid['netcdf_info']['code_version']
-        ds.attrs['history']      = mom6_grid['netcdf_info']['history_entry']
+        ds.attrs['grid_version'] = self.mom6_grid['netcdf_info']['grid_version']
+        ds.attrs['code_version'] = self.mom6_grid['netcdf_info']['code_version']
+        ds.attrs['history']      = self.mom6_grid['netcdf_info']['history_entry']
 
         return
 
@@ -641,8 +645,8 @@ class MOM6:
     
         # Approximate edge lengths as great arcs
         R = 6370.e3 # Radius of sphere
-        self.mom6_grid['supergrid']['dx'][:,:] = R * Spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) )
-        self.mom6_grid['supergrid']['dy'][:,:] = R * Spherical.angle_through_center( (lat[1:, :],lon[1:, :]), (lat[:-1,:  ],lon[:-1,:  ]) )
+        self.mom6_grid['supergrid']['dx'][:,:] = R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) )
+        self.mom6_grid['supergrid']['dy'][:,:] = R * spherical.angle_through_center( (lat[1:, :],lon[1:, :]), (lat[:-1,:  ],lon[:-1,:  ]) )
     
         # Approximate angles using centered differences in interior, and side differences on left/right edges
         # TODO: Why do something different at the edges when we have extra ROMS points available?
@@ -664,7 +668,7 @@ class MOM6:
         self.mom6_grid['supergrid']['angle'][:,:] = numpy.maximum(angle, angle2)
     
         # Approximate cell areas as that of spherical polygon
-        self.mom6_grid['supergrid']['area'][:,:] = R * R * Spherical.quad_area(lat, lon)
+        self.mom6_grid['supergrid']['area'][:,:] = R * R * spherical.quad_area(lat, lon)
     
         return
     
@@ -703,13 +707,13 @@ class MOM6:
         :return: land or ocean mask
         :rtype: xarray
 
-        Keyword args must have a valid depth field in *topographyField*.
+        Keyword args must have a valid depth grid in *topographyGrid*.
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
 
         # Access depth field
-        depthField = kwargs['topographyField']
+        depthGrid = kwargs['topographyGrid']
 
         # Determine values from other possible arguments
         minimum_depth = 0.0
@@ -725,7 +729,7 @@ class MOM6:
         # As is done in MOM6, if maximum is negative, it is defined by the maximum of
         # the 'depth' field passed.
         if maximum_depth < 0.0:
-            maximum_depth = depthField.max().values.tolist()
+            maximum_depth = depthGrid.max().values.tolist()
             #msg = ("The (diagnosed) maximum depth of the ocean %f meters." % (maximum_depth))
             #grd.printMsg(msg, level=logging.INFO)
         # Negative values are set back to zero for MINIMUM_DEPTH and MASKING_DEPTH
@@ -735,10 +739,10 @@ class MOM6:
             masking_depth = 0.0
 
         if maskType == 'land':
-            return xr.where(depthField <= masking_depth, 1, 0)
+            return xr.where(depthGrid <= masking_depth, 1, 0)
 
         if maskType == 'ocean':
-            return xr.where(depthField > masking_depth, 1, 0)
+            return xr.where(depthGrid > masking_depth, 1, 0)
 
         msg = ("ERROR: Unknown mask type (%s) passed to mom6._generate_mask()")
         grd.printMsg(msg, logging.ERROR)

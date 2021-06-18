@@ -2,7 +2,7 @@
 
 import xarray as xr
 
-def writeLandMask(grd, dsData, dsField, outField, outFile, **kwargs):
+def writeLandMask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     '''Write a land mask based on provided information.  This routine
     assumes a depth field is being passed as an argument to create the
     mask.
@@ -18,14 +18,14 @@ def writeLandMask(grd, dsData, dsField, outField, outFile, **kwargs):
             masking_depth = 0.0
 
     dsDataset = xr.Dataset()
-    dsDataset[outField] = xr.where(dsData[dsField] <= masking_depth, 1.0, 0.0)
+    dsDataset[outVariable] = xr.where(dsData[dsVariable] <= masking_depth, 1.0, 0.0)
     dsDataset['x'] = dsData['x']
     dsDataset['y'] = dsData['y']
     dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))
 
     return
 
-def writeOceanMask(grd, dsData, dsField, outField, outFile, **kwargs):
+def writeOceanMask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     '''Write a ocean mask based on provided information.  This routine
     assumes a depth field is being passed as an argument to create the
     mask.
@@ -41,7 +41,7 @@ def writeOceanMask(grd, dsData, dsField, outField, outFile, **kwargs):
             masking_depth = 0.0
 
     dsDataset = xr.Dataset()
-    dsDataset[outField] = xr.where(dsData[dsField] > masking_depth, 1.0, 0.0)
+    dsDataset[outVariable] = xr.where(dsData[dsVariable] > masking_depth, 1.0, 0.0)
     dsDataset['x'] = dsData['x']
     dsDataset['y'] = dsData['y']
     dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))

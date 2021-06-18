@@ -1395,9 +1395,31 @@ class GridUtils:
             +--------+--------+---------------------------------------------------+
             | ROMS   | MOM6   | :cite:p:`Ilicak_2020_ROMS_to_MOM6`                |
             +--------+--------+---------------------------------------------------+
+
+        **Keyword arguments**:
+
+            * *writeTopography* (``boolean``) -- set True to write topographic grid to a file. Default: False
+            * *topographyFilename* (``string``) -- filename used to write topographic grid. Default: "ocean_topog.nc"
+            * *writeMosaic* (``boolean``) -- set True to write the mosaic file. Default: False
+            * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
+            * *oceanGridFilename* (``string``) -- filename for ocean grid file. Default: "ocean_hgrid.nc"
+            * *writeLandmask* (``boolean``) -- set True to write land mask file. Default: False
+            * *landmaskFilename* (``string``) -- filename used to write the land mask. Default: "land_mask.nc"
+            * *writeOceanmask* (``boolean``) -- set True to write ocean mask file. Default: False
+            * *oceanmaskFilename* (``string``) -- filename used to write the ocean mask. Default: "ocean_mask.nc"
+            * *tileName* (``string``) -- name to assign to the solo tile. Default: "tile1"
+            * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
+            * *MASKING_DEPTH* (``float``) -- masking depth of ocean in meters. Default: 0.0
+            * *MAXIMUM_DEPTH* (``float``) -- maximum depth of ocean in meters. Default: -99999.0
+            * *writeCouplerMosaic* (``boolean``) -- set False to skip creation of coupler mosaic file. Default: False
+            * *couplerMosaicFilename* (``string``) -- set False to skip creation of coupler mosaic file. Default: "mosaic.nc"
+            * *writeExchangeGrids* (``boolean``) -- set False to skip creation of exchange grids. Default: False
+            * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
+            * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
+            * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
         '''
 
-        # Define the two paramters we need to perform a conversion
+        # Define the two parameters we need to perform a conversion
         sourceGrid = None
         targetGrid = None
 
@@ -1436,6 +1458,29 @@ class GridUtils:
             self.printMsg(msg, level=logging.ERROR)
             return
 
+        # Check kwargs
+        # Check and set any defaults to kwargs
+        # For this routine, topographyVariable is hardcoded to depth.
+        utils.checkArgument(kwargs, 'writeTopography', False)
+        utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        utils.checkArgument(kwargs, 'writeMosaic', False)
+        utils.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
+        utils.checkArgument(kwargs, 'oceanGridFilename', "ocean_hgrid.nc")
+        utils.checkArgument(kwargs, 'writeLandmask', False)
+        utils.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
+        utils.checkArgument(kwargs, 'writeOceanmask', False)
+        utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
+        utils.checkArgument(kwargs, 'tileName', "tile1")
+        utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0) 
+        utils.checkArgument(kwargs, 'writeExchangeGrids', False)
+        utils.checkArgument(kwargs, 'writeCouplerMosaic', False)
+        utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
+        utils.checkArgument(kwargs, 'overwrite', False)
+        utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+
         # Create a templating mechanism later, for now perform direct calls into each
         # model type based on current grid type and target.
 
@@ -1451,7 +1496,9 @@ class GridUtils:
             roms.trim_ROMS_grid()
             # mom6_grid = convert_ROMS_to_MOM6(mom6_grid, roms_grid)
             mom6.setup_MOM6_grid(**kwargs)
-            mom6.convert_ROMS_to_MOM6(roms.getGrid())
+            romsGrid = roms.getGrid()
+            kwargs['topographyGrid'] = romsGrid['rho']['h']
+            mom6.convert_ROMS_to_MOM6(romsGrid)
             # mom6_grid = approximate_MOM6_grid_metrics(mom6_grid)
             mom6.approximate_MOM6_grid_metrics()
 
@@ -1459,15 +1506,29 @@ class GridUtils:
             self.grid = mom6.getGrid()
             self.gridInfo['type'] = targetGrid
 
+            # There is another routine that can be used to formally save the grid
             # write_MOM6_supergrid_file(mom6_grid)
-            # write_MOM6_topography_file(mom6_grid)
-            # write_MOM6_solo_mosaic_file(mom6_grid)
-            # write_MOM6_land_mask_file(mom6_grid)
-            # write_MOM6_ocean_mask_file(mom6_grid)
-            # write_MOM6_exchange_grid_file(mom6_grid, 'atmos',  'land')
-            # write_MOM6_exchange_grid_file(mom6_grid, 'atmos', 'ocean')
-            # write_MOM6_exchange_grid_file(mom6_grid,  'land', 'ocean')
-            # write_MOM6_coupler_mosaic_file(mom6_grid)
+            if kwargs['writeTopography']:
+                # write_MOM6_topography_file(mom6_grid)
+                mom6.write_MOM6_topography_file(self, **kwargs)
+            if kwargs['writeMosaic']:
+                # write_MOM6_solo_mosaic_file(mom6_grid)
+                mom6.write_MOM6_solo_mosaic_file(self, **kwargs)
+            if kwargs['writeLandmask']:
+                # write_MOM6_land_mask_file(mom6_grid)
+                mom6.write_MOM6_land_mask_file(self, **kwargs)
+            if kwargs['writeOceanmask']:
+                # write_MOM6_ocean_mask_file(mom6_grid)
+                mom6.write_MOM6_ocean_mask_file(self, **kwargs)
+            if kwargs['writeExchangeGrids']:
+                # write_MOM6_exchange_grid_file(mom6_grid, 'atmos',  'land')
+                # write_MOM6_exchange_grid_file(mom6_grid, 'atmos', 'ocean')
+                # write_MOM6_exchange_grid_file(mom6_grid,  'land', 'ocean')
+                mom6.write_MOM6_exchange_grid_files(self, **kwargs)
+            if kwargs['writeCouplerMosaic']:
+                # write_MOM6_coupler_mosaic_file(mom6_grid)
+                mom6.write_MOM6_coupler_mosaic_file(self, **kwargs)
+
             msg = ('INFO: Successful conversion of grid (%s => %s).' % (sourceGrid, targetGrid))
             self.printMsg(msg, level=logging.INFO)
             return
@@ -1547,9 +1608,10 @@ class GridUtils:
         for ncVar in ncVars:
             ncEncoding[ncVar] = {'_FillValue': None}
 
-        for ncVar in stringVars.keys():
-            if ncVar in ncVars:
-                ncEncoding[ncVar] = {'dtype': 'S%d' % (stringVars[ncVar]), 'char_dim_name': 'string'}
+        if stringVars:
+            for ncVar in stringVars.keys():
+                if ncVar in ncVars:
+                    ncEncoding[ncVar] = {'dtype': 'S%d' % (stringVars[ncVar]), 'char_dim_name': 'string'}
 
         return ncEncoding
     
@@ -1594,13 +1656,13 @@ class GridUtils:
 
         **Keyword arguments**:
 
-            * *topographyField* (``xarray``) -- topographic field to be used with the grid. REQUIRED. Default: None
-            * *topographyFilename* (``string``) -- filename used to write topographic field. Default: "ocean_topog.nc"
+            * *topographyGrid* (``xarray``) -- topographic grid to be used with the model grid. REQUIRED. Default: None
+            * *topographyFilename* (``string``) -- filename used to write topographic grid. Default: "ocean_topog.nc"
             * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
             * *oceanGridFilename* (``string``) -- filename for ocean grid file. Default: "ocean_hgrid.nc"
-            * *writeLandMask* (``boolean``) -- set True to write land mask file. Default: False
+            * *writeLandmask* (``boolean``) -- set True to write land mask file. Default: False
             * *landmaskFilename* (``string``) -- filename used to write the land mask. Default: "land_mask.nc"
-            * *writeOceanMask* (``boolean``) -- set True to write ocean mask file. Default: False
+            * *writeOceanmask* (``boolean``) -- set True to write ocean mask file. Default: False
             * *oceanmaskFilename* (``string``) -- filename used to write the ocean mask. Default: "ocean_mask.nc"
             * *tileName* (``string``) -- name to assign to the solo tile. Default: "tile1"
             * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
@@ -1632,22 +1694,23 @@ class GridUtils:
         '''
 
         # Check and set any defaults to kwargs
-        util.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
-        util.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
-        util.checkArgument(kwargs, 'writeLandMask', False)
-        util.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
-        util.checkArgument(kwargs, 'writeOceanMask', False)
-        util.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
-        util.checkArgument(kwargs, 'tileName', "tile1")
-        util.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
-        util.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
-        util.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0) 
-        util.checkArgument(kwargs, 'writeExchangeGrids', True)
-        util.checkArgument(kwargs, 'writeCouplerMosaic', True)
-        util.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
-        util.checkArgument(kwargs, 'overwrite', False)
-        util.checkArgument(kwargs, 'inputDirectory', "INPUT")
-        util.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+        utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        utils.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
+        utils.checkArgument(kwargs, 'oceanGridFilename', "ocean_hgrid.nc")
+        utils.checkArgument(kwargs, 'writeLandmask', False)
+        utils.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
+        utils.checkArgument(kwargs, 'writeOceanmask', False)
+        utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
+        utils.checkArgument(kwargs, 'tileName', "tile1")
+        utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0) 
+        utils.checkArgument(kwargs, 'writeExchangeGrids', True)
+        utils.checkArgument(kwargs, 'writeCouplerMosaic', True)
+        utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
+        utils.checkArgument(kwargs, 'overwrite', False)
+        utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
 
         if len(self.grid.variables) == 0:
             # No grid found
@@ -1660,12 +1723,12 @@ class GridUtils:
         # Supergrid is stored via GridUtils.saveGrid()
         mom6.write_MOM6_topography_file(self, **kwargs)
         mom6.write_MOM6_solo_mosaic_file(self, **kwargs)
-        if kwargs['writeLandMask']:
+        if kwargs['writeLandmask']:
             mom6.write_MOM6_land_mask_file(self, **kwargs)
-        if kwargs['writeOceanMask']:
+        if kwargs['writeOceanmask']:
             mom6.write_MOM6_ocean_mask_file(self, **kwargs)
         if kwargs['writeExchangeGrids']:
-            mom6.write_MOM6_exchange_grids(self, **kwargs)
+            mom6.write_MOM6_exchange_grid_files(self, **kwargs)
         if kwargs['writeCouplerMosaic']:
             mom6.write_MOM6_coupler_mosaic_file(self, **kwargs)
     
@@ -2093,8 +2156,8 @@ class GridUtils:
         '''Add a data source to the catalog.  See: datasource.addDataSource()'''
         self.dataSourcesObj.addDataSource(dataSource, delete=delete)
 
-    def checkAvailableFields(self, dsData, varList):
-        '''Check for available fields in a data source.  If any field is missing,
+    def checkAvailableVariables(self, dsData, varList):
+        '''Check for available variables in a data source.  If any variable is missing,
         issue a warning and return False.  If all variables are available, return
         True.
         '''
@@ -2250,10 +2313,10 @@ class GridUtils:
 
     # bathyutils routines
 
-    def applyExistingLandMask(self, dsData, dsField, maskFile, maskField, **kwargs):
+    def applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
         '''This modifies a given bathymetry using an existing land mask.'''
         from . import bathyutils
-        return bathyutils.applyExistingLandMask(self, dsData, dsField, maskFile, maskField, kwargs)
+        return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, kwargs)
 
     def computeBathymetricRoughness(self, dsName, **kwargs):
         '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
@@ -2267,16 +2330,16 @@ class GridUtils:
         from . import meshutils
         return meshutils.generateGridByRefinement(self, dsName, kwargs)
 
-    def writeLandMask(self, dsData, dsField, outField, outFile, **kwargs):
+    def writeLandmask(self, dsData, dsVariable, outVariable, outFile, **kwargs):
         '''Write a land mask based on provided information.'''
         from . import meshutils
-        meshutils.writeLandMask(self, dsData, dsField, outField, outFile, **kwargs)
+        meshutils.writeLandmask(self, dsData, dsVariable, outVariable, outFile, **kwargs)
         return
 
-    def writeOceanMask(self, dsData, dsField, outField, outFile, **kwargs):
+    def writeOceanmask(self, dsData, dsVariable, outVariable, outFile, **kwargs):
         '''Write a ocean mask based on provided information.'''
         from . import meshutils
-        meshutils.writeOceanMask(self, dsData, dsField, outField, outFile, **kwargs)
+        meshutils.writeOceanmask(self, dsData, dsVariable, outVariable, outFile, **kwargs)
         return
 
     # topoutils routines

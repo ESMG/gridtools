@@ -21,6 +21,7 @@ sphinxcontrib-bibtex
 xarray
 panel
 jupyterlab
+colorama
 numpypi@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi
 datashader@git+https://github.com/holoviz/datashader.git@v0.12.2a0#egg=datashader
 xesmf@git+https://github.com/jsimkins2/xESMF.git@master#egg=xesmf

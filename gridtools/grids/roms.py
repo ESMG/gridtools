@@ -11,6 +11,12 @@ class ROMS:
         self._grid_type = "ROMS"
         self.roms_grid = dict()
 
+    def getGrid(self, variable=None):
+        '''Return the ROMS grid to the caller.
+        '''
+
+        return self.roms_grid
+
     def read_ROMS_grid(self, grd):
         '''Load the ROMS grid previous read by GridUtils().
 
@@ -22,27 +28,32 @@ class ROMS:
 
         # Extract fields named based on which grid they are on
         for subgrid in subgrids:
-            roms_grid[subgrid] = dict()
+            self.roms_grid[subgrid] = dict()
             for field in fields:
                 var_name = field + '_' + subgrid
-                roms_grid[subgrid][field] = roms_ds.variables[var_name][:]
+                #self.roms_grid[subgrid][field] = roms_ds.variables[var_name][:]
+                self.roms_grid[subgrid][field] = grd.grid[var_name]
                 if (field == 'x') or (field == 'y'):
-                     units = roms_ds.variables[var_name].units.lower()
+                     #units = roms_ds.variables[var_name].units.lower()
+                     units = grd.grid[var_name].attrs['units'].lower()
                      assert units.startswith('meter')
                 elif (field == 'lat') or (field == 'lon'):
-                     units = roms_ds.variables[var_name].units.lower()
+                     #units = roms_ds.variables[var_name].units.lower()
+                     units = grd.grid[var_name].attrs['units'].lower()
                      assert units.startswith('degree')
 
         # Extract fields that do not follow the naming pattern
-        roms_grid['rho']['h'] = roms_ds.variables['h'][:] # on the rho grid, but not called "h_rho"
+        #self.roms_grid['rho']['h'] = roms_ds.variables['h'][:] # on the rho grid, but not called "h_rho"
+        self.roms_grid['rho']['h'] = grd.grid['h'] # on the rho grid, but not called "h_rho"
 
-        roms_grid['metadata'] = dict()
+        self.roms_grid['metadata'] = dict()
 
-        spherical = roms_ds.variables['spherical'][:]
+        #spherical = roms_ds.variables['spherical'][:]
+        spherical = grd.grid['spherical']
         if (spherical == 0) or (spherical == b'F') or (spherical == b'f'):
-             roms_grid['metadata']['is_spherical'] = False
+            self.roms_grid['metadata']['is_spherical'] = False
         elif (spherical == 1) or (spherical == b'T') or (spherical == b't'):
-             roms_grid['metadata']['is_spherical'] = True
+            self.roms_grid['metadata']['is_spherical'] = True
         else:
              warnings.warn('Unrecognized value for spherical in ROMS grid: %s' % str(spherical))
 

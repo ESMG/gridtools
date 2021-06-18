@@ -1,5 +1,13 @@
 # Changelog
 
+# 2021-06-17
+
+ - Adopt use of colorama for optional coloring of text output
+ - Debug gridtools.grids.mom6
+ - Debug gridtools.grids.roms
+ - Fixes for at least when git commands fail attempting to grab
+   git related information.
+
 # 2021-06-16
 
  - Initial coding of ROMS to MOM6 converter and writing out a solo

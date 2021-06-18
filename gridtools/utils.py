@@ -35,8 +35,11 @@ def get_git_repo_version_info():
     # Refactor to use: git config --get remote.origin.url
     repo_name = 'ESMG/gridtools'
     git_command = ['git', 'describe', '--all', '--long', '--dirty', '--abbrev=10']
-    description =  subprocess.check_output(git_command, universal_newlines=True).rstrip()
-    return repo_name + ': ' + description
+    try:
+        description =  subprocess.check_output(git_command, universal_newlines=True).rstrip()
+        return repo_name + ': ' + description
+    except:
+        return repo_name + ': running git returned an error'
 
 def get_history_entry(argv):
     """Construct an entry for the global 'history' attribute of a NetCDF file,

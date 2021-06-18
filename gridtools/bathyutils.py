@@ -12,19 +12,19 @@ from . import meshrefinement
 
 # Functions
 
-def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
+def applyExistingLandMask(grd, dsData, dsVariable, maskFile, maskVariable, **kwargs):
     '''Modify a given bathymetry using a specified land mask.
 
     :param grd: class object
     :type grd: GridUtils
     :param dsData: data source data object
     :type dsData: xarray
-    :param dsField: data source fieldname
-    :type dsField: string
+    :param dsVariable: data source variable name
+    :type dsVariable: string
     :param maskFile: filename
     :type maskFile: string
-    :param maskField: field name in maskFile
-    :type maskField: string
+    :param maskVariable: variable name in maskFile
+    :type maskVariable: string
     :param \**kwargs:
         See below
 
@@ -55,20 +55,20 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
         grd.printMsg(msg, level=logging.ERROR)
         return None
 
-    # Find input land mask field
+    # Find input land mask variable
     maskData = xr.open_dataset(maskFile)
     try:
-        originalLandMask = maskData[maskField]
+        originalLandMask = maskData[maskVariable]
     except:
-        msg = ("ERROR: Mask file does not have requested field (%s)" % (maskField))
+        msg = ("ERROR: Mask file does not have requested variable (%s)" % (maskVariable))
         grd.printMsg(msg, level=logging.ERROR)
         return
 
-    # Check for supplied depth field
+    # Check for supplied depth variable
     try:
-        depthField = dsData[dsField]
+        depthGrid = dsData[dsVariable]
     except:
-        msg = ("ERROR: The depth field (%s) could not be found in the supplied field." % (dsField))
+        msg = ("ERROR: The depth variable (%s) could not be found in the supplied data source." % (dsVariable))
         grd.printMsg(msg, level=logging.ERROR)
         return
 
@@ -84,9 +84,9 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
         masking_depth = kwargs['MASKING_DEPTH']
 
     # As is done in MOM6, if maximum is negative, it is defined by the maximum of
-    # the 'depth' field passed.
+    # the 'depth' grid passed.
     if maximum_depth < 0.0:
-        maximum_depth = depthField.max().values.tolist()
+        maximum_depth = depthGrid.max().values.tolist()
         msg = ("The (diagnosed) maximum depth of the ocean %f meters." % (maximum_depth))
         grd.printMsg(msg, level=logging.INFO)
     # Negative values are set back to zero for MINIMUM_DEPTH and MASKING_DEPTH
@@ -97,7 +97,7 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
 
     # To use xr.where the data and mask have to be in the same Dataset()
     workData = xr.Dataset()
-    workData['depth'] = depthField
+    workData['depth'] = depthGrid
     workData['land_mask'] = originalLandMask
     workData['land_mask'].attrs['masking_depth'] = masking_depth
     workData['land_mask'].attrs['minimum_depth'] = minimum_depth
@@ -129,7 +129,7 @@ def applyExistingLandMask(grd, dsData, dsField, maskFile, maskField, **kwargs):
         grd.printMsg(msg, level=logging.INFO)
         workData['newDepth'] = xr.where(condExp, masking_depth, workData['newDepth'])
 
-    # Update hash for the new field
+    # Update hash for the new grid
     workData['newDepth'].attrs['sha256'] = hashlib.sha256( np.array( workData['newDepth'] ) ).hexdigest()
 
     return workData['newDepth']
@@ -400,7 +400,7 @@ def do_block(grd, part, lon, lat, topo_lons, topo_lats, topo_elvs, max_mb=500):
 
 # Rebuilt from main() function
 def computeBathymetricRoughness(grd, dsName, **kwargs):
-    '''This generates h2 and other fields and returns an xarray DataSet with the field.
+    '''This generates h2 and other variables and returns an xarray DataSet.
 
     :param grd: class object
     :type grd: GridUtils
@@ -414,13 +414,13 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         * *maxMb* (``int``) -- 
           Memory limit for grid refinements. Default: 8000.0
         * *h2Name* (``string``) --
-          The computed bathymetric roughness field name. Default: h2
+          The computed bathymetric roughness grid name. Default: h2
         * *depthName* (``string``) --
-          The bathymetry field name to use from data source. Default: depth
+          The bathymetry grid name to use from data source. Default: depth
         * *gridPoint* (``string``) --
           Grid placement of bathymetric roughness values. See below. Default: h
-        * *auxFields* (``list``) --
-          Specify additional fields to include with bathymetric roughness. See below. Default: []
+        * *auxVariables* (``list``) --
+          Specify additional variables to include with bathymetric roughness. See below. Default: []
         * *superGrid* (``boolean``) --
           If ``True``, the bathymetric roughness grid returned is a super grid.  Otherwise, the ocean roughness is the same size as the current grid. Default: False
         * *useClipping* (``boolean``) --
@@ -434,8 +434,8 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
 
     .. note::
 
-      :auxFields:
-          h_std, h_min, h_max, and height fields. Ask for one or more additional fields by python list [] to auxFields.
+      :auxVariables:
+          h_std, h_min, h_max, and height variables. Ask for one or more additional variables by python list [] to auxVariables.
           Default is an empty list: []
 
       :gridPoint:
@@ -466,7 +466,7 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         in the future.
       * For h-points, h2 is created on the q-points and shifted by 1/2
         a grid cell back to the h-points.  Accuracy of the roughness
-        and other resultant fields are off by a 1/2 grid cell.
+        and other resultant variables are off by a 1/2 grid cell.
       * Support for 'q' and 'uv' grid points are not supported.
       * If the program is running out of memory, reduce the maxMb value.
         This reduces the available memory footprint available to
@@ -502,10 +502,10 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     # Attempt to open the selected dataset
     bathyData = grd.openDataset(dsName)
     if not(bathyData):
-        grd.printMsg("ERROR: The datasource (%s) did not return a usable field." % (dsName), level=logging.ERROR)
+        grd.printMsg("ERROR: The datasource (%s) did not return a usable variable." % (dsName), level=logging.ERROR)
         return None
 
-    if not(grd.checkAvailableFields(bathyData, ['lat','lon','depth'])):
+    if not(grd.checkAvailableVariables(bathyData, ['lat','lon','depth'])):
         return None
 
     # Collect data source data
@@ -648,28 +648,28 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
             'Subgrid scale topography height variance at Arakawa C %s-points' % (kwargs['gridPoint'])
     bathymetricRoughness[h2Name].attrs['sha256'] = hashlib.sha256( np.array( hstd_refsamp * hstd_refsamp ) ).hexdigest()
 
-    if 'hStd' in kwargs['auxFields']:
+    if 'hStd' in kwargs['auxVariables']:
         bathymetricRoughness['hStd'] = (('ny','nx'), hstd_refsamp)
         bathymetricRoughness['hStd'].attrs['units'] = 'meters'
         bathymetricRoughness['hStd'].attrs['standard_name'] =\
                 'Subgrid scale topography height standard deviation at Arakawa C %s-points' % (kwargs['gridPoint'])
         bathymetricRoughness['hStd'].attrs['sha256'] = hashlib.sha256( np.array( hstd_refsamp ) ).hexdigest()
 
-    if 'hMin' in kwargs['auxFields']:
+    if 'hMin' in kwargs['auxVariables']:
         bathymetricRoughness['hMin'] = (('ny','nx'), hmin_refsamp)
         bathymetricRoughness['hMin'].attrs['units'] = 'meters'
         bathymetricRoughness['hMin'].attrs['standard_name'] =\
                 'Subgrid scale topography height standard deviation minimum at Arakawa C %s-points' % (kwargs['gridPoint'])
         bathymetricRoughness['hMin'].attrs['sha256'] = hashlib.sha256( np.array( hmin_refsamp ) ).hexdigest()
 
-    if 'hMax' in kwargs['auxFields']:
+    if 'hMax' in kwargs['auxVariables']:
         bathymetricRoughness['hMax'] = (('ny','nx'), hmax_refsamp)
         bathymetricRoughness['hMax'].attrs['units'] = 'meters'
         bathymetricRoughness['hMax'].attrs['standard_name'] =\
                 'Subgrid scale topography height standard deviation maximum at Arakawa C %s-points' % (kwargs['gridPoint'])
         bathymetricRoughness['hMax'].attrs['sha256'] = hashlib.sha256( np.array( hmax_refsamp ) ).hexdigest()
 
-    if 'depth' in kwargs['auxFields']:
+    if 'depth' in kwargs['auxVariables']:
         # Do not invert the value here, it is done later!
         bathymetricRoughness['depth'] = (('ny','nx'), height_refsamp)
         bathymetricRoughness['depth'].attrs['units'] = 'meters'
