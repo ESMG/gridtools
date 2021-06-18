@@ -2,7 +2,7 @@
 
 import xarray as xr
 
-def writeLandMask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
+def writeLandmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     '''Write a land mask based on provided information.  This routine
     assumes a depth field is being passed as an argument to create the
     mask.
@@ -25,7 +25,7 @@ def writeLandMask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
 
     return
 
-def writeOceanMask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
+def writeOceanmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     '''Write a ocean mask based on provided information.  This routine
     assumes a depth field is being passed as an argument to create the
     mask.

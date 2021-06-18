@@ -10,6 +10,7 @@ import pdb
 # Setup a work directory
 #wrkDir = '/home/cermak/mom6/configs/zOutput'
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
+inputDir = os.path.join(wrkDir, "INPUT")
 
 # Initialize a grid object
 grd = GridUtils()
@@ -30,7 +31,7 @@ grd.clearGrid()
 # gridMode should be 2.0 for supergrid
 # Normally 30.0; 0.0 for debugging
 gtilt = 30.0
-grd.printMsg("Initial grid parameters are set:")
+grd.printMsg("Set grid parameters.")
 grd.setGridParameters({
     'projection': {
         'name': 'LambertConformalConic',
@@ -75,7 +76,7 @@ grd.useDataSource(ds)
 # to be in brackets.  If the key is new, a new field will be
 # created with the given expression.
 ds.addDataSource({
-    '/GEBCO_2020': {
+    'GEBCO_2020': {
             'url' : 'file:///import/AKWATERS/jrcermakiii/bathy/gebco/GEBCO_2020.nc',
             'variableMap' : {
                     'lat': 'lat',
@@ -93,26 +94,28 @@ ds.saveCatalog(os.path.join(wrkDir, 'catalog.json'))
 ds.saveCatalog(os.path.join(wrkDir, 'catalog.yaml'))
 
 # Data sources cannot be in chunked mode for use in this routine
-bathyFields = grd.computeBathymetricRoughness('ds:///GEBCO_2020',
+bathyFields = grd.computeBathymetricRoughness('ds:GEBCO_2020',
         maxMb=99, superGrid=False, useClipping=False,
-        FixByOverlapQHGridShift=True, auxFields=['hStd', 'hMin', 'hMax', 'depth'])
+        FixByOverlapQHGridShift=True,
+        auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
+)
 
 # This is needed to really convert the elevation field to depth
-# The 'depth' field has to be requested as an auxFields
-grd.applyEvalMap('ds:///GEBCO_2020', bathyFields)
+# The 'depth' field has to be requested as an auxVariables
+grd.applyEvalMap('ds:GEBCO_2020', bathyFields)
 
 # Write ocean_mask.nc and land_mask.nc based on existing field
-grd.writeOceanMask(bathyFields, 'depth', 'mask',
+grd.writeOceanmask(bathyFields, 'depth', 'mask',
         os.path.join(wrkDir, 'ocean_mask_Example7.nc'),
         MASKING_DEPTH=0.0)
-grd.writeLandMask(bathyFields, 'depth', 'mask',
+grd.writeLandmask(bathyFields, 'depth', 'mask',
         os.path.join(wrkDir, 'land_mask_Example7.nc'),
         MASKING_DEPTH=0.0)
 
 # Apply existing land mask which should not change anything
 # The minimum depth will modify a couple points.   We save the
 # new field as 'newDepth' to allow comparison with 'depth'.
-bathyFields['newDepth'] = grd.applyExistingLandMask(bathyFields, 'depth',
+bathyFields['newDepth'] = grd.applyExistingLandmask(bathyFields, 'depth',
         os.path.join(wrkDir, 'land_mask_Example7.nc'), 'mask',
         MASKING_DEPTH=0.0, MINIMUM_DEPTH=1000.0, MAXIMUM_DEPTH=-99999.0)
 bathyFields['newDepth'].attrs['units'] = 'meters'
@@ -124,5 +127,15 @@ bathyFields.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example7.nc'),
         encoding=grd.removeFillValueAttributes(data=bathyFields))
 
 grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example7.nc"))
+
+# Write out FMS related support files
+grd.makeSoloMosaic(
+    topographyGrid=bathyFields['newDepth'],
+    writeLandmask=True,
+    writeOceanmask=True,
+    inputDirectory=inputDir,
+    overwrite=True,
+)
+grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid.nc"))
 
 # Do some plotting!

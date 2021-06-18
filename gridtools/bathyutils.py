@@ -12,7 +12,7 @@ from . import meshrefinement
 
 # Functions
 
-def applyExistingLandMask(grd, dsData, dsVariable, maskFile, maskVariable, **kwargs):
+def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwargs):
     '''Modify a given bathymetry using a specified land mask.
 
     :param grd: class object

@@ -2316,19 +2316,19 @@ class GridUtils:
     def applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
         '''This modifies a given bathymetry using an existing land mask.'''
         from . import bathyutils
-        return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, kwargs)
+        return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def computeBathymetricRoughness(self, dsName, **kwargs):
         '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
         from . import bathyutils
-        return bathyutils.computeBathymetricRoughness(self, dsName, kwargs)
+        return bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
 
     # meshutils routines
 
     def generateGridByRefinement(self, dsName, **kwargs):
         '''Generates a grid from a data source using refinement regridding.'''
         from . import meshutils
-        return meshutils.generateGridByRefinement(self, dsName, kwargs)
+        return meshutils.generateGridByRefinement(self, dsName, **kwargs)
 
     def writeLandmask(self, dsData, dsVariable, outVariable, outFile, **kwargs):
         '''Write a land mask based on provided information.'''

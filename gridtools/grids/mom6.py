@@ -337,7 +337,7 @@ class MOM6:
         """
     
         # Define target file
-        destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['mosaicFilename'])
+        destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['landmaskFilename'])
         if os.path.isfile(destinationFile) and not(kwargs['overwrite']):
             msg = ("WARNING: File (%s) exists, use overwrite=True to allow overwriting." % (destinationFile))
             grd.printMsg(msg, logging.WARNING)
@@ -380,7 +380,7 @@ class MOM6:
         """
 
         # Define target file
-        destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['mosaicFilename'])
+        destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['oceanmaskFilename'])
         if os.path.isfile(destinationFile) and not(kwargs['overwrite']):
             msg = ("WARNING: File (%s) exists, use overwrite=True to allow overwriting." % (destinationFile))
             grd.printMsg(msg, logging.WARNING)
@@ -404,7 +404,7 @@ class MOM6:
         # Find land mask points using settings from kwargs
         oceanMask = self._generate_mask('ocean', grd, **kwargs)
 
-        ds['mask'] = (('ny', 'nx'), landMask)
+        ds['mask'] = (('ny', 'nx'), oceanMask)
         ds['mask'].attrs['standard_name'] = 'ocean fraction at T-cell centers'
         ds['mask'].attrs['units'] = 'none'
 
@@ -442,14 +442,25 @@ class MOM6:
 
             ds = xr.Dataset()
 
-            # calculate the exchange grid
+            # calculate the exchange grid for name1 X name2
 
             #mask = mom6_grid['cell_grid'][name2 + '_mask']
             mask = self._generate_mask(name2, grd, **kwargs)
 
             tile_cells_j, tile_cells_i = numpy.where(mask == 1)
             tile_cells = numpy.column_stack((tile_cells_i, tile_cells_j)) + 1 # +1 converts from Python indices to Fortran
-            xgrid_area = self.mom6_grid['cell_grid']['area'][mask == 1]
+            print(type(self.mom6_grid['cell_grid']['area']), type(mask))
+
+            # In xarray, to pull cell values out for matching mask, the variable and mask have to appear in the same
+            # dataset.
+            dsCombined = xr.Dataset()
+            dsCombined['area'] = (('ny','nx'), self.mom6_grid['cell_grid']['area'])
+            dsCombined['mask'] = mask
+            idx = np.nonzero(mask==1)
+
+            #breakpoint()
+            #xgrid_area = self.mom6_grid['cell_grid']['area'][mask == 1]
+            xgrid_area = dsCombined['area'][idx[0], idx[1]]
             ncells = len(xgrid_area)
             tile_dist = numpy.zeros((ncells,2))
 
@@ -738,6 +749,7 @@ class MOM6:
         if masking_depth < 0.0:
             masking_depth = 0.0
 
+        #breakpoint()
         if maskType == 'land':
             return xr.where(depthGrid <= masking_depth, 1, 0)
 
