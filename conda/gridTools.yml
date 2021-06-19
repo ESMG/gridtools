@@ -16,6 +16,7 @@ dependencies:
   - pip
   - pyproj
   - pytest
+  - sphinxcontrib-bibtex
   - xarray
   - xesmf
   - xgcm

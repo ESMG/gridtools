@@ -1,5 +1,18 @@
 # Changelog
 
+ - Restructure plotGrid to enable plotting of model grid or other variables.
+
+# 2021-06-18
+
+ - conda export environments should not include special pip packages
+ - Remove pip definitions from binder/environment.yml
+ - Document build failing: adding sphinxcontrib.bibtex
+ - Indexing across xarray and numpy is hard; need to move
+   more numpy items toward xarray.
+ - Add makeSoloMosaic to 20x30 test grid Example7
+ - Rename LandMask to Landmask
+ - Rename OceanMask to Oceanmask
+
 # 2021-06-17
 
  - Adopt use of colorama for optional coloring of text output

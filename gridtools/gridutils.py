@@ -1750,13 +1750,14 @@ class GridUtils:
         
         return fig
     
-    def plotGrid(self):
-        '''Perform a plot operation.
+    def plotGrid(self, **kwargs):
+        '''Perform a plot operation.  This function supports plotting a variable from a data
+        source or the model grid that was loaded or created.  A plot may contain both.
 
         :return: Returns a tuple of matplotlib objects (figure, axes)
         :rtype: tuple
 
-        To plot a grid, you first must have the projection set.
+        In general, a projection is necessary to plot a variable or model grid.
 
         :Example:
 
@@ -1769,6 +1770,21 @@ class GridUtils:
                         ...other projection options...,
                     },
         >>> grd.plotGrid()
+
+        **Keyword arguments**:
+
+            * *showModelGrid* (``boolean``) -- set False to hide the model grid. Default: True
+            * *plotVariables* (``dict()``) -- one or more variables and plot parameters. Default: None
+
+        **Keyword arguments for plotVariables**:
+
+            * *vals* (``xarray``) -- one dataset, variable or grid of information.
+            * *cmap* (``str or Colormap``) -- A Colormap instance or
+              registered colormap name. Default: ``rcParams["image.cmap"]`` or ``viridis``
+            * *norm* (``Normalize``) -- A Normalize instance. Default:
+              The data range is mapped to the colorbar range using linear scaling.
+
+        Useful information on `plot shading <https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py>`_ for grid cell or centered over a grid point.  Useful example for `adjusting the colorbar <https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py>`_ and using a `different colormap <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`_.
         '''
 
         #if not('shape' in self.gridInfo.keys()):
@@ -1778,7 +1794,7 @@ class GridUtils:
         plotProjection = self.getPlotParameter('name', subKey='projection', default=None)
 
         if not(plotProjection):
-            msg = "Please set the plot 'projection' parameter 'name'"
+            msg = "ERROR: Please set the plot 'projection' parameter 'name'."
             self.printMsg(msg, level=logging.ERROR)
             return (None, None)
 
@@ -1848,23 +1864,30 @@ class GridUtils:
             self.printMsg(msg, level=logging.ERROR)
             return (None, None)
 
-        plotAllVertices = self.getPlotParameter('showGridCells', default=False)
-        iColor = self.getPlotParameter('iColor', default='k')
-        jColor = self.getPlotParameter('jColor', default='k')
-        transform = self.getPlotParameter('transform', default=cartopy.crs.Geodetic())
-        iLinewidth = self.getPlotParameter('iLinewidth', default=1.0)
-        jLinewidth = self.getPlotParameter('jLinewidth', default=1.0)
+        # Plot the model grid only if specified
+        if kwargs['showModelGrid']:
+            plotAllVertices = self.getPlotParameter('showGridCells', default=False)
+            iColor = self.getPlotParameter('iColor', default='k')
+            jColor = self.getPlotParameter('jColor', default='k')
+            transform = self.getPlotParameter('transform', default=cartopy.crs.Geodetic())
+            iLinewidth = self.getPlotParameter('iLinewidth', default=1.0)
+            jLinewidth = self.getPlotParameter('jLinewidth', default=1.0)
 
-        # plotting vertices
-        # For a non conforming projection, we have to plot every line between the points of each grid box
-        for i in range(0,ni+1,2):
-            if (i == 0 or i == (ni-1)) or plotAllVertices:
-                if i <= ni-1:
-                    ax.plot(self.grid['x'][:,i], self.grid['y'][:,i], iColor, linewidth=iLinewidth, transform=transform)
-        for j in range(0,nj+1,2):
-            if (j == 0 or j == (nj-1)) or plotAllVertices:
-                if j <= nj-1:
-                    ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
+            # plotting vertices
+            # For a non conforming projection, we have to plot every line between the points of each grid box
+            for i in range(0,ni+1,2):
+                if (i == 0 or i == (ni-1)) or plotAllVertices:
+                    if i <= ni-1:
+                        ax.plot(self.grid['x'][:,i], self.grid['y'][:,i], iColor, linewidth=iLinewidth, transform=transform)
+            for j in range(0,nj+1,2):
+                if (j == 0 or j == (nj-1)) or plotAllVertices:
+                    if j <= nj-1:
+                        ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
+
+        # Loop through provided variables
+        if kwargs['plotVariables']:
+            for pVar in kwargs['plotVariables'].keys():
+                pass
 
         return f, ax
 
@@ -1877,7 +1900,7 @@ class GridUtils:
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
     def deleteGridParameters(self, gList, subKey=None):
-        """This deletes a given list of grid parameters."""
+        '''This deletes a given list of grid parameters.'''
 
         # Top level subkeys
         if subKey:
