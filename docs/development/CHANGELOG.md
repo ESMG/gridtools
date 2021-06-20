@@ -1,5 +1,22 @@
 # Changelog
 
+# 2021-06-19
+
+ - Add **kwargs access to convert_ROMS_to_MOM6 function.
+ - ROMS2MOM6: Mask depths to MASKING_DEPTH instead of a hard coded zero(0).
+   Use xarray instead of numpy.
+ - Deployment plan firming up for generic plotting.
+ - Add default tileName to example 7.
+ - Update documentation about file specifications.
+ - Basic testing has increased confidence code that grid generation
+   and conversion is somewhat operational.
+ - NOTE: **kwargs is not updatable within function calls
+ - Update utils routine to use generic command callout function to fix extranious
+   warnings to be output when a git repo may not be present.
+ - Conversion routine ROMS_to_MOM6 did not update the kwargs topographyGrid which is
+   used later when writing out the topography and masking files.
+ - Add a sanity check module instead of repeating code.
+ - Add `*_DEPTH` specified options to metadata for topography and masking files.
  - Restructure plotGrid to enable plotting of model grid or other variables.
 
 # 2021-06-18

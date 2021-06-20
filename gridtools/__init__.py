@@ -1,6 +1,7 @@
 
 __all__ = ["app", "bathyutils", "fileutils", "datasource", "gridutils",
-        "meshrefinement", "spherical", "sysinfo", "topoutils", "utils"]
+        "meshrefinement", "sanity", "spherical",
+        "sysinfo", "topoutils", "utils"]
 
 # Copied from sphinx/src/sphinx/__init__.py
 # Remove warnings support

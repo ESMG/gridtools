@@ -21,6 +21,7 @@ from . import spherical
 # Other utilities
 from . import fileutils
 from . import utils
+from . import sanity
 
 class GridUtils:
 
@@ -1417,6 +1418,18 @@ class GridUtils:
             * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
             * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
             * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
+
+        **Keyword arguments (ROMS)**:
+
+            * *topographyVariable* (``string``) -- grid name for ROMS topography containing depths.  Some ROMS
+              grids also contain a `hraw` which might be useful. Default: h
+
+        .. note::
+
+            In the original ROMS to MOM6 conversion script, any land mask points are masked to a depth of zero(0).
+            This version sets the depth to the `MASKING_DEPTH`.  If the mask or clamping depth is known from the
+            ROMS grid, please set `MASKING_DEPTH` appropriately or the land mask depths will be set to zero(0)
+            which is the default.
         '''
 
         # Define the two parameters we need to perform a conversion
@@ -1459,8 +1472,8 @@ class GridUtils:
             return
 
         # Check kwargs
+
         # Check and set any defaults to kwargs
-        # For this routine, topographyVariable is hardcoded to depth.
         utils.checkArgument(kwargs, 'writeTopography', False)
         utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
         utils.checkArgument(kwargs, 'writeMosaic', False)
@@ -1481,6 +1494,16 @@ class GridUtils:
         utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
         utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
 
+        # ROMS specific kwargs
+        utils.checkArgument(kwargs, 'topographyVariable', 'h')
+
+        # Sanity checks
+        if not(sanity.saneDepthOptions(**kwargs)):
+            msg = ('ERROR: Invalid *_DEPTH options passed. (MAXIMUM_DEPTH(%f) <= MINIMUM_DEPTH(%f) <= MASKING_DEPTH(%f))' %\
+                (kwargs['MAXIMUM_DEPTH'], kwargs['MINIMUM_DEPTH'], kwargs['MASKING_DEPTH']))
+            self.printMsg(msg, level=logging.INFO)
+            return
+
         # Create a templating mechanism later, for now perform direct calls into each
         # model type based on current grid type and target.
 
@@ -1497,8 +1520,10 @@ class GridUtils:
             # mom6_grid = convert_ROMS_to_MOM6(mom6_grid, roms_grid)
             mom6.setup_MOM6_grid(**kwargs)
             romsGrid = roms.getGrid()
-            kwargs['topographyGrid'] = romsGrid['rho']['h']
-            mom6.convert_ROMS_to_MOM6(romsGrid)
+            mom6.convert_ROMS_to_MOM6(romsGrid, **kwargs)
+            # Special update to kwargs: this is not seen by higher level calls
+            # It is needed here for a corner case to support makeSoloMosaic()
+            kwargs['topographyGrid'] = mom6.mom6_grid['cell_grid']['depth']
             # mom6_grid = approximate_MOM6_grid_metrics(mom6_grid)
             mom6.approximate_MOM6_grid_metrics()
 

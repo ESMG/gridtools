@@ -4,6 +4,7 @@ Generic utility functions
 '''
 
 import datetime, subprocess
+from . import sysinfo
 
 def checkArgument(vDict, vKey, vVal):
     '''
@@ -27,19 +28,24 @@ def checkArgument(vDict, vKey, vVal):
     except:
         pass
 
-def get_git_repo_version_info():
+def get_git_repo_version_info(grd=None):
     """Describe the current version of this script as known by Git.
 
     This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
     """
     # Refactor to use: git config --get remote.origin.url
     repo_name = 'ESMG/gridtools'
-    git_command = ['git', 'describe', '--all', '--long', '--dirty', '--abbrev=10']
-    try:
-        description =  subprocess.check_output(git_command, universal_newlines=True).rstrip()
-        return repo_name + ': ' + description
-    except:
-        return repo_name + ': running git returned an error'
+    #git_command = ['git', 'describe', '--all', '--long', '--dirty', '--abbrev=10']
+    git_command = 'git describe --all --long --dirty --abbrev=10'
+    #try:
+    #    description =  subprocess.check_output(git_command, universal_newlines=True).rstrip()
+    #    return repo_name + ': ' + description
+    #except:
+    #    return repo_name + ': running git returned an error'
+    sysObj = sysinfo.SysInfo(grd=grd)
+    (out, err, rc) = sysObj.runCommand(git_command)
+    return repo_name + ": %s" % (out)
+
 
 def get_history_entry(argv):
     """Construct an entry for the global 'history' attribute of a NetCDF file,

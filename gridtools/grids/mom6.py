@@ -150,13 +150,24 @@ class MOM6:
         self.initMOM6 = True
         return
 
-    def convert_ROMS_to_MOM6(self, roms_grid):
+    def convert_ROMS_to_MOM6(self, roms_grid, **kwargs):
         '''Convert the ROMS grid data into a skeleton MOM6 grid, mainly by
         merging the four sets of point locations from the ROMS grid
         into a single supergrid for MOM6.
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
+
+        # Determine values from other possible arguments
+        minimum_depth = 0.0
+        masking_depth = 0.0
+        maximum_depth = -99999.0
+        if 'MINIMUM_DEPTH' in kwargs.keys():
+            minimum_depth = kwargs['MINIMUM_DEPTH']
+        if 'MAXIMUM_DEPTH' in kwargs.keys():
+            maximum_depth = kwargs['MAXIMUM_DEPTH']
+        if 'MASKING_DEPTH' in kwargs.keys():
+            masking_depth = kwargs['MASKING_DEPTH']
 
         ny, nx = roms_grid['rho']['lon'].shape # trimmed
         self.mom6_grid['cell_grid']['nx'] = nx
@@ -189,7 +200,8 @@ class MOM6:
         mask = roms_grid['rho']['mask']
         #mask[mask != 0] = 1
         mask = np.where(mask != 0, 1, 0)
-        self.mom6_grid['cell_grid']['depth'] = roms_grid['rho']['h'] * mask
+        #self.mom6_grid['cell_grid']['depth'] = roms_grid['rho']['h'] * mask
+        self.mom6_grid['cell_grid']['depth'] = xr.where(mask, roms_grid['rho'][kwargs['topographyVariable']], masking_depth)
         self.mom6_grid['cell_grid']['ocean_mask'] = mask
         self.mom6_grid['cell_grid']['land_mask'] = numpy.logical_not(mask)
 
@@ -449,7 +461,7 @@ class MOM6:
 
             tile_cells_j, tile_cells_i = numpy.where(mask == 1)
             tile_cells = numpy.column_stack((tile_cells_i, tile_cells_j)) + 1 # +1 converts from Python indices to Fortran
-            print(type(self.mom6_grid['cell_grid']['area']), type(mask))
+            #print(type(self.mom6_grid['cell_grid']['area']), type(mask))
 
             # In xarray, to pull cell values out for matching mask, the variable and mask have to appear in the same
             # dataset.
@@ -718,7 +730,9 @@ class MOM6:
         :return: land or ocean mask
         :rtype: xarray
 
-        Keyword args must have a valid depth grid in *topographyGrid*.
+        Keyword args must have a valid depth grid in *topographyGrid*.  MOM6
+        parameters `MINIMUM_DEPTH`, `MASKING_DEPTH` and `MAXIMUM_DEPTH` may also
+        be specified.
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
@@ -749,7 +763,6 @@ class MOM6:
         if masking_depth < 0.0:
             masking_depth = 0.0
 
-        #breakpoint()
         if maskType == 'land':
             return xr.where(depthGrid <= masking_depth, 1, 0)
 

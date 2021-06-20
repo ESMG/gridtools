@@ -56,7 +56,8 @@ grd.setGridParameters({
     'gridMode': 2,
     'gridType': 'MOM6',
     'ensureEvenI': True,
-    'ensureEvenJ': True
+    'ensureEvenJ': True,
+    'tileName': 'tile1',
 })
 grd.printMsg("")
 
