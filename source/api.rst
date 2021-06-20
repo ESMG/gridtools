@@ -12,6 +12,7 @@ API
    gridutils
    meshrefinement
    meshutils
+   sanity
    spherical
    sysinfo
    topoutils

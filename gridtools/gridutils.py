@@ -1889,14 +1889,15 @@ class GridUtils:
             self.printMsg(msg, level=logging.ERROR)
             return (None, None)
 
+        iColor = self.getPlotParameter('iColor', default='k')
+        jColor = self.getPlotParameter('jColor', default='k')
+        transform = self.getPlotParameter('transform', default=cartopy.crs.Geodetic())
+        iLinewidth = self.getPlotParameter('iLinewidth', default=1.0)
+        jLinewidth = self.getPlotParameter('jLinewidth', default=1.0)
+
         # Plot the model grid only if specified
         if kwargs['showModelGrid']:
             plotAllVertices = self.getPlotParameter('showGridCells', default=False)
-            iColor = self.getPlotParameter('iColor', default='k')
-            jColor = self.getPlotParameter('jColor', default='k')
-            transform = self.getPlotParameter('transform', default=cartopy.crs.Geodetic())
-            iLinewidth = self.getPlotParameter('iLinewidth', default=1.0)
-            jLinewidth = self.getPlotParameter('jLinewidth', default=1.0)
 
             # plotting vertices
             # For a non conforming projection, we have to plot every line between the points of each grid box
@@ -1912,7 +1913,21 @@ class GridUtils:
         # Loop through provided variables
         if kwargs['plotVariables']:
             for pVar in kwargs['plotVariables'].keys():
-                pass
+                ds = xr.Dataset()
+                ds[pVar] = (('ny','nx'), kwargs['plotVariables'][pVar]['values'])
+                s1 = ds[pVar].shape
+                s2 = self.grid['x'].shape
+                # See if we are on the same grid, if not assume the variable to plot was
+                # on the regular grid and subset our supergrid to a regular grid for plotting
+                if s1 == s2:
+                    ds['x'] = (('ny','nx'), self.grid['x'])
+                    ds['y'] = (('ny','nx'), self.grid['y'])
+                else:
+                    ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2])
+                    ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2])
+
+                breakpoint()
+                ds[pVar].plot(x='nx', y='ny', ax=ax, transform=transform)
 
         return f, ax
 

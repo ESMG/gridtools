@@ -2,31 +2,33 @@
 
 ## Milestones
 
- - [X] Version 0.1.1
-   - [X] Installation and usage tutorials
-   - [X] Make library installable via pip or setup.py
-   - [X] Create specific installation instructions
  - [ ] Version 0.2
    - [X] Implement a basic data catalog for data management
    - [X] Improve reproducibility of grids produced by the library
    - [X] Establish sphinx document generator and link to readthedocs
    - [X] Construct initial bathymetry grid for new grids
    - [X] Construct bathymetric roughness
-   - [ ] Construct initial grid ocean/land masks for new grids
-   - [ ] Creation of more of the needed files to run a MOM6 simulation
+   - [X] Construct initial grid ocean/land masks for new grids
+   - [X] Creation of more of the needed files to run a MOM6 simulation
+   - [X] Allow import of ROMS grid for conversion to MOM6
+   - [ ] Implement basic plotting of variable or other grid of information
+ - [ ] Version 0.3
+   - [ ] Port ROMS mask editor as-is to gridtools under ipython/pylab so it works with MOM6/ROMS grids
  - [ ] Verison 0.x
+   - [ ] Improve mask editor grid location on click
+   - [ ] Enable mask editor to work under Jupyter
+   - [ ] Boundery condition grid creation and support (OBCs)
+     - [ ] Save only the points we need instead of the whole supergrid
    - [ ] Sponge data preparation
    - [ ] Subset existing grids and infrastructure
    - [ ] Leverage dask (for users that lack access to large memory nodes)
    - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
-   - [ ] Enhanced grid/plot projection options
-   - [ ] Allow import of ROMS grid for conversion to MOM6
+   - [ ] Enhanced grid/plot projection options (non-map based; e.g. dumbbell; double gyre grids)
+   - [ ] Enhanced plotting support
    - [ ] Allow export of MOM6 grid to ROMS
      - [ ] implement ROMS.extend_ROMS_grid()
-   - [ ] Boundery condition grid creation and support
-   - [ ] Grid filling options (flooding)
-   - [ ] Grid mask editor
-   - [ ] This library is installable via conda
+   - [ ] Grid filling options (flooding) (ice9)
+   - [ ] Enable gridtools library to be installable via conda
 
 # BUGS
  - [X] app:Remote Files does not save the grid in the specified directory
@@ -121,14 +123,25 @@
 
 # TODO
 
- - [ ] Plotting
+ - [ ] Grid plotting
    - [X] Grid
    - [X] Gridboxes
    - [ ] Supergrid
-   - [ ] Fields (from data sources or script generated)
+ - [ ] Generic plotting of figures
+   - [ ] Scour MOM6-examples/tools for useful code; analysis/m6plot.py
+     - [ ] May hold solution to plotting grid vertices and center values
+   - [ ] Grid, data or other values (from data sources or script generated)
+   - [ ] Support other colorbar options: orientation, et al
+   - [ ] Support for custom colorbar ranges
+   - [ ] Allow for one plot
+   - [ ] Allow for two or more plots; side by side (sbs) or (stack)ed top to bottom
+   - [ ] Allow for four plots
+   - [ ] Allow paper mode: portrait
+   - [ ] Allow paper mode: landscape
+   - [ ] Allow paper mode: custom/poster
  - [ ] Add "Refresh Plot" buttons to other Plot tabs or figure out how to squeeze a single plot button into the layout
  - [ ] Do we have to declare everything in __init__ first or can be push all that to respective reset/clear functions?
- - [ ] refactor messaging/logging out of GridUtils into its own package so we can import printMsg/debugMsg as standalone calls
+ - [ ] refactor messaging/logging of GridUtils into its own package so we can import printMsg/debugMsg as standalone calls
  - [X] refactor refineS and refineR options as Niki had them defined
  - [X] makeGrid assumes working in degrees
  - [X] Allow library to work in degree or meters
@@ -137,8 +150,8 @@
    - [X] Allow display of important messages and warnings in panel application: widget=TextAreaInput
    - [X] Create options in application and other tools for user configuration of logging and output.
    - [X] Create a message buffer/system for information.
-   - [ ] Create a separate app to watch a log file? https://discourse.holoviz.org/t/scrollable-log-text-viewer/317
-   - [ ] log github revision used by mybinder.org instances
+   - [ ] Create a way to monitor a log file; https://discourse.holoviz.org/t/scrollable-log-text-viewer/317
+   - [ ] log/display github revision of gridtools used by mybinder.org instances
  - [ ] For now, the gridParameters are always in reference to a center point in a grid
    in the future, one may fix a side or point of the grid and grow out from that point
    instead of the center.
@@ -171,7 +184,7 @@
 
 # WISH
 
- - [ ] Support for multiple tiles
+ - [ ] Support for multiple tiles for a model grid
  - [ ] Harmonize filename operations in functions
  - [ ] Teach grid tools to use "input.nml" to find grid related things for model runs.
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
@@ -233,8 +246,10 @@
  - [X] triton node issue: python netCDF4 large file reading seems to hang nodes
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
  - [ ] Update all references to field to either variable or grid depending on context.
+ - [ ] Expand CI to include more platform tests
 
 # QUESTIONS
 
  - [ ] ntiles,1 is written in write_MOM6_topography_file, is this required for MOM6?
- - [ ] is there a reason to keep zeroed land mask depths in the ROMS to MOM6 converter?
+ - [X] is there a reason to keep zeroed land mask depths in the ROMS to MOM6 converter? A future
+       PR is changing this behavior.  Adopted use of MASKING_DEPTH.

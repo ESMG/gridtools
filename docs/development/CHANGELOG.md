@@ -2,6 +2,10 @@
 
 # 2021-06-19
 
+ - Add generic plotting demonstration to Example 7.  Will add more options
+   in later releases.
+ - Add sanity module to documentation.
+ - New goals and milestones defined.  Older milestones archived.
  - Add **kwargs access to convert_ROMS_to_MOM6 function.
  - ROMS2MOM6: Mask depths to MASKING_DEPTH instead of a hard coded zero(0).
    Use xarray instead of numpy.

@@ -3,8 +3,10 @@
 # conda: gridTools
 
 import sys, os, logging
+import cartopy
 from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
+
 import pdb
 
 # Setup a work directory
@@ -140,3 +142,57 @@ grd.makeSoloMosaic(
 grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid.nc"))
 
 # Do some plotting!
+
+# Set some plot parameters for the grid and topography
+
+grd.setPlotParameters(
+    {
+        'figsize': (8,8),
+        'projection': {
+            'name': 'NearsidePerspective',
+            'lat_0': 40.0,
+            'lon_0': 230.0
+        },
+        'extent': [-160.0 ,-100.0, 20.0, 60.0],
+        'iLinewidth': 1.0,
+        'jLinewidth': 1.0,
+        'showGridCells': True,
+        'title': "Nearside Perspective: 20x30 with %.1f degree tilt" % (gtilt),
+        'iColor': 'k',
+        'jColor': 'k',
+        'transform': cartopy.crs.PlateCarree(),
+    }
+)
+
+# Plot original depth grid after running computeBathyRoughness()
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'depth': {
+            'values': bathyFields['depth'],
+            'title': 'Original diagnosed bathymetric field'
+        }
+    },
+)
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+
+# Plot depth grid after we apply an existing landmask with minimum
+# depth set to 1000 meters
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'depth': {
+            'values': bathyFields['newDepth'],
+            'title': 'Bathymetric grid with 1000 meter minimum depth'
+        }
+    },
+)
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy.png'), dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+
+# Plot model grid showing land mask points as painted
+# grid cells.
+
+# Plot model grid showing ocean mask points as painted
+# grid cells.
