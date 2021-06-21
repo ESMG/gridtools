@@ -100,6 +100,7 @@ These are people, references and bookmarks that provided useful information to m
  * https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
  * https://stackoverflow.com/questions/4076239/finding-out-the-name-of-the-original-repository-you-cloned-from-in-git
  * https://stackoverflow.com/questions/6999621/how-to-use-extent-in-matplotlib-pyplot-imshow
+ * https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/21778118/counting-the-number-of-non-nan-elements-in-a-numpy-ndarray-in-python

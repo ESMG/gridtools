@@ -1,11 +1,13 @@
 # General imports and definitions
 import os, re, sys, datetime, logging, importlib
-import cartopy, warnings, pdb, hashlib
+import cartopy, warnings, hashlib
 import numpy as np
 import xarray as xr
 from pyproj import CRS, Transformer
 import pandas as pd
 import requests, urllib.parse
+import matplotlib as mpl
+import gridtools
 
 # Needed for panel.pane                
 from matplotlib.figure import Figure
@@ -22,6 +24,7 @@ from . import spherical
 from . import fileutils
 from . import utils
 from . import sanity
+from . import sysinfo
 
 class GridUtils:
 
@@ -55,6 +58,7 @@ class GridUtils:
         # Defaults
         self.plotParameterDefaults = {
             'figsize': (8, 6),
+            'dpi': 100.0,
             'extent': [],
             'extentCRS': cartopy.crs.PlateCarree(),
             'projection': {
@@ -188,7 +192,7 @@ class GridUtils:
             raise
 
         if level == 3:
-            pdb.set_trace()
+            breakpoint()
 
         return
 
@@ -283,7 +287,7 @@ class GridUtils:
     def getVersion(self):
         '''Return the version number of this library'''
 
-        softwareRevision = "0.1"
+        softwareRevision = gridtools.__version__
 
         return softwareRevision
 
@@ -465,16 +469,23 @@ class GridUtils:
 
         self.grid.attrs['grid_version'] = "0.2"
         self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
-        self.grid.attrs['history'] = "%s: created grid with GridTools library" % (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        self.grid.attrs['history'] = "%s: created grid with GridTools library" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
         self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
-        self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
-        self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
-        self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
-        self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
-        self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
-        self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
-        self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
-        self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
+
+        # Add additional metadata if available
+        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        for metaTag in addMetadata:
+            if metaTag in self.gridInfo['gridParameters'].keys():
+                self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
+        #self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
+        #self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
+        #self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
+        #self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
+        #self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
+        #self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
+        #self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
+        #self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
 
         try:
             self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
@@ -482,9 +493,15 @@ class GridUtils:
             self.grid.attrs['conda_env'] = "Conda environment not found."
 
         try:
-            os.system("conda list --explicit > package_versions.txt")
-            self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+            #os.system("conda list --explicit > package_versions.txt")
+            #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+            sysObj = sysinfo.SysInfo(grd=self)
+            cmd = "conda list --explicit"
+            (out, err, rc) = sysObj.runCommand(cmd)
+            self.grid.attrs['package_versions'] = out
+            #self.grid.attrs['package_versions'] = "/n".join(out)
         except:
+            #raise
             try:
                 self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
             except:
@@ -1763,16 +1780,24 @@ class GridUtils:
     # These functions should not care what grid is loaded. 
     # Plotting is affected by plotParameters and gridParameters.
 
-    def newFigure(self, figsize=None):
+    def newFigure(self, figsize=None, dpi=None):
         '''Establish a new matplotlib figure.'''
-        
+
         if figsize:
-            figsize = self.getPlotParameter('figsize', default=figsize)             
+            figsize = self.getPlotParameter('figsize', default=figsize)
         else:
             figsize = self.getPlotParameter('figsize', default=self.plotParameterDefaults['figsize'])
-            
-        fig = Figure(figsize=figsize)
+
+        if dpi:
+            dpi = self.getPlotParameter('dpi', default=dpi)
+        else:
+            dpi = self.getPlotParameter('dpi', default=self.plotParameterDefaults['dpi'])
+
+        fig = Figure(figsize=figsize, dpi=dpi)
         
+        #dpiVal = mpl.rcParams['figure.dpi']
+        #print(dpiVal)
+
         return fig
     
     def plotGrid(self, **kwargs):
@@ -1808,13 +1833,19 @@ class GridUtils:
               registered colormap name. Default: ``rcParams["image.cmap"]`` or ``viridis``
             * *norm* (``Normalize``) -- A Normalize instance. Default:
               The data range is mapped to the colorbar range using linear scaling.
+            * *levels* (``list()``) -- Discrete levels for plotting. Default: None
+            * *cbar_kwargs* (``dict()``) -- Keyword arguments that are
+              applied to the colorbar. See: `matplotlib.figure.Figure.colorbar() <https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure.colorbar>`_
+              Default: dict()
 
         Useful information on `plot shading <https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py>`_ for grid cell or centered over a grid point.  Useful example for `adjusting the colorbar <https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py>`_ and using a `different colormap <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`_.
         '''
 
-        #if not('shape' in self.gridInfo.keys()):
-        #    warnings.warn("Unable to plot the grid.  Missing its 'shape'.")
-        #    return (None, None)
+        # Set defaults for keyword arguments
+        if not('showModelGrid' in kwargs.keys()):
+            kwargs['showModelGrid'] = True
+        if not('plotVariables' in kwargs.keys()):
+            kwargs['plotVariables'] = dict()
 
         plotProjection = self.getPlotParameter('name', subKey='projection', default=None)
 
@@ -1885,7 +1916,7 @@ class GridUtils:
             nj = self.grid.dims['nyp']
             ni = self.grid.dims['nxp']
         except:
-            msg = "ERROR: Unable to plot.  Missing grid dimensions."
+            msg = "ERROR: Unable to plot. Missing grid dimensions."
             self.printMsg(msg, level=logging.ERROR)
             return (None, None)
 
@@ -1898,9 +1929,11 @@ class GridUtils:
         # Plot the model grid only if specified
         if kwargs['showModelGrid']:
             plotAllVertices = self.getPlotParameter('showGridCells', default=False)
+            #self.printMsg("Current grid parameters:", level=logging.INFO)
 
             # plotting vertices
-            # For a non conforming projection, we have to plot every line between the points of each grid box
+            # For a non conforming projection, we have to plot every line between
+            # the points of each grid box
             for i in range(0,ni+1,2):
                 if (i == 0 or i == (ni-1)) or plotAllVertices:
                     if i <= ni-1:
@@ -1926,10 +1959,57 @@ class GridUtils:
                     ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2])
                     ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2])
 
-                breakpoint()
-                ds[pVar].plot(x='nx', y='ny', ax=ax, transform=transform)
+                # xarray plot needs coordinate variables for lon and lat
+                ds = ds.set_coords(['y', 'x'])
+
+                # Set cmap, norm, levels
+                cmap = self.setPlotCMap(kwargs['plotVariables'][pVar])
+                norm = self.setPlotNorm(kwargs['plotVariables'][pVar])
+                levels = self.setPlotLevels(kwargs['plotVariables'][pVar])
+                cbar_kwargs = self.setPlotCbarkwargs(kwargs['plotVariables'][pVar])
+
+                ds[pVar].plot(x='x', y='y', ax=ax, transform=transform, cmap=cmap,
+                    norm=norm, levels=levels, cbar_kwargs=cbar_kwargs)
+
+                # Configure plot parameters, title is covered up by the plot?
+                ax = self.updateAxes(ax, kwargs['plotVariables'][pVar])
+
+                #breakpoint()
 
         return f, ax
+
+    def setPlotCMap(self, varArgs):
+        '''Set user defined color map or use matplotlib default.'''
+        if 'cmap' in varArgs.keys():
+            return varArgs['cmap']
+
+        return mpl.cm.viridis
+
+    def setPlotNorm(self, varArgs):
+        if 'norm' in varArgs.keys():
+            return varArgs['norm']
+
+        return None
+
+    def setPlotLevels(self, varArgs):
+        if 'levels' in varArgs.keys():
+            return varArgs['levels']
+
+        return None
+
+    def setPlotCbarkwargs(self, varArgs):
+        if 'cbar_kwargs' in varArgs.keys():
+            return varArgs['cbar_kwargs']
+
+        return dict()
+
+    def updateAxes(self, ax, varArgs):
+        '''Apply figure options to axes based on parameters passed to variable.'''
+
+        if 'title' in varArgs.keys():
+            ax.set_title(varArgs['title'])
+
+        return ax
 
     # grid parameter operations grid parameter functions
     # Grid Parameter Operations Grid Parameter Functions

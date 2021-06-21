@@ -4,6 +4,7 @@
 
 import sys, os, logging
 import cartopy
+import numpy as np
 from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
 
@@ -96,44 +97,54 @@ ds.addDataSource({
 ds.saveCatalog(os.path.join(wrkDir, 'catalog.json'))
 ds.saveCatalog(os.path.join(wrkDir, 'catalog.yaml'))
 
-# Data sources cannot be in chunked mode for use in this routine
-bathyFields = grd.computeBathymetricRoughness('ds:GEBCO_2020',
-        maxMb=99, superGrid=False, useClipping=False,
-        FixByOverlapQHGridShift=True,
-        auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
-)
+# Bathymetry grid variables filename
+bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example7.nc')
 
-# This is needed to really convert the elevation field to depth
-# The 'depth' field has to be requested as an auxVariables
-grd.applyEvalMap('ds:GEBCO_2020', bathyFields)
+# The bathymetric roughness can take a while to run.
+# If the file exists, we use that one instead of regenerating
+# it.  If you want to test the routine again, erase the output
+# file.
+if os.path.isfile(bathyGridFilename):
+    bathyGrids = xr.open_dataset(bathyGridFilename)
+else:
+    # Data sources cannot be in chunked mode for use in this routine
+    bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
+            maxMb=99, superGrid=False, useClipping=False,
+            FixByOverlapQHGridShift=True,
+            auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
+    )
 
-# Write ocean_mask.nc and land_mask.nc based on existing field
-grd.writeOceanmask(bathyFields, 'depth', 'mask',
-        os.path.join(wrkDir, 'ocean_mask_Example7.nc'),
-        MASKING_DEPTH=0.0)
-grd.writeLandmask(bathyFields, 'depth', 'mask',
-        os.path.join(wrkDir, 'land_mask_Example7.nc'),
-        MASKING_DEPTH=0.0)
+    # This is needed to really convert the elevation field to depth
+    # The 'depth' field has to be requested as an auxVariables
+    grd.applyEvalMap('ds:GEBCO_2020', bathyGrids)
 
-# Apply existing land mask which should not change anything
-# The minimum depth will modify a couple points.   We save the
-# new field as 'newDepth' to allow comparison with 'depth'.
-bathyFields['newDepth'] = grd.applyExistingLandmask(bathyFields, 'depth',
-        os.path.join(wrkDir, 'land_mask_Example7.nc'), 'mask',
-        MASKING_DEPTH=0.0, MINIMUM_DEPTH=1000.0, MAXIMUM_DEPTH=-99999.0)
-bathyFields['newDepth'].attrs['units'] = 'meters'
-bathyFields['newDepth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
+    # Write ocean_mask.nc and land_mask.nc based on existing field
+    grd.writeOceanmask(bathyGrids, 'depth', 'mask',
+            os.path.join(wrkDir, 'ocean_mask_Example7.nc'),
+            MASKING_DEPTH=0.0)
+    grd.writeLandmask(bathyGrids, 'depth', 'mask',
+            os.path.join(wrkDir, 'land_mask_Example7.nc'),
+            MASKING_DEPTH=0.0)
 
-# Write fields out to a file
-# TODO: provide a data source service hook?
-bathyFields.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example7.nc'),
-        encoding=grd.removeFillValueAttributes(data=bathyFields))
+    # Apply existing land mask which should not change anything
+    # The minimum depth will modify a couple points.   We save the
+    # new field as 'newDepth' to allow comparison with 'depth'.
+    bathyGrids['newDepth'] = grd.applyExistingLandmask(bathyGrids, 'depth',
+            os.path.join(wrkDir, 'land_mask_Example7.nc'), 'mask',
+            MASKING_DEPTH=0.0, MINIMUM_DEPTH=1000.0, MAXIMUM_DEPTH=-99999.0)
+    bathyGrids['newDepth'].attrs['units'] = 'meters'
+    bathyGrids['newDepth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
+
+    # Write fields out to a file
+    # TODO: provide a data source service hook?
+    bathyGrids.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example7.nc'),
+            encoding=grd.removeFillValueAttributes(data=bathyGrids))
 
 grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example7.nc"))
 
 # Write out FMS related support files
 grd.makeSoloMosaic(
-    topographyGrid=bathyFields['newDepth'],
+    topographyGrid=bathyGrids['newDepth'],
     writeLandmask=True,
     writeOceanmask=True,
     inputDirectory=inputDir,
@@ -161,6 +172,7 @@ grd.setPlotParameters(
         'iColor': 'k',
         'jColor': 'k',
         'transform': cartopy.crs.PlateCarree(),
+        'satellite_height': 35785831.0,
     }
 )
 
@@ -169,8 +181,11 @@ grd.setPlotParameters(
     showModelGrid=False,
     plotVariables={
         'depth': {
-            'values': bathyFields['depth'],
-            'title': 'Original diagnosed bathymetric field'
+            'values': bathyGrids['depth'],
+            'title': 'Original diagnosed bathymetric field',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
         }
     },
 )
@@ -183,16 +198,25 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None, faceco
     showModelGrid=False,
     plotVariables={
         'depth': {
-            'values': bathyFields['newDepth'],
-            'title': 'Bathymetric grid with 1000 meter minimum depth'
+            'values': bathyGrids['newDepth'],
+            'title': 'Bathymetric grid with 1000 meter minimum depth',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
         }
     },
 )
 figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy.png'), dpi=None, facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
 
+# Plot original gebco just using the grid extent, not the model grid points
+# as to show the real resolution of GEBCO
+# TODO: Future release
+
 # Plot model grid showing land mask points as painted
 # grid cells.
+# TODO: Future release
 
 # Plot model grid showing ocean mask points as painted
 # grid cells.
+# TODO: Future release

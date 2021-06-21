@@ -2,7 +2,7 @@
 
 ## Milestones
 
- - [ ] Version 0.2
+ - [ ] Release 0.2
    - [X] Implement a basic data catalog for data management
    - [X] Improve reproducibility of grids produced by the library
    - [X] Establish sphinx document generator and link to readthedocs
@@ -12,9 +12,13 @@
    - [X] Creation of more of the needed files to run a MOM6 simulation
    - [X] Allow import of ROMS grid for conversion to MOM6
    - [ ] Implement basic plotting of variable or other grid of information
- - [ ] Version 0.3
-   - [ ] Port ROMS mask editor as-is to gridtools under ipython/pylab so it works with MOM6/ROMS grids
- - [ ] Verison 0.x
+   API Changes:
+   - Use readGrid() to open any model grids.
+ - [ ] Release 0.3
+   - [ ] Port ROMS mask editor as-is to gridtools under ipython/pylab
+         so it works with MOM6/ROMS grids
+ - [ ] Release 0.x
+   - [ ] Application improvements
    - [ ] Improve mask editor grid location on click
    - [ ] Enable mask editor to work under Jupyter
    - [ ] Boundery condition grid creation and support (OBCs)
@@ -23,7 +27,8 @@
    - [ ] Subset existing grids and infrastructure
    - [ ] Leverage dask (for users that lack access to large memory nodes)
    - [ ] Explore the extent problem for lon defined as +0,+360 vs -180,+180
-   - [ ] Enhanced grid/plot projection options (non-map based; e.g. dumbbell; double gyre grids)
+   - [ ] Enhanced grid/plot projection options (non-map based;
+         e.g. dumbbell; double gyre grids)
    - [ ] Enhanced plotting support
    - [ ] Allow export of MOM6 grid to ROMS
      - [ ] implement ROMS.extend_ROMS_grid()
@@ -31,6 +36,8 @@
    - [ ] Enable gridtools library to be installable via conda
 
 # BUGS
+ - [ ] latitude is not reliably reproduced between platforms; other
+       fields show reproducibility.
  - [X] app:Remote Files does not save the grid in the specified directory
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
@@ -46,17 +53,19 @@
 # TASKS
 
  - [ ] Sponge data preparation
-   - [ ] Current scripts generate u,v fields on h-points; this needs to be changed to C-grid u/v-points instead
+   - [ ] Current scripts generate u,v fields on h-points; this needs
+         to be changed to C-grid u/v-points instead
  - [ ] general documentation
    - [X] enable sphinx as the documentation generator
    - [X] link to readthedocs
    - [ ] include local markdown files
-     - [ ] Use m2r2 to create a one way connection and compile local .md files into
-           .rst files for use in the sphinx documentation.
+     - [ ] Use m2r2 to create a one way connection and compile local
+           .md files into .rst files for use in the sphinx documentation.
  - [ ] grid creation/editor
    - [ ] grid metrics
      - [X] Spherical solution is complete via Niki's ROMS to MOM6 converter
-     - [X] Mercator (angle_dx might be 0 as it is lined up along latitude lines; except for tilt?)
+     - [X] Mercator (`angle_dx` might be 0 as it is lined up along
+           latitude lines; except for tilt?)
      - [X] Polar
    - [ ] make Lambert Conformal Conic Grids; needs testing
      - [ ] LCC cannot take custom lat_1 and lat_2; it generates 
@@ -99,14 +108,17 @@
    - [ ] Rework calculation of input grid points available vs grid points utilized
    - [ ] Rework for use with periodic grids
    - [ ] Include metadata for each partition: number of refinements, etc
-   - [ ] implement useFixByOverlapQHGridShift so a regular grid can be used without a shift
+   - [ ] implement useFixByOverlapQHGridShift so a regular grid can be
+         used without a shift
    - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingLandMask()
- - [X] add nbserverproxy/xgcm to conda software stacks; copied to binder environment.yml
+ - [X] add nbserverproxy/xgcm to conda software stacks; copied to
+       binder environment.yml
  - [ ] improve reproducibility
    - [ ] include a dump of conda environment in the grid file (nc)
    - [ ] if conda environment does not exist, do some other snooping
    - [X] add sha256 to grid elements
- - [ ] Add option to use numpypi package (Alistair) as a configurable option in gridtools
+ - [ ] Add option to use numpypi package (Alistair) as a configurable
+       option in gridtools
  - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
@@ -115,11 +127,13 @@
    - [ ] calculate R
    - [ ] calculate tilt (may not be possible)
    - [ ] update any tool metadata that is appropriate for that grid
-   - [ ] parse and utilize any available proj string; must be a global or variable attribute
- - [ ] Using xesmf regridder and other tools to create bathymetry and other forcing and boundary files
+   - [ ] parse and utilize any available proj string; must be a global
+         or variable attribute
+ - [ ] Using xesmf regridder and other tools to create bathymetry and
+       other forcing and boundary files
  - [ ] Develop a field "flood" routine similar to pyroms
- - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.  This applies only to the grid not
-       the supergrid.
+ - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.
+       This applies only to the grid not the supergrid.
 
 # TODO
 
@@ -134,49 +148,61 @@
    - [ ] Support other colorbar options: orientation, et al
    - [ ] Support for custom colorbar ranges
    - [ ] Allow for one plot
-   - [ ] Allow for two or more plots; side by side (sbs) or (stack)ed top to bottom
+   - [ ] Allow for two or more plots; side by side (sbs)
+         or (stack)ed top to bottom
    - [ ] Allow for four plots
    - [ ] Allow paper mode: portrait
    - [ ] Allow paper mode: landscape
    - [ ] Allow paper mode: custom/poster
- - [ ] Add "Refresh Plot" buttons to other Plot tabs or figure out how to squeeze a single plot button into the layout
- - [ ] Do we have to declare everything in __init__ first or can be push all that to respective reset/clear functions?
- - [ ] refactor messaging/logging of GridUtils into its own package so we can import printMsg/debugMsg as standalone calls
+ - [ ] Add "Refresh Plot" buttons to other Plot tabs or figure out how
+       to squeeze a single plot button into the layout
+ - [ ] Do we have to declare everything in __init__ first or can be
+       push all that to respective reset/clear functions?
+ - [ ] refactor messaging/logging of GridUtils into its own package
+       so we can import printMsg/debugMsg as standalone calls
  - [X] refactor refineS and refineR options as Niki had them defined
  - [X] makeGrid assumes working in degrees
  - [X] Allow library to work in degree or meters
  - [X] Pass back an error graphic instead of None for figures that do not render
  - [ ] Add a formal logging/message mechanism.
-   - [X] Allow display of important messages and warnings in panel application: widget=TextAreaInput
-   - [X] Create options in application and other tools for user configuration of logging and output.
+   - [X] Allow display of important messages and warnings in panel
+         application: widget=TextAreaInput
+   - [X] Create options in application and other tools for user
+         configuration of logging and output.
    - [X] Create a message buffer/system for information.
-   - [ ] Create a way to monitor a log file; https://discourse.holoviz.org/t/scrollable-log-text-viewer/317
+   - [ ] Create a way to monitor a log file;
+         https://discourse.holoviz.org/t/scrollable-log-text-viewer/317
    - [ ] log/display github revision of gridtools used by mybinder.org instances
- - [ ] For now, the gridParameters are always in reference to a center point in a grid
-   in the future, one may fix a side or point of the grid and grow out from that point
-   instead of the center.
+ - [ ] For now, the gridParameters are always in reference to a center
+       point in a grid in the future, one may fix a side or point of
+       the grid and grow out from that point instead of the center.
  - [ ] application
    - [ ] enable user configurable plot and widget sizes (hardcoded in __init__)
-   - [ ] enable user to change ellipsoid, R, `x_0` and `y_0` grid and plot parameters
+   - [ ] enable user to change ellipsoid, R, `x_0` and `y_0` grid and
+         plot parameters
    - [ ] plotting: adjust `satellite_height`, for now it is fixed to the default
    - [ ] title is misleading; it should show the projections in use if different
  - [ ] Develop a GridUtils() function
    - [ ] Run `proj -le` and return the names or display the details
    - [ ] Populates the ellps field for the application
- - [ ] `x_0` and `y_0` are hard coded to be zero offsets.  The user can modify these values.
+ - [ ] `x_0` and `y_0` are hard coded to be zero offsets.  The user can
+        modify these values.
  - [ ] Deploy use of self.gridMade (robTest:PR#1)
    - [ ] After success in makeGrid()
    - [ ] Successful load of grid from a file
    - [ ] Reset appropriately when clearGrid() is called
  - [ ] More contemplation of longitude range with respect 0, +/-180, 360.
-   - [ ] How does this library respond for grids draped over 0 degree longitude vs +/-180 degrees longitude
+   - [ ] How does this library respond for grids draped over 0 degree
+         longitude vs +/-180 degrees longitude
  - [ ] numpypi
    - [ ] a test fails in `test_trunc.py`
  - [ ] Add testing harnesses.
-   - [X] pytest: This will allow testing of core code via command line and iterative methods.
+   - [X] pytest: This will allow testing of core code via command line
+         and iterative methods.
    - [ ] pytest: Setup some simple projection tests: IBCAO, ....
    - [ ] pytest: Refactor numpypi into structured tests under pytest
-   - [ ] pytest: allow certain tests to fail if a module is not available (issue warnings instead)
+   - [ ] pytest: allow certain tests to fail if a module is not
+         available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
  - [X] gridtools.openDataset() should scan the dsName for a file:// or
        http: address maybe using the parser to detect something that
@@ -184,14 +210,18 @@
 
 # WISH
 
+ - [ ] Show use of dask
+   - [ ] Example 4: mkGridsEample4a.ipynb is incomplete
  - [ ] Support for multiple tiles for a model grid
  - [ ] Harmonize filename operations in functions
- - [ ] Teach grid tools to use "input.nml" to find grid related things for model runs.
+ - [ ] Teach grid tools to use "input.nml" to find grid related things
+       for model runs.
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
        there things that we could use there instead of recreating many wheels.
        There are lot of FRE-NCtool references in the ROMS to MOM6 conversion tool.
  - [ ] Migrate to use of file:// or http://, https:// for file specifications.
- - [ ] Allow gridtools to continue to operate with some disabled routines that use xesmf.
+ - [ ] Allow gridtools to continue to operate with some disabled
+       routines that use xesmf.
  - [ ] app:Save remote files; additional sanity checks
  - [ ] app:Add an activity spinner to indicate the notebook is busy
  - [ ] Compute `angle_dy` for testing of grid conformality.  Theoretically,
@@ -209,16 +239,18 @@
    - [ ] Alternate version/software capture if conda and/or git is not available
    - [X] Added proj string to netCDF file
    - [ ] Tri polar grid description
-   - [ ] Update conda capture code so a temporary file is not necessary
- - [ ] Work with generic non-mapping reference systems for use with some of the sample MOM6 problems
+   - [X] Update conda capture code so a temporary file is not necessary
+ - [ ] Work with generic non-mapping reference systems for use with
+       some of the sample MOM6 problems
    - [ ] MOM6-examples: double_gyre
      - [ ] https://github.com/NOAA-GFDL/MOM6-examples/blob/dev/gfdl/ocean_only/double_gyre/Visualizing%20and%20animating%20sea-surface%20height.ipynb
      - [ ] https://gist.github.com/adcroft/2a2b91d66625fd534372
    - [ ] MOM6 dumbbell: https://github.com/NOAA-GFDL/MOM6/search?q=dumbbell
-     - [ ] Support for grid field and plotting
-     - [ ] Learn about field preparation and sponges
- - [ ] Refactor any grid math into a gridmath library.  Any grid computation that can stand on its own
-       should be moved into a separate gridmath library.
+     - [ ] Support for grid variable and plotting
+     - [ ] Learn about OBC preparation and sponges
+ - [ ] Refactor any grid math into a gridmath library. Any grid
+       computation that can stand on its own should be moved into a
+       separate gridmath library.
  - [ ] gridtools.makeGrid() will need a refactor to work with other grid types
  - [ ] write out all MOM6 ancillary files when writing a grid
  - [ ] refactor expansion/clipping of grid points when fitting grid
@@ -229,11 +261,18 @@
  - [ ] Subset any grid for running with MOM6
    - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
    - [ ] May be especially useful for debugging situations; Arctic6
- - [ ] Allow gridtools to be used without xesmf and xgcm; enable module detection for available capabilities
+ - [ ] Allow gridtools to be used without xesmf and xgcm; enable module
+       detection for available capabilities
  - [ ] Update setup.py and other files with package dependencies
-   - Create a configuration script that would perform autosetup of gridtools library
+   - [ ] Create a configuration script that would perform autosetup of
+         gridtools library
  - [ ] Pull in BC and forcing fields from various sources
-   - [ ] Delta method: "We extract 20-30 years of a future projection from several models, build an average of each forcing variable which we superpose on modern day climate.  It’s the so-called delta method.  It debiases climate projections relative to modern day (reanalysis constrained) dynamics, but adds the climate change signal on top of it (as a secular change/delta)."
+   - [ ] Delta method: "We extract 20-30 years of a future projection
+         from several models, build an average of each forcing variable
+         which we superpose on modern day climate.  It’s the so-called
+         delta method.  It debiases climate projections relative to
+         modern day (reanalysis constrained) dynamics, but adds the
+         climate change signal on top of it (as a secular change/delta)."
    - [ ] CMIP/ESM
      - [ ] Browser catalog: https://esgf-node.llnl.gov/search/cmip6/
      - [ ] Programmatic access: https://github.com/intake/intake-esm
@@ -245,11 +284,13 @@
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
  - [X] triton node issue: python netCDF4 large file reading seems to hang nodes
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
- - [ ] Update all references to field to either variable or grid depending on context.
- - [ ] Expand CI to include more platform tests
+ - [ ] Update all references to field to either variable or grid
+       depending on context.
 
 # QUESTIONS
 
- - [ ] ntiles,1 is written in write_MOM6_topography_file, is this required for MOM6?
- - [X] is there a reason to keep zeroed land mask depths in the ROMS to MOM6 converter? A future
-       PR is changing this behavior.  Adopted use of MASKING_DEPTH.
+ - [ ] ntiles,1 is written in write_MOM6_topography_file, is this
+       required for MOM6?
+ - [X] is there a reason to keep zeroed land mask depths in the ROMS
+       to MOM6 converter? A future PR is changing this behavior.
+       Adopted use of MASKING_DEPTH.

@@ -1,9 +1,32 @@
 # Changelog
 
+# 2021-06-20
+
+ - Add keyword arguments to GridUtils.plotGrid() for control over plotting
+   elements.
+ - Add dpi control to GridUtils.newFigure() and add 100.0 dpi to defaults.
+ - Bump __version__ to 0.2.0
+ - Jupyter notebooks pass initial testing towards release 0.2.0
+ - Jupyter notebooks require: %matplotlib inline for showing figures
+ - Fix code fetching __version__ tag
+ - reformat TODOs to shorter columns
+ - sysinfo: needed some self prefixes on a few objects
+ - sysinfo: stdout/stderr needed to be decoded() from bytes
+ - sysinfo: fix capture of returncode
+ - Add a common wrkDir and inputDir for examples to easier set paths to files, etc.
+ - Add default tileName of `tile1` to examples.
+ - Replace temporary package_versions.txt placeholder.
+ - Begin running tests to work on Release 0.2.0
+ - Fix dpi at a default value (100.0).  It can magically change between Figure() calls.
+ - xarray plot wants coordinate variables.  For MOM6, add `x` and `y`
+   to coordinates before plotting.
+ - xarray tutorial data requires python module pooch
+ - Create mkGridsExample7a notebook to experiment with xarray plotting methods.
+
 # 2021-06-19
 
  - Add generic plotting demonstration to Example 7.  Will add more options
-   in later releases.
+   in later releases.  Not quite working yet.
  - Add sanity module to documentation.
  - New goals and milestones defined.  Older milestones archived.
  - Add **kwargs access to convert_ROMS_to_MOM6 function.

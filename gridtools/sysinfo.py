@@ -40,9 +40,9 @@ class SysInfo:
             import conda.cli.python_api
         except:
             msg = ("Unable to show requested version information.")
-            if self.grd: grd.printMsg(msg, level=logging.INFO)
+            if self.grd: self.grd.printMsg(msg, level=logging.INFO)
             msg = ("Please install the 'conda' python module in this environment.")
-            if self.grd: grd.printMsg(msg, level=logging.INFO)
+            if self.grd: self.grd.printMsg(msg, level=logging.INFO)
             return
         
         # Load conda environment information
@@ -94,20 +94,21 @@ class SysInfo:
             cmdList = shlex.split(cmdString)
             temp = subprocess.Popen(cmdList, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
             stdout, stderr = temp.communicate()
-            stdout = stdout.split("\n")
-            stderr = stderr.split("\n")
-            rc = temp.rc
+            stdout = stdout.decode('utf-8').split("\n")
+            stderr = stderr.decode('utf-8').split("\n")
+            rc = temp.returncode
             msg = ("stdout: %s" % (stdout))
-            if self.grd: grd.debugMsg(msg)
+            if self.grd: self.grd.debugMsg(msg)
             msg = ("stderr: %s" % (stderr))
-            if self.grd: grd.debugMsg(msg)
+            if self.grd: self.grd.debugMsg(msg)
             msg = ("return code: %d" % (rc))
-            if self.grd: grd.debugMsg(msg)
+            if self.grd: self.grd.debugMsg(msg)
             return (stdout, stderr, rc)
         except:
-            # Un
+            #raise
+            # Uncaught error
             msg = ("ERROR: Command failed to run (%s)" % (cmdString))
-            if self.grd: grd.debugMsg(msg)
+            if self.grd: self.grd.debugMsg(msg)
             return (None, None, None)
             
     def showAll(self, vList=[]):
