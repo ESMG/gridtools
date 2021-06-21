@@ -1,6 +1,6 @@
-# This was originally GMesh.py from Niki Zahdah
-# https://github.com/nikizadehgfdl/ocean_model_topog_generator
+'''This was originally GMesh.py from Niki Zahdah.  :cite:p:`Zadeh_2020_ocean_model_topog_generator`
 
+'''
 import numpy as np
 import pdb
 
@@ -380,7 +380,7 @@ class MeshRefinement:
         dlat[-1,:]=dlat[-2,:]
         dti[:,-1]=dti[:,-2]
         #print(dtj)
-        dtj[-1,:]=dtj[-2,:] 
+        dtj[-1,:]=dtj[-2,:]
         #print(dtj)
         for J in range(0,self.lat.shape[0]):
             for I in range(0,self.lon.shape[1]):

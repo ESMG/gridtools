@@ -30,7 +30,7 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
 
     **Keyword arguments**:
 
-        * *MINIMUM_DEPTH* (``float``) -- 
+        * *MINIMUM_DEPTH* (``float``) --
           Minimum ocean depth. Default: 0.0
         * *MASKING_DEPTH* (``float``) --
           Ocean points equal or shallower are set to land mask. Default: 0.0
@@ -411,7 +411,7 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
 
     **Keyword arguments**:
 
-        * *maxMb* (``int``) -- 
+        * *maxMb* (``int``) --
           Memory limit for grid refinements. Default: 8000.0
         * *h2Name* (``string``) --
           The computed bathymetric roughness grid name. Default: h2
@@ -454,7 +454,7 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
               * 'h' h-point; grid center
               * 'q' q-point; grid corners
               * 'uv' u- and v-point; grid faces
-              
+
       :superGrid:
           If you want all supergrid points, set superGrid=True.  Setting
           tells this routine to use the supergrid when calculating

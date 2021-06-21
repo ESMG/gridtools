@@ -4,7 +4,7 @@ This is information for using the RU:triton cluster.
 
 This information is based on using a ssh key to alnilam.
 
-# Start an interactive node 
+# Start an interactive node
 
 ```
 srun --nodes=1 --ntasks-per-node=1 --time=01:00:00 --pty bash -i

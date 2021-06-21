@@ -89,7 +89,7 @@ class SysInfo:
         '''
         Generic function to run a command string and return the results as
         an array of three items.  Return: (stdout, stderr, returncode)
-        ''' 
+        '''
         try:
             cmdList = shlex.split(cmdString)
             temp = subprocess.Popen(cmdList, stdout = subprocess.PIPE, stderr = subprocess.PIPE)

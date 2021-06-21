@@ -1,5 +1,13 @@
 # Changelog
 
+# 2021-06-21
+
+ - pdb.set_trace() can be replaced with breakpoint() and the import pdb is no longer needed.
+ - BUG: RTD: bullet items not rendered, use "conda install docutils=0.16"
+ - Verified python script examples are still operational.
+ - Updated some documentation in the sanity module.
+ - Add reference to gridutils.generate_regional_spherical_meters()
+
 # 2021-06-20
 
  - Add keyword arguments to GridUtils.plotGrid() for control over plotting
@@ -78,7 +86,7 @@
 # 2021-06-15
 
  - Replace {} with dict()
- - Porting of ROMS to MOM6 grids will go hand in hand with general 
+ - Porting of ROMS to MOM6 grids will go hand in hand with general
    solo mosaic creation routines.
  - Created ROMS and MOM6 specific classes for dealing with their own grids
  - Add sphinxcontrib-bibtex to requirements.txt file to see if we fix RTD build failure
@@ -116,7 +124,7 @@
  - Attempts to build FRE-nctools on chinook have failed so far.
 
 # 2021-06-12
- 
+
  - Numpy has a method to access the indexes that match grid points
    for any value test.
 

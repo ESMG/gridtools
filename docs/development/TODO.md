@@ -2,18 +2,6 @@
 
 ## Milestones
 
- - [ ] Release 0.2
-   - [X] Implement a basic data catalog for data management
-   - [X] Improve reproducibility of grids produced by the library
-   - [X] Establish sphinx document generator and link to readthedocs
-   - [X] Construct initial bathymetry grid for new grids
-   - [X] Construct bathymetric roughness
-   - [X] Construct initial grid ocean/land masks for new grids
-   - [X] Creation of more of the needed files to run a MOM6 simulation
-   - [X] Allow import of ROMS grid for conversion to MOM6
-   - [ ] Implement basic plotting of variable or other grid of information
-   API Changes:
-   - Use readGrid() to open any model grids.
  - [ ] Release 0.3
    - [ ] Port ROMS mask editor as-is to gridtools under ipython/pylab
          so it works with MOM6/ROMS grids
@@ -38,17 +26,11 @@
 # BUGS
  - [ ] latitude is not reliably reproduced between platforms; other
        fields show reproducibility.
- - [X] app:Remote Files does not save the grid in the specified directory
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
        `setGridParameters` to recursively update dictionary elements.
  - [ ] Regular filenames should be usable everywhere that takes file or
        data source arguments.
- - [X] file:// spec does not honor relative paths.  There should be
-       generic support for relative and absolute paths for file:// and
-       ds:// file specs.  Discovered that the argument after (//) is
-       a network specification.  (ds:/ == ds:///)  Relative paths
-       should start right after the colon(:).
 
 # TASKS
 
@@ -56,17 +38,12 @@
    - [ ] Current scripts generate u,v fields on h-points; this needs
          to be changed to C-grid u/v-points instead
  - [ ] general documentation
-   - [X] enable sphinx as the documentation generator
-   - [X] link to readthedocs
    - [ ] include local markdown files
      - [ ] Use m2r2 to create a one way connection and compile local
            .md files into .rst files for use in the sphinx documentation.
- - [ ] grid creation/editor
+ - [ ] grid creation
    - [ ] grid metrics
-     - [X] Spherical solution is complete via Niki's ROMS to MOM6 converter
-     - [X] Mercator (`angle_dx` might be 0 as it is lined up along
-           latitude lines; except for tilt?)
-     - [X] Polar
+     - [ ] Copy cartesian solution for Niki''s ROMS to MOM6 converter
    - [ ] make Lambert Conformal Conic Grids; needs testing
      - [ ] LCC cannot take custom lat_1 and lat_2; it generates 
            lat_1 and lat_2 based on grid inputs.
@@ -75,51 +52,47 @@
    - [ ] make Mercator grids; needs testing
      - [ ] issue a warning if tilt is non-zero - disabled
      - [ ] having tilt may not produce conformal grids
-     - [X] Niki's example added; but it may not be correct
+     - [X] Niki''s example added; but it may not be correct
      - [ ] Niki might have solved lat lon tilt?
-   - [X] make Stereographic grids; needs testing
-     - [X] using meters; no tilt; based on code from Raphael
-     - [X] using degrees; with tilt; based on code from Niki; may not be correct
+   - [ ] make Stereographic grids
+     - [ ] user testing
    - [ ] grid generation in other projections (tri-polar, etc)
-   - [X] on saveGrid() convert lon [+0,+360] to [-180,+180]
-     - [ ] Unify code that adjusts lon (robTest:PR#1)
-   - [X] Unify ellipse radius (R) constants throughout code
-     - [X] Gridutils initializes with proj GRS80
-     - [X] Allow user control
+   - [ ] on saveGrid():
+     - [X] convert lon [+0,+360] to [-180,+180]
+     - [ ] Unify code that adjusts lon (PR#1)
+   - [ ] Verify unification of radius (R) throughout code
  - [ ] grid mask editor (land, etc)
      - [ ] add routines for mask checking
      - [ ] add routines for updating the exchange grid masks
      - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
            `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
+     - [ ] needs upgrade from basemap()
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources
-   - [ ] option to create land mask fraction
+   - [X] option to create land mask fraction
    - [ ] option to use source grid as a supergrid for coarsening
-   - [X] implemented as topoutils.TopoUtils.regridTopo()
    - [ ] refactor function arguments into kwargs
    - [ ] refactor print statements to use gridtools logging facility
  - [ ] integration of bathymetric sources and apply to grids
-   - [ ] https://github.com/nikizadehgfdl/ocean\_model\_topog\_generator
+   - [X] https://github.com/nikizadehgfdl/ocean\_model\_topog\_generator
    - [ ] fix native zero band columns in partitions
    - [ ] flexible partitioning / rework
    - [ ] Investigate `get_indices1D()` function
    - [ ] Rework detection of grid bounds
-   - [ ] Rework calculation of input grid points available vs grid points utilized
+   - [ ] Rework calculation of input grid points available vs grid
+         points utilized
    - [ ] Rework for use with periodic grids
    - [ ] Include metadata for each partition: number of refinements, etc
    - [ ] implement useFixByOverlapQHGridShift so a regular grid can be
          used without a shift
    - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingLandMask()
- - [X] add nbserverproxy/xgcm to conda software stacks; copied to
-       binder environment.yml
  - [ ] improve reproducibility
-   - [ ] include a dump of conda environment in the grid file (nc)
+   - [X] include a dump of conda environment in the grid file (nc)
+   - [X] add sha256 to grid and variable arrays
    - [ ] if conda environment does not exist, do some other snooping
-   - [X] add sha256 to grid elements
  - [ ] Add option to use numpypi package (Alistair) as a configurable
        option in gridtools
- - [X] turn numpypi into a loadable package via pip
  - [X] add datashader and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
@@ -160,10 +133,6 @@
        push all that to respective reset/clear functions?
  - [ ] refactor messaging/logging of GridUtils into its own package
        so we can import printMsg/debugMsg as standalone calls
- - [X] refactor refineS and refineR options as Niki had them defined
- - [X] makeGrid assumes working in degrees
- - [X] Allow library to work in degree or meters
- - [X] Pass back an error graphic instead of None for figures that do not render
  - [ ] Add a formal logging/message mechanism.
    - [X] Allow display of important messages and warnings in panel
          application: widget=TextAreaInput
@@ -204,13 +173,10 @@
    - [ ] pytest: allow certain tests to fail if a module is not
          available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
- - [X] gridtools.openDataset() should scan the dsName for a file:// or
-       http: address maybe using the parser to detect something that
-       is not a catalog.  This routine could be improved.
 
 # WISH
 
- - [ ] Show use of dask
+ - [ ] Write example program(s) that utilizes dask
    - [ ] Example 4: mkGridsEample4a.ipynb is incomplete
  - [ ] Support for multiple tiles for a model grid
  - [ ] Harmonize filename operations in functions
@@ -218,7 +184,8 @@
        for model runs.
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
        there things that we could use there instead of recreating many wheels.
-       There are lot of FRE-NCtool references in the ROMS to MOM6 conversion tool.
+       There are lot of FRE-NCtool references in the ROMS to MOM6
+       conversion tool.
  - [ ] Migrate to use of file:// or http://, https:// for file specifications.
  - [ ] Allow gridtools to continue to operate with some disabled
        routines that use xesmf.
@@ -282,7 +249,7 @@
      - [ ] https://github.com/MackenzieBlanusa/OHC_CMIP6
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
- - [X] triton node issue: python netCDF4 large file reading seems to hang nodes
+ - [ ] triton node issue: python netCDF4 large file reading seems to hang nodes
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
  - [ ] Update all references to field to either variable or grid
        depending on context.
@@ -291,6 +258,3 @@
 
  - [ ] ntiles,1 is written in write_MOM6_topography_file, is this
        required for MOM6?
- - [X] is there a reason to keep zeroed land mask depths in the ROMS
-       to MOM6 converter? A future PR is changing this behavior.
-       Adopted use of MASKING_DEPTH.

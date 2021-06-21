@@ -111,7 +111,7 @@ Building
 ```
 # See HDF5 dependency below
 $ export H5DIR=/home/jrcermakiii/workdir/local
-$ CPPFLAGS='-I${H5DIR}/include' LDFLAGS='-L${H5DIR}/lib' ./configure --prefix=${H5DIR} --enable-nczarr --enable-mmap --enable-byterange 
+$ CPPFLAGS='-I${H5DIR}/include' LDFLAGS='-L${H5DIR}/lib' ./configure --prefix=${H5DIR} --enable-nczarr --enable-mmap --enable-byterange
 ```
 
 ### zlib

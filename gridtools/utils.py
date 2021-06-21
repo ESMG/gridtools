@@ -50,7 +50,7 @@ def get_git_repo_version_info(grd=None):
 def get_history_entry(argv):
     """Construct an entry for the global 'history' attribute of a NetCDF file,
     which is a date and the command used.
-    
+
     This function is copied from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
     """
     today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')

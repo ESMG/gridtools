@@ -457,7 +457,7 @@ class GridUtils:
         self.resetPlotParameters()
 
     def computeGridMetricsCartesian(self):
-        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a 
+        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a
         grid in cartesian coordinates.
         '''
         pass
@@ -1283,7 +1283,10 @@ class GridUtils:
     # Rebuilt grid generation routines
     
     def generate_regional_spherical_meters(self, cUnits, cX, cY, dx, dxU, dy, dyU, tilt, grX, grXU, grY, grYU, pD, **kwargs):
-        '''Create a grid in the spherical projection using grid distances in meters.'''
+        '''Create a grid in the spherical projection using grid distances in meters.
+
+        This function uses code that performs projection transformation of 2D grids. :cite:p:`Dussin_2020_regrid_weights_bedmachine_gebco`
+        '''
 
         gType = None
         if 'gridType' in kwargs.keys():
@@ -1473,7 +1476,7 @@ class GridUtils:
         # Import source and target grid module types
         sourceGridModule = sourceGrid.lower()
         targetGridModule = targetGrid.lower()
-        
+
         try:
             mdlSource = importlib.import_module('gridtools.grids.%s' % (sourceGridModule))
         except:
@@ -1503,7 +1506,7 @@ class GridUtils:
         utils.checkArgument(kwargs, 'tileName', "tile1")
         utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
         utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
-        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0) 
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0)
         utils.checkArgument(kwargs, 'writeExchangeGrids', False)
         utils.checkArgument(kwargs, 'writeCouplerMosaic', False)
         utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
@@ -1634,8 +1637,8 @@ class GridUtils:
         :return: netCDF encoding
         :rtype: dict()
 
-        For *data*, the ``_FillValue`` is masked. 
-        
+        For *data*, the ``_FillValue`` is masked.
+
         For *stringVars*, supply a string length.  e.g. ``{'tile': 255}``
         This will result in an encoding of ``{'dtype': 'S255', 'char_dim_name': 'string'}``.
 
@@ -1746,7 +1749,7 @@ class GridUtils:
         utils.checkArgument(kwargs, 'tileName', "tile1")
         utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
         utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
-        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0) 
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0)
         utils.checkArgument(kwargs, 'writeExchangeGrids', True)
         utils.checkArgument(kwargs, 'writeCouplerMosaic', True)
         utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
@@ -2226,9 +2229,9 @@ class GridUtils:
 
             * *figsize* (``(float inches, float inches)`` -- matplotlib figure size [width, height (**5.0, 3.75**)]
             * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see extentCRS) [**[]**]
-              If no extent is given, **[]**, then the global extent ``set_global()`` is used. 
+              If no extent is given, **[]**, then the global extent ``set_global()`` is used.
               See `matplotlib geoaxes <https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html>`_.
-            * *extentCRS* (``cartopy.crs method``) -- cartopy crs [**cartopy.crs.PlateCarree()**] 
+            * *extentCRS* (``cartopy.crs method``) -- cartopy crs [**cartopy.crs.PlateCarree()**]
               You must have the cartopy.crs module loaded to change this setting.
               See `Cartopy projection list <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html>`_.
             * *showGrid* (``boolean``) -- show the grid outline [**True**]

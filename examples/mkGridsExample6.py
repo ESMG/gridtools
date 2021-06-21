@@ -7,6 +7,10 @@
 import os, sys
 from gridtools.gridutils import GridUtils
 
+# Set a place to write files
+wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
+inputDir = os.path.join(wrkDir, 'INPUT')
+
 grd = GridUtils()
 grd.clearGrid()
 
@@ -57,6 +61,6 @@ grd.setPlotParameters(
 )
 
 (figure, axes) = grd.plotGrid()
-figure.savefig('configs/test/IBCAO_Example6_script.jpg')
+figure.savefig(os.path.join(wrkDir, 'IBCAO_Example6_script.jpg'))
 
 print(grd.grid)

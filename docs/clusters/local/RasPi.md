@@ -3,7 +3,7 @@
 These are notes for running grid tools on a Raspberry Pi
 platform [Raspberry Pi 4 Model B Rev 1.4].  These notes
 are based on running Ubuntu 20.04.2 LTS on a Pi with 8 GB
-of RAM.  
+of RAM.
 
 # nodejs 14.16.0
 
@@ -63,3 +63,46 @@ either presented link will work.  The option
 automatically start a browser on your Pi
 workstation.
 
+# ESMF
+
+The ESMF package does compile on the RasPi platform
+using version 8.1.1.
+
+```
+wget "https://github.com/esmf-org/esmf/archive/refs/tags/ESMF_8_1_1.tar.gz"
+tar xzf ESMF_8_1_1.tar.gz
+export ESMF_DIR=/home/cermak/workdir/software/esmf-ESMF_8_1_1
+make script_info
+make
+make check
+```
+
+All checks pass for mpiuni.
+
+A python virtual environment (venv) was created for a non-sudo
+install of ESMPy and xESMF.
+
+A very minimum start to a python virtual environment:
+```
+python3 -m venv venv/base
+source venv/base/bin/activate
+# Once the environment is active,
+# python can be used instead of python3
+```
+
+# ESMPy
+
+```
+cd $ESMF_DIR/src/addon/ESMPy
+python setup.py build --ESMFMKFILE=${ESMF_DIR}/lib/libO/Linux.gfortran.32.mpiuni.default/esmf.mk install
+```
+
+# xESMF
+
+```
+git clone https://github.com/pangeo-data/xESMF.git
+cd xESMF
+python -m pip install .
+```
+
+NOTE: Extensive testing of the installed software has yet to be done.

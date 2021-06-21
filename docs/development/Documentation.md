@@ -6,7 +6,7 @@ documentation.
 
 # Important Information
 
-For python documentation to work, it requires a fully operational 
+For python documentation to work, it requires a fully operational
 software stack for the library.  These instructions are additional
 to the basic requirements for installation of the gridtools
 library.
@@ -47,7 +47,7 @@ The install may fail with some warnings:
 kpsewhich: /lib64/libc.so.6: version 'GLIBC_2.14' not found
 ```
 This means a local installation of the libc.so is required for TeX to run.  See one
-time installation steps below.  
+time installation steps below.
 
 These commands needed to be rerun after installation at chinook@UAF once the
 environment variables are set and glibc is installed.
@@ -158,7 +158,7 @@ translate text that it generates into that language.
 
 For a list of supported codes, see
 https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language.
-> Project language [en]: 
+> Project language [en]:
 
 Creating file src/gridtools/source/conf.py.
 Creating file src/gridtools/source/index.rst.
@@ -167,7 +167,8 @@ Creating file src/gridtools/make.bat.
 
 Finished: An initial directory structure has been created.
 
-You should now populate your master file src/gridtools/source/index.rst and create other documentation
+You should now populate your master file src/gridtools/source/index.rst
+and create other documentation
 source files. Use the Makefile to build the docs, like so:
    make builder
 where "builder" is one of the supported builders, e.g. html, latex or linkcheck.

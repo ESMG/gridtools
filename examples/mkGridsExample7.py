@@ -5,10 +5,9 @@
 import sys, os, logging
 import cartopy
 import numpy as np
+import xarray as xr
 from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
-
-import pdb
 
 # Setup a work directory
 #wrkDir = '/home/cermak/mom6/configs/zOutput'

@@ -100,7 +100,7 @@ class MOM6:
         :return: none
         :rtype: none
         '''
-        
+
         # Check and set any defaults to kwargs
         utils.checkArgument(kwargs, 'tileName', "tile1")
         utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
@@ -282,7 +282,7 @@ class MOM6:
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
-    
+
         # Define target file
         destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['mosaicFilename'])
         if os.path.isfile(destinationFile) and not(kwargs['overwrite']):
@@ -297,7 +297,7 @@ class MOM6:
         # make_solo_mosaic tool performs.  It's not needed right now,
         # since we only have one (regional) tile, but I think this feature
         # will be needed if we ever use a tripolar grid.
-    
+
         #with netCDF4.Dataset(mom6_grid['filenames']['mosaic'], 'w', format='NETCDF3_CLASSIC') as mosaic_ds:
         #    # Dimenisons
         #    mosaic_ds.createDimension('ntiles', 1)
@@ -340,14 +340,14 @@ class MOM6:
             stringVars={'mosaic': 255, 'gridlocation': 255, 'gridfiles': 255, 'gridtiles': 255}))
 
         return
-    
+
     def write_MOM6_land_mask_file(self, grd, **kwargs):
         """Write the land mask file.  Based on 'make_quick_mosaic' tool in version
         5 of MOM (http://www.mom-ocean.org/).
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
-    
+
         # Define target file
         destinationFile = os.path.join(kwargs['inputDirectory'], kwargs['landmaskFilename'])
         if os.path.isfile(destinationFile) and not(kwargs['overwrite']):
@@ -363,7 +363,7 @@ class MOM6:
         #    # Dimenisons (of grid cells, not supergrid)
         #    land_mask_ds.createDimension('nx', nx)
         #    land_mask_ds.createDimension('ny', ny)
-    
+
         #    # Variables & Values
         #    hmask = land_mask_ds.createVariable('mask', 'd', ('ny', 'nx'))
         #    hmask.standard_name = 'land fraction at T-cell centers'
@@ -383,7 +383,7 @@ class MOM6:
         ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds))
 
         return
-    
+
     def write_MOM6_ocean_mask_file(self, grd, **kwargs):
         """Write the ocean mask file.  Based on 'make_quick_mosaic' tool in version
         5 of MOM (http://www.mom-ocean.org/).
@@ -406,7 +406,7 @@ class MOM6:
         #    # Dimenisons (of grid cells, not supergrid)
         #    ocean_mask_ds.createDimension('nx', nx)
         #    ocean_mask_ds.createDimension('ny', ny)
-    
+
         #    # Variables & Values
         #    hmask = ocean_mask_ds.createVariable('mask', 'd', ('ny', 'nx'))
         #    hmask.standard_name = 'ocean fraction at T-cell centers'
@@ -426,7 +426,7 @@ class MOM6:
         ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds))
 
         return
-    
+
     def write_MOM6_exchange_grid_files(self, grd, **kwargs):
         """Write three exchange grid files.
         Based on 'make_quick_mosaic' tool in version 5 of MOM (http://www.mom-ocean.org/).
@@ -448,7 +448,7 @@ class MOM6:
             # Copy supergrid area to internal variable
             self.mom6_grid['supergrid']['area'] = grd.grid['area']
             self._calculate_MOM6_cell_grid_area()
-    
+
         # Loop for the three types
         for name1, name2 in exchangeGrids:
 
@@ -601,26 +601,26 @@ class MOM6:
         #    mosaic_ds.createDimension('nfile_lXo', 1)
 
         # same mosaic file for all three -- just like when "make_solo_mosaic" is used
-    
+
         add_string_var_1d(ds, 'atm_mosaic_dir',  'directory_storing_atmosphere_mosaic', self.mom6_grid['filenames']['directory'], strVarMap)
         add_string_var_1d(ds, 'atm_mosaic_file', 'atmosphere_mosaic_file_name',         self.mom6_grid['filenames']['mosaic']   , strVarMap)
         add_string_var_1d(ds, 'atm_mosaic',      'atmosphere_mosaic_name',              'atmos_mosaic'                     , strVarMap)
-    
+
         add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
         add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
         add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
-    
+
         add_string_var_1d(ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      self.mom6_grid['filenames']['directory'],  strVarMap)
         add_string_var_1d(ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
         add_string_var_1d(ds, 'ocn_mosaic',      'ocean_mosaic_name',                   'ocean_mosaic'                     ,  strVarMap)
-    
+
         add_string_var_1d(ds, 'ocn_topog_dir',   'directory_storing_ocean_topog',       self.mom6_grid['filenames']['directory'],  strVarMap)
         add_string_var_1d(ds, 'ocn_topog_file',  'ocean_topog_file_name',               self.mom6_grid['filenames']['topography'], strVarMap)
-    
+
         add_string_var_2d(ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', self.mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
         add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', self.mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
         add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
-    
+
         # Global attributes
         self._add_global_attributes(ds)
 
@@ -662,15 +662,15 @@ class MOM6:
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
-    
+
         lat = self.mom6_grid['supergrid']['lat']
         lon = self.mom6_grid['supergrid']['lon']
-    
+
         # Approximate edge lengths as great arcs
         R = 6370.e3 # Radius of sphere
         self.mom6_grid['supergrid']['dx'][:,:] = R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) )
         self.mom6_grid['supergrid']['dy'][:,:] = R * spherical.angle_through_center( (lat[1:, :],lon[1:, :]), (lat[:-1,:  ],lon[:-1,:  ]) )
-    
+
         # Approximate angles using centered differences in interior, and side differences on left/right edges
         # TODO: Why do something different at the edges when we have extra ROMS points available?
         # Because we're using a big enough footprint to need to.
@@ -689,37 +689,37 @@ class MOM6:
         angle2[:, 0  ] = numpy.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
         angle2[:,-1  ] = numpy.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
         self.mom6_grid['supergrid']['angle'][:,:] = numpy.maximum(angle, angle2)
-    
+
         # Approximate cell areas as that of spherical polygon
         self.mom6_grid['supergrid']['area'][:,:] = R * R * spherical.quad_area(lat, lon)
-    
+
         return
-    
+
     def _fill_in_MOM6_supergrid_metrics_cartesian(self):
         """Fill in missing MOM6 supergrid metrics by computing best guess
         values based on x and y coordinates.
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
-    
+
         x = self.mom6_grid['supergrid']['x']
         y = self.mom6_grid['supergrid']['y']
-    
+
         # Compute edge lengths
         self.mom6_grid['supergrid']['dx'][:,:] = numpy.sqrt( (x[:,1:] - x[:,:-1])**2 + (y[:,1:] - y[:,:-1])**2 )
         self.mom6_grid['supergrid']['dy'][:,:] = numpy.sqrt( (x[1:,:] - x[:-1,:])**2 + (y[1:,:] - y[:-1,:])**2 )
-    
+
         # Compute angles using centered differences in interior, and side differences on left/right edges
         # TODO: Why do something different at the edges when we have extra ROMS points available?
         self.mom6_grid['supergrid']['angle'][:,1:-1] = numpy.arctan2( (y[:,2:] - y[:,:-2]), (x[:,2:] - x[:,:-2]) )
         self.mom6_grid['supergrid']['angle'][:, 0  ] = numpy.arctan2( (y[:, 1] - y[:, 0 ]), (x[:, 1] - x[:, 0 ]) )
         self.mom6_grid['supergrid']['angle'][:,-1  ] = numpy.arctan2( (y[:,-1] - y[:,-2 ]), (x[:,-1] - x[:,-2 ]) )
-    
+
         # Compute cell areas
         self.mom6_grid['supergrid']['area'][:,:] = self.mom6_grid['supergrid']['dx'][:-1, :] * self.mom6_grid['supergrid']['dy'][:, :-1]
-    
+
         return
-    
+
     def _generate_mask(self, maskType, grd, **kwargs):
         '''Generate a land or ocean mask based on parameters provided.
 
