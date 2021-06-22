@@ -81,8 +81,16 @@ $ source latex.sh
 
 # Updates to the gridTools environment
 
-The only thing needed is Doxygen.  The rest of the
-requirements are installed via pip.
+If building just the gridtools documentation, the
+next steps can be ignored.  Sphinx 4+ will work fine
+for gridtools documentation generation of HTML and PDF.
+
+Updating the MOM6 manaul requires additional
+dependencies.  Use the requirements from the
+MOM6 repo `docs` directory.
+
+Doxygen is required for source code processing.
+The rest of the requirements are installed via pip.
 
 To test with the MOM6 Manual documentation:
 ```
@@ -114,6 +122,8 @@ $ make
 $ make install
 ```
 
+Use of glibc is tricky, be careful.
+
 ## MOM6 Manual
 
 Make the HTML pages:
@@ -126,12 +136,17 @@ Make the PDF:
 $ make latexpdf
 ```
 
+NOTE: On the UAF cluster, it was discovered that making the PDF
+will cause a segfault if the manual was not previously created
+using `make html`.  Run: `make html` outside the `latex.sh`
+environment.
+
 # Gridtools manual
 
 ## Initialization
 
-This was the initialization process.  This does not need to be
-repeated.
+This was the initialization process for the documentation
+tree.  This does not need to be repeated.
 
 ```
 $ sphinx-quickstart
