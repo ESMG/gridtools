@@ -1,4 +1,5 @@
 #!/bin/bash
+pip install nbserverproxy
 # enable nbserverproxy
 jupyter serverextension enable --sys-prefix nbserverproxy
 # install the panel server extension so that

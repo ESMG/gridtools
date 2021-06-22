@@ -2,6 +2,10 @@
 
 # 2021-06-21
 
+ - Add more environment infomation
+ - Show stdout for pytests (-rA)
+ - Add dev and main branches for CI testing
+ - Add a pytest to show some initial hashes to check in CI output
  - Add reference for numpypi.  Need to add URL to original and latestURL if updates were made.
  - Updated workaround information dropping datashader and updating xesmf information.
  - Add `source/_static` and `source/_templates` to repo as they are needed for sphinx.
