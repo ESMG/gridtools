@@ -1,5 +1,9 @@
 # Changelog
 
+# 2021-06-22
+
+ - PR#8 submitted to main.  Making final checks of CI, RTD and mybinder.
+
 # 2021-06-21
 
  - Add more environment infomation
