@@ -8,7 +8,10 @@ on:
   push:
     branches: [ exp/** ]
   pull_request:
-    branches: [ exp/** ]
+    branches:
+      - 'exp/**'
+      - 'dev'
+      - 'main'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -43,14 +46,16 @@ jobs:
           echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
           echo "🖥️ The workflow is now ready to test your code on the runner."
           uname -a
+          pwd
+          df -h
           printenv
 
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
-          conda env create -f=conda/gridTools_export.yml
+          conda env create -q -f conda/gridTools_export.yml
           conda activate gridTools
-          python -m pip install .
+          python -m pip install -q -e .
 
       # Run tests
       - name: Tests
@@ -58,6 +63,6 @@ jobs:
           cd ${{ github.workspace }}
           conda activate gridTools
           cd tests
-          pytest
+          pytest -rA
 
 

@@ -4,8 +4,13 @@
 # a notebook.  This example uses a slightly different default
 # radius.
 
+import os, sys, logging
 import numpy as np
 import xarray as xr
+
+# Set a place to write files
+wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
+inputDir = os.path.join(wrkDir, 'INPUT')
 
 # IBCAO
 # Working in cartesian coordinates, all values are in meters
@@ -91,9 +96,9 @@ grd.setPlotParameters(
     }
 )
 
-grd.computeGridMetrics()
+grd.computeGridMetricsSpherical()
 
 (figure, axes) = grd.plotGrid()
-figure.savefig('configs/test/IBCAO_Example5a_script.jpg')
+figure.savefig(os.path.join(wrkDir,'IBCAO_Example5a_script.jpg'))
 
 print(grd.grid)

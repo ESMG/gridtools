@@ -1,17 +1,20 @@
-# Small helper class to show basic system information
-# Useful for debugging module/system conflicts
-# Revised:
-#   https://www.python.org/dev/peps/pep-0008/#package-and-module-names
-
 import os, sys, re
-import psutil
-import shlex, subprocess
+import psutil, shlex, subprocess
+import logging
 
 class SysInfo:
+    '''
+    A small helper class to provide basic system information and misc
+    operating system utilities.  Useful for debugging module or system
+    conflicts.
+    '''
 
     # Functions
 
-    def __init__(self):
+    def __init__(self, grd=None):
+        # Attach to a logging mechanism
+        self.grd = grd
+
         # Initialize
         self.resetVersionData()
         
@@ -36,13 +39,16 @@ class SysInfo:
         try:
             import conda.cli.python_api
         except:
-            print("Unable to show requested version information.  Please install 'conda' in this environment.")
+            msg = ("Unable to show requested version information.")
+            if self.grd: self.grd.printMsg(msg, level=logging.INFO)
+            msg = ("Please install the 'conda' python module in this environment.")
+            if self.grd: self.grd.printMsg(msg, level=logging.INFO)
             return
         
         # Load conda environment information
         stdin, stdout, errcode =\
             conda.cli.python_api.run_command(conda.cli.python_api.Commands.LIST, "--export")
-        itemList = {}
+        itemList = dict()
         for strItem in stdin.split("\n"):
             #print(strItem)
             if len(strItem) > 0:
@@ -61,13 +67,7 @@ class SysInfo:
         try:
             # Check if we can run jupyter labextension list
             cmd = 'jupyter labextension list'
-            cmdList = shlex.split(cmd)
-            temp = subprocess.Popen(cmdList, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-            stdout, stderr = temp.communicate()
-            stdout = stdout.split("\n")
-            stderr = stderr.split("\n")
-            print("stdout:",stdout)
-            print("stderr:",stderr)
+            (stdout, stderr, rc) = self.runCommand(cmd)
         except:
             pass
     
@@ -83,7 +83,33 @@ class SysInfo:
 
     def resetVersionData(self):
         self.versionDataLoaded = False
-        self.versionData = {}
+        self.versionData = dict()
+
+    def runCommand(self, cmdString):
+        '''
+        Generic function to run a command string and return the results as
+        an array of three items.  Return: (stdout, stderr, returncode)
+        '''
+        try:
+            cmdList = shlex.split(cmdString)
+            temp = subprocess.Popen(cmdList, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            stdout, stderr = temp.communicate()
+            stdout = stdout.decode('utf-8').split("\n")
+            stderr = stderr.decode('utf-8').split("\n")
+            rc = temp.returncode
+            msg = ("stdout: %s" % (stdout))
+            if self.grd: self.grd.debugMsg(msg)
+            msg = ("stderr: %s" % (stderr))
+            if self.grd: self.grd.debugMsg(msg)
+            msg = ("return code: %d" % (rc))
+            if self.grd: self.grd.debugMsg(msg)
+            return (stdout, stderr, rc)
+        except:
+            #raise
+            # Uncaught error
+            msg = ("ERROR: Command failed to run (%s)" % (cmdString))
+            if self.grd: self.grd.debugMsg(msg)
+            return (None, None, None)
             
     def showAll(self, vList=[]):
         self.showSystem()

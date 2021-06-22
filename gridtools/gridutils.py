@@ -1,11 +1,13 @@
 # General imports and definitions
-import os, sys, datetime, logging
-import cartopy, warnings, pdb
+import os, re, sys, datetime, logging, importlib
+import cartopy, warnings, hashlib
 import numpy as np
 import xarray as xr
 from pyproj import CRS, Transformer
 import pandas as pd
-import requests
+import requests, urllib.parse
+import matplotlib as mpl
+import gridtools
 
 # Needed for panel.pane                
 from matplotlib.figure import Figure
@@ -18,12 +20,15 @@ from matplotlib.backends.backend_agg import FigureCanvas
 #  * Computation of MOM6 grid metrics
 from . import spherical
 
-# GridUtils() application
-from . import app
+# Other utilities
+from . import fileutils
+from . import utils
+from . import sanity
+from . import sysinfo
 
 class GridUtils:
 
-    def __init__(self, app={}):
+    def __init__(self, app=dict()):
         # Constants
         self.PI_180 = np.pi/180.
         # Adopt GRS80 ellipse from proj
@@ -31,10 +36,14 @@ class GridUtils:
         self._default_ellps = 'GRS80'
         self._default_availableGridTypes = ['MOM6']
         
+        # Application object
+        self.applicationObj = None
         # File pointers
         self.xrOpen = False
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        # Allow setting of chunk parameter for grids
+        self.xrChunks = None
         # Internal parameters
         self.usePaneMatplotlib = False
         self.msgBox = None
@@ -42,13 +51,14 @@ class GridUtils:
         # Grid parameters
         # Locals
         self.gridMade = False
-        self.gridInfo = {}
-        self.gridInfo['dimensions'] = {}
-        self.gridInfo['gridParameters'] = {}
+        self.gridInfo = dict()
+        self.gridInfo['dimensions'] = dict()
+        self.gridInfo['gridParameters'] = dict()
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
         # Defaults
         self.plotParameterDefaults = {
             'figsize': (8, 6),
+            'dpi': 100.0,
             'extent': [],
             'extentCRS': cartopy.crs.PlateCarree(),
             'projection': {
@@ -80,7 +90,8 @@ class GridUtils:
                 50: 'CRITICAL'
         }
 
-    # Utility functions
+    # utility operations utility functions
+    # Utility Operations Utility Functions
 
     def addMessage(self, msg):
         '''Append new message to message buffer.'''
@@ -90,12 +101,16 @@ class GridUtils:
     def app(self):
         '''By calling this function, the user is requesting the application functionality of GridUtils().
            return the dashboard, but GridUtils() also has an internal pointer to the application.'''
+        # Delay loading app module until we actually call app()
+        # GridUtils() application
+        from . import app
         appObj = app.App(grd=self)
-        self.app = appObj
+        self.applicationObj = appObj
         return appObj.dashboard
 
-    def application(self, app={}):
-        '''Convienence function to attach application items to GridUtil so it can update certain portions of the application.
+    def application(self, app=dict()):
+        '''Convienence function to attach application items to GridUtils() so it can update certain portions
+        of the application::
 
             app = {
                 'messages': panel.widget.TextBox     # Generally a pointer to a panel widget for display of text
@@ -145,8 +160,8 @@ class GridUtils:
     def debugMsg(self, msg, level = -1):
         '''This function has a specific purpose to aid in debugging and
         activating pdb breakpoints.  NOTE: pdb breakpoints tend not to
-        work very well when running under the application.  It tends to
-        terminate the bokeh/tornado server.
+        work very well when running under the gridtools application.  It
+        tends to terminate the bokeh/tornado server.
 
         The debug level can be zero(0) and you can forcibly add a break
         point in the code by using `debugMsg(msg, level=3)` anywhere in
@@ -177,7 +192,7 @@ class GridUtils:
             raise
 
         if level == 3:
-            pdb.set_trace()
+            breakpoint()
 
         return
 
@@ -272,7 +287,7 @@ class GridUtils:
     def getVersion(self):
         '''Return the version number of this library'''
 
-        softwareRevision = "0.1"
+        softwareRevision = gridtools.__version__
 
         return softwareRevision
 
@@ -358,14 +373,19 @@ class GridUtils:
             module.
 
             The available levels are:
-
-            Level     Numeric value
-            CRITICAL  50
-            ERROR     40
-            WARNING   30
-            INFO      20
-            DEBUG     10
-            NOTSET    0
+                +----------+---------------+
+                | Level    | Numeric value |
+                +----------+---------------+
+                | CRITICAL | 50            |
+                +----------+---------------+
+                | ERROR    | 40            |
+                +----------+---------------+
+                | WARNING  | 30            |
+                +----------+---------------+
+                | INFO     | 20            |
+                +----------+---------------+
+                | DEBUG    | 10            |
+                +----------+---------------+
         '''
         if type(newLevel) == str:
             try:
@@ -392,13 +412,19 @@ class GridUtils:
             module.
 
             The available levels are:
-
-            Level     Numeric value
-            CRITICAL  50
-            ERROR     40
-            WARNING   30
-            INFO      20
-            DEBUG     10
+                +----------+---------------+
+                | Level    | Numeric value |
+                +----------+---------------+
+                | CRITICAL | 50            |
+                +----------+---------------+
+                | ERROR    | 40            |
+                +----------+---------------+
+                | WARNING  | 30            |
+                +----------+---------------+
+                | INFO     | 20            |
+                +----------+---------------+
+                | DEBUG    | 10            |
+                +----------+---------------+
         '''
         if type(newLevel) == str:
             try:
@@ -408,7 +434,8 @@ class GridUtils:
                 
         self.verboseLevel = newLevel
 
-    # Grid operations
+    # grid operations grid functions
+    # Grid Operations Grid Functions
 
     def clearGrid(self):
         '''Call this when you want to erase the current grid.  This also
@@ -418,47 +445,75 @@ class GridUtils:
 
         # If there are file resources open, close them first.
         if self.xrOpen:
-            self.closeDataset()
+            self.closeGrid()
 
         self.xrFilename = None
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
-        self.gridInfo = {}
-        self.gridInfo['dimensions'] = {}
+        self.xrChunks = None
+        self.gridInfo = dict()
+        self.gridInfo['dimensions'] = dict()
         self.clearGridParameters()
         self.resetPlotParameters()
 
-    def computeGridMetrics(self):
-        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area.'''
+    def computeGridMetricsCartesian(self):
+        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a
+        grid in cartesian coordinates.
+        '''
+        pass
+
+    def computeGridMetricsSpherical(self):
+        '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a
+        grid in spherical coordinates.
+        '''
 
         self.grid.attrs['grid_version'] = "0.2"
         self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
-        self.grid.attrs['history'] = "%s: created grid with GridTools library" % (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        self.grid.attrs['history'] = "%s: created grid with GridTools library" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
         self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
-        self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
-        self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
-        self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
-        self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
-        self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
-        self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
-        self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
-        self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
-        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+
+        # Add additional metadata if available
+        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        for metaTag in addMetadata:
+            if metaTag in self.gridInfo['gridParameters'].keys():
+                self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
+        #self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
+        #self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
+        #self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
+        #self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
+        #self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
+        #self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
+        #self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
+        #self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
 
         try:
-            os.system("conda list --explicit > package_versions.txt")
-            self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+            self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
         except:
-            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
+            self.grid.attrs['conda_env'] = "Conda environment not found."
 
+        try:
+            #os.system("conda list --explicit > package_versions.txt")
+            #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+            sysObj = sysinfo.SysInfo(grd=self)
+            cmd = "conda list --explicit"
+            (out, err, rc) = sysObj.runCommand(cmd)
+            self.grid.attrs['package_versions'] = out
+            #self.grid.attrs['package_versions'] = "/n".join(out)
+        except:
+            #raise
+            try:
+                self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+            except:
+                self.grid.attrs['conda_env'] = "Conda environment not found."
+
+            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
 
         try:
             response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
             self.grid.attrs['software_version'] =  print(response.json()["name"])
         except:
             self.grid.attrs['software_version'] = ""
-
-
 
         try:
             self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
@@ -483,9 +538,13 @@ class GridUtils:
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
-        self.grid.dx.attrs['units'] = 'meters'
+        self.grid['dx'].attrs['standard_name'] = 'grid_edge_x_distance'
+        self.grid['dx'].attrs['units'] = 'meters'
+        self.grid['dx'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['dx'] ) ).hexdigest()
         self.grid['dy'] = (('ny' , 'nxp'), R * spherical.angle_through_center( (lat[1:, :],lon[1:, :]), (lat[:-1,:  ],lon[:-1,:  ]) ))
-        self.grid.dy.attrs['units'] = 'meters'
+        self.grid['dy'].attrs['standard_name'] = 'grid_edge_y_distance'
+        self.grid['dy'].attrs['units'] = 'meters'
+        self.grid['dy'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['dy'] ) ).hexdigest()
 
         # Scaling by latitude?
         cos_lat = np.cos(np.radians(lat))
@@ -498,10 +557,15 @@ class GridUtils:
         angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
         angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
         self.grid['angle_dx'] = (('nyp', 'nxp'), angle_dx)
-        self.grid.angle_dx.attrs['units'] = 'radians'
+        #self.grid.angle_dx.attrs['standard_name'] = 'grid_vertex_x_angle_WRT_geographic_east'
+        #self.grid.angle_dx.attrs['units'] = 'degrees_east'
+        self.grid['angle_dx'].attrs['units'] = 'radians'
+        self.grid['angle_dx'].attrs['sha256'] = hashlib.sha256( np.array( angle_dx ) ).hexdigest()
 
         self.grid['area'] = (('ny','nx'), R * R * spherical.quad_area(lat, lon))
-        self.grid.area.attrs['units'] = 'meters^2'
+        self.grid['area'].attrs['standard_name'] = 'grid_cell_area'
+        self.grid['area'].attrs['units'] = 'm2'
+        self.grid['area'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['area'] ) ).hexdigest()
 
         return
 
@@ -552,7 +616,7 @@ class GridUtils:
 
         return projString
 
-    def makeGrid(self):
+    def makeGrid(self, setFilename=None):
         '''Using supplied grid parameters, populate a grid in memory.'''
 
         # New grid created flag
@@ -600,6 +664,15 @@ class GridUtils:
                 msg = 'ERROR: Grid parameter centerY must be -90.0 to +90.0.'
                 self.printMsg(msg, level=logging.ERROR)
                 return
+
+        # The centerUnits will determine the geometry type for the grid
+        if centerUnits == 'degrees':
+            geometryType = 'spherical'
+        else:
+            geometryType = 'cartesian'
+
+        # For MOM6, we set a default tile name
+        tileName = self.getGridParameter('tileName', default='tile1')
 
         # Review dx and dy: these must be set
         dx = self.getGridParameter('dx', default='Error')
@@ -691,9 +764,13 @@ class GridUtils:
                     (nxp, nyp) = lonGrid.shape
 
                     self.grid['x'] = (('nyp','nxp'), lonGrid)
-                    self.grid.x.attrs['units'] = 'degrees_east'
+                    self.grid['x'].attrs['standard_name'] = 'geographic_longitude'
+                    self.grid['x'].attrs['units'] = 'degrees_east'
+                    self.grid['x'].attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                     self.grid['y'] = (('nyp','nxp'), latGrid)
-                    self.grid.y.attrs['units'] = 'degrees_north'
+                    self.grid['y'].attrs['standard_name'] = 'geographic_latitude'
+                    self.grid['y'].attrs['units'] = 'degrees_north'
+                    self.grid['y'].attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                     newGridCreated = True
 
@@ -734,9 +811,13 @@ class GridUtils:
                         (nxp, nyp) = lonGrid.shape
 
                         self.grid['x'] = (('nyp','nxp'), lonGrid)
+                        self.grid.x.attrs['standard_name'] = 'geographic_longitude'
                         self.grid.x.attrs['units'] = 'degrees_east'
+                        self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                         self.grid['y'] = (('nyp','nxp'), latGrid)
+                        self.grid.y.attrs['standard_name'] = 'geographic_latitude'
                         self.grid.y.attrs['units'] = 'degrees_north'
+                        self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                         newGridCreated = True
                     
@@ -766,9 +847,13 @@ class GridUtils:
                         (nxp, nyp) = lonGrid.shape
 
                         self.grid['x'] = (('nyp','nxp'), lonGrid)
+                        self.grid.x.attrs['standard_name'] = 'geographic_longitude'
                         self.grid.x.attrs['units'] = 'degrees_east'
+                        self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
                         self.grid['y'] = (('nyp','nxp'), latGrid)
+                        self.grid.y.attrs['standard_name'] = 'geographic_latitude'
                         self.grid.y.attrs['units'] = 'degrees_north'
+                        self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                         newGridCreated = True
                     
@@ -787,9 +872,13 @@ class GridUtils:
             (nxp, nyp) = lonGrid.shape
 
             self.grid['x'] = (('nyp','nxp'), lonGrid)
+            self.grid.x.attrs['standard_name'] = 'geographic_longitude'
             self.grid.x.attrs['units'] = 'degrees_east'
+            self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
             self.grid['y'] = (('nyp','nxp'), latGrid)
+            self.grid.y.attrs['standard_name'] = 'geographic_latitude'
             self.grid.y.attrs['units'] = 'degrees_north'
+            self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
             newGridCreated = True
 
@@ -813,9 +902,13 @@ class GridUtils:
             (nxp, nyp) = lonGrid.shape
 
             self.grid['x'] = (('nyp','nxp'), lonGrid)
+            self.grid.x.attrs['standard_name'] = 'geographic_longitude'
             self.grid.x.attrs['units'] = 'degrees_east'
+            self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
             self.grid['y'] = (('nyp','nxp'), latGrid)
+            self.grid.y.attrs['standard_name'] = 'geographic_latitude'
             self.grid.y.attrs['units'] = 'degrees_north'
+            self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
             newGridCreated = True
 
@@ -870,9 +963,13 @@ class GridUtils:
             (nxp, nyp) = lonGrid.shape
 
             self.grid['x'] = (('nyp','nxp'), lonGrid)
+            self.grid.x.attrs['standard_name'] = 'geographic_longitude'
             self.grid.x.attrs['units'] = 'degrees_east'
+            self.grid.x.attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
             self.grid['y'] = (('nyp','nxp'), latGrid)
+            self.grid.y.attrs['standard_name'] = 'geographic_latitude'
             self.grid.y.attrs['units'] = 'degrees_north'
+            self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
             # This technique seems to return a Lambert Conformal Projection with the following properties
             # This only works if the grid does not overlap a polar point
@@ -885,6 +982,10 @@ class GridUtils:
             newGridCreated = True
 
         if newGridCreated:
+            # Fill in a tile name and geometry
+            self.grid['tile'] = tileName
+            self.grid.tile['geometry'] = geometryType
+
             # Generate a proj string
             try:
                 projString = self.formProjString(self.gridInfo['gridParameters'])
@@ -904,19 +1005,24 @@ class GridUtils:
             # Compute grid metrics
             if gridType == 'MOM6':
                 if gridMode == 2:
-                    self.computeGridMetrics()
+                    self.computeGridMetricsSpherical()
                 else:
                     msg = "NOTE: Grid metrics were not computed."
                     self.printMsg(msg, level=logging.INFO)
         else:
             msg = "WARNING: Grid generation failed."
             self.printMsg(msg, level=logging.WARNING)
+
+        # If the grid was just created, the user can provide using setFilename
+        if setFilename:
+            self.xrFilename = setFilename
                                 
-    # Original grid generation functions provided by Niki Zadeh
+    # Original grid generation functions from Niki Zadeh
+    # Replace above comment with attribution in each function to mark lineage
 
     # Mercator
     def rotate_u(self, x , y, z, ux, uy, uz, theta):
-        """Rotate by angle θ around a general axis (ux,uy,uz)."""
+        """Rotate by angle :math:`\\theta` around a general axis (ux,uy,uz)."""
         c=np.cos(theta)
         s=np.sin(theta)
 
@@ -1177,7 +1283,10 @@ class GridUtils:
     # Rebuilt grid generation routines
     
     def generate_regional_spherical_meters(self, cUnits, cX, cY, dx, dxU, dy, dyU, tilt, grX, grXU, grY, grYU, pD, **kwargs):
-        '''Create a grid in the spherical projection using grid distances in meters.'''
+        '''Create a grid in the spherical projection using grid distances in meters.
+
+        This function uses code that performs projection transformation of 2D grids. :cite:p:`Dussin_2020_regrid_weights_bedmachine_gebco`
+        '''
 
         gType = None
         if 'gridType' in kwargs.keys():
@@ -1284,79 +1393,295 @@ class GridUtils:
         
         return lam_,phi_
 
-    # xarray Dataset operations
+    # xarray grid operations grid functions
+    # Xarray Grid Operations Grid Functions
     
-    def closeDataset(self):
+    def closeGrid(self):
         '''Closes and open dataset file pointer.'''
         if self.xrOpen:
             self.xrDS.close()
             self.xrOpen = False
-            
-    def openDataset(self, inputFilename):
-        '''Open a grid file.  The file pointer is internal to the object.
-        To access it, use: obj.xrDS or obj.grid'''
-        # check if we have a vailid inputFilename
-        if not(os.path.isfile(inputFilename)):
-            self.printMsg("Dataset not found: %s" % (inputFilename), level=logging.INFO)
+
+    def convertGrid(self, target, **kwargs):
+        '''Convert current grid to another grid type.
+
+        :param target: name of new grid format
+        :type target: string
+        :return: none
+        :rtype: none
+
+        Supported grid conversions:
+            +--------+--------+---------------------------------------------------+
+            | SOURCE | TARGET | CODE CITATIONS                                    |
+            +--------+--------+---------------------------------------------------+
+            | ROMS   | MOM6   | :cite:p:`Ilicak_2020_ROMS_to_MOM6`                |
+            +--------+--------+---------------------------------------------------+
+
+        **Keyword arguments**:
+
+            * *writeTopography* (``boolean``) -- set True to write topographic grid to a file. Default: False
+            * *topographyFilename* (``string``) -- filename used to write topographic grid. Default: "ocean_topog.nc"
+            * *writeMosaic* (``boolean``) -- set True to write the mosaic file. Default: False
+            * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
+            * *oceanGridFilename* (``string``) -- filename for ocean grid file. Default: "ocean_hgrid.nc"
+            * *writeLandmask* (``boolean``) -- set True to write land mask file. Default: False
+            * *landmaskFilename* (``string``) -- filename used to write the land mask. Default: "land_mask.nc"
+            * *writeOceanmask* (``boolean``) -- set True to write ocean mask file. Default: False
+            * *oceanmaskFilename* (``string``) -- filename used to write the ocean mask. Default: "ocean_mask.nc"
+            * *tileName* (``string``) -- name to assign to the solo tile. Default: "tile1"
+            * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
+            * *MASKING_DEPTH* (``float``) -- masking depth of ocean in meters. Default: 0.0
+            * *MAXIMUM_DEPTH* (``float``) -- maximum depth of ocean in meters. Default: -99999.0
+            * *writeCouplerMosaic* (``boolean``) -- set False to skip creation of coupler mosaic file. Default: False
+            * *couplerMosaicFilename* (``string``) -- set False to skip creation of coupler mosaic file. Default: "mosaic.nc"
+            * *writeExchangeGrids* (``boolean``) -- set False to skip creation of exchange grids. Default: False
+            * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
+            * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
+            * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
+
+        **Keyword arguments (ROMS)**:
+
+            * *topographyVariable* (``string``) -- grid name for ROMS topography containing depths.  Some ROMS
+              grids also contain a `hraw` which might be useful. Default: h
+
+        .. note::
+
+            In the original ROMS to MOM6 conversion script, any land mask points are masked to a depth of zero(0).
+            This version sets the depth to the `MASKING_DEPTH`.  If the mask or clamping depth is known from the
+            ROMS grid, please set `MASKING_DEPTH` appropriately or the land mask depths will be set to zero(0)
+            which is the default.
+        '''
+
+        # Define the two parameters we need to perform a conversion
+        sourceGrid = None
+        targetGrid = None
+
+        if not('type' in self.gridInfo.keys()):
+            msg = ('ERROR: No current grid defined.  Please create or read a grid before converting.')
+            self.printMsg(msg, level=logging.ERROR)
             return
-                
+
+        # Match source grids first, then the available targets
+        if self.gridInfo['type'] == 'ROMS':
+            sourceGrid = self.gridInfo['type']
+            if target in ['MOM6']:
+                targetGrid = target
+
+        if not(sourceGrid) or not(targetGrid):
+            msg = ('ERROR: The source grid (%s) is not supported or is incompatible with the target grid (%s).' %\
+                (sourceGrid, target))
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        # Import source and target grid module types
+        sourceGridModule = sourceGrid.lower()
+        targetGridModule = targetGrid.lower()
+
+        try:
+            mdlSource = importlib.import_module('gridtools.grids.%s' % (sourceGridModule))
+        except:
+            msg = ('ERROR: Failed to load grid module for %s.' % (sourceGrid))
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        try:
+            mdlTarget = importlib.import_module('gridtools.grids.%s' % (targetGridModule))
+        except:
+            msg = ('ERROR: Failed to load grid module for %s.' % (targetGrid))
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        # Check kwargs
+
+        # Check and set any defaults to kwargs
+        utils.checkArgument(kwargs, 'writeTopography', False)
+        utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        utils.checkArgument(kwargs, 'writeMosaic', False)
+        utils.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
+        utils.checkArgument(kwargs, 'oceanGridFilename', "ocean_hgrid.nc")
+        utils.checkArgument(kwargs, 'writeLandmask', False)
+        utils.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
+        utils.checkArgument(kwargs, 'writeOceanmask', False)
+        utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
+        utils.checkArgument(kwargs, 'tileName', "tile1")
+        utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0)
+        utils.checkArgument(kwargs, 'writeExchangeGrids', False)
+        utils.checkArgument(kwargs, 'writeCouplerMosaic', False)
+        utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
+        utils.checkArgument(kwargs, 'overwrite', False)
+        utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+
+        # ROMS specific kwargs
+        utils.checkArgument(kwargs, 'topographyVariable', 'h')
+
+        # Sanity checks
+        if not(sanity.saneDepthOptions(**kwargs)):
+            msg = ('ERROR: Invalid *_DEPTH options passed. (MAXIMUM_DEPTH(%f) <= MINIMUM_DEPTH(%f) <= MASKING_DEPTH(%f))' %\
+                (kwargs['MAXIMUM_DEPTH'], kwargs['MINIMUM_DEPTH'], kwargs['MASKING_DEPTH']))
+            self.printMsg(msg, level=logging.INFO)
+            return
+
+        # Create a templating mechanism later, for now perform direct calls into each
+        # model type based on current grid type and target.
+
+        # ROMS to MOM6: :cite:p:`Ilicak_2020_ROMS_to_MOM6`
+        if sourceGrid == 'ROMS' and targetGrid == 'MOM6':
+            # Obtain respective class objects so we can access the full
+            # suite of class functions.
+            roms = mdlSource.ROMS()
+            mom6 = mdlTarget.MOM6()
+            # roms_grid = read_ROMS_grid(roms_grid_filename)
+            roms.read_ROMS_grid(self)
+            # roms_grid = trim_ROMS_grid(roms_grid)
+            roms.trim_ROMS_grid()
+            # mom6_grid = convert_ROMS_to_MOM6(mom6_grid, roms_grid)
+            mom6.setup_MOM6_grid(**kwargs)
+            romsGrid = roms.getGrid()
+            mom6.convert_ROMS_to_MOM6(romsGrid, **kwargs)
+            # Special update to kwargs: this is not seen by higher level calls
+            # It is needed here for a corner case to support makeSoloMosaic()
+            kwargs['topographyGrid'] = mom6.mom6_grid['cell_grid']['depth']
+            # mom6_grid = approximate_MOM6_grid_metrics(mom6_grid)
+            mom6.approximate_MOM6_grid_metrics()
+
+            # Replace the grid
+            self.grid = mom6.getGrid()
+            self.gridInfo['type'] = targetGrid
+
+            # There is another routine that can be used to formally save the grid
+            # write_MOM6_supergrid_file(mom6_grid)
+            if kwargs['writeTopography']:
+                # write_MOM6_topography_file(mom6_grid)
+                mom6.write_MOM6_topography_file(self, **kwargs)
+            if kwargs['writeMosaic']:
+                # write_MOM6_solo_mosaic_file(mom6_grid)
+                mom6.write_MOM6_solo_mosaic_file(self, **kwargs)
+            if kwargs['writeLandmask']:
+                # write_MOM6_land_mask_file(mom6_grid)
+                mom6.write_MOM6_land_mask_file(self, **kwargs)
+            if kwargs['writeOceanmask']:
+                # write_MOM6_ocean_mask_file(mom6_grid)
+                mom6.write_MOM6_ocean_mask_file(self, **kwargs)
+            if kwargs['writeExchangeGrids']:
+                # write_MOM6_exchange_grid_file(mom6_grid, 'atmos',  'land')
+                # write_MOM6_exchange_grid_file(mom6_grid, 'atmos', 'ocean')
+                # write_MOM6_exchange_grid_file(mom6_grid,  'land', 'ocean')
+                mom6.write_MOM6_exchange_grid_files(self, **kwargs)
+            if kwargs['writeCouplerMosaic']:
+                # write_MOM6_coupler_mosaic_file(mom6_grid)
+                mom6.write_MOM6_coupler_mosaic_file(self, **kwargs)
+
+            msg = ('INFO: Successful conversion of grid (%s => %s).' % (sourceGrid, targetGrid))
+            self.printMsg(msg, level=logging.INFO)
+            return
+            
+    def openGrid(self, inputUrl, chunks=None):
+        '''Open a grid file.  The file pointer is internal to the gridtools object.
+
+	Specify with file: or OpenDAP (http://, https://) or ds:.
+
+        To access it, use: obj.xrDS or obj.grid'''
+
         # If we have a file pointer and it is open, close it and re-open the new file
         if self.xrOpen:
-            self.closeDataset()
+            self.closeGrid()
             
         try:
-            self.xrDS = xr.open_dataset(inputFilename)
+            if chunks:
+                self.xrDS = self.openDataset(inputUrl, chunks=self.xrChunks)
+            else:
+                self.xrDS = self.openDataset(inputUrl)
             self.xrOpen = True
-            self.xrFilename = inputFilename
+            self.xrFilename = inputUrl
         except:
-            msg = "ERROR: Unable to load dataset: %s" % (inputFilename)
+            msg = "ERROR: Unable to load grid: %s" % (inputUrl)
             self.printMsg(msg, level=logging.ERROR)
             self.xrDS = None
             self.xrOpen = False
-            # Stop on error to load a file
-            self.debugMsg("")
+            # If in DEBUG mode, stop on error to load the inputUrl
+            self.debugMsg("DEBUG: Stopping on read error of grid file.")
             
     def readGrid(self, opts={'type': 'MOM6'}, local=None, localFilename=None):
         '''Read a grid.
         
-        This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc)
+        This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc).
+        This routine does not verify the read grid vs. type of grid specified.
         '''
         # if a dataset is being loaded via readGrid(local=), close any existing dataset
         if local:
             if self.xrOpen:
-                self.closeDataset()
+                self.closeGrid()
             self.xrOpen = True
             self.xrDS = local
             self.grid = local
         else:
             if self.xrOpen:
-                if opts['type'] == 'MOM6':
-                    # Save grid metadata
-                    self.gridInfo['type'] = opts['type']
-                    self.grid = self.xrDS
+                # Save grid metadata
+                self.gridInfo['type'] = opts['type']
+                self.grid = self.xrDS
         
         if localFilename:
             self.xrFilename = localFilename
 
-    def removeFillValueAttributes(self):
+    def removeFillValueAttributes(self, data=None, stringVars=None):
+        '''Helper function to format the netCDF file to emulate the
+        current styles.
 
-        ncEncoding = {}
-        ncVars = list(self.grid.variables)
+        :param data: variables to format
+        :type data: xarray
+        :param stringVars: dictionary of string variables and lengths
+        :type stringVars: dict()
+        :return: netCDF encoding
+        :rtype: dict()
+
+        For *data*, the ``_FillValue`` is masked.
+
+        For *stringVars*, supply a string length.  e.g. ``{'tile': 255}``
+        This will result in an encoding of ``{'dtype': 'S255', 'char_dim_name': 'string'}``.
+
+        '''
+
+        ncEncoding = dict()
+        if data:
+            ncVars = list(data.variables)
+        else:
+            ncVars = list(self.grid.variables)
+
         for ncVar in ncVars:
             ncEncoding[ncVar] = {'_FillValue': None}
 
-        return ncEncoding
+        if stringVars:
+            for ncVar in stringVars.keys():
+                if ncVar in ncVars:
+                    ncEncoding[ncVar] = {'dtype': 'S%d' % (stringVars[ncVar]), 'char_dim_name': 'string'}
 
+        return ncEncoding
     
-    def saveGrid(self, filename=None):
+    def saveGrid(self, filename=None, directory=None):
         '''
         This operation is destructive using the last known filename which can be overridden.
         '''
         if filename:
+            if directory:
+                filename = os.path.join(directory, filename)
             self.xrFilename = filename
-            if self.grid.x.attrs['units'] == 'degrees_east':
-                self.grid.x.values = np.where(self.grid.x.values>180, self.grid.x.values-360, self.grid.x.values)
-            self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+        else:
+            if not(self.xrFilename):
+                msg = ("ERROR: Save grid failed.  A grid filename was not specified.")
+                grd.printMsg(msg, logging.ERROR)
+                return
+
+        # Generic longitude check
+        if self.grid['x'].attrs['units'] == 'degrees_east':
+            self.grid['x'].values = np.where(self.grid['x'].values>180, self.grid['x'].values-360, self.grid['x'].values)
+
+        #Duplicate
+        #self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+
+        # Save the grid here
         try:
             self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
             msg = "Successfully wrote netCDF file to %s" % (self.xrFilename)
@@ -1364,32 +1689,128 @@ class GridUtils:
         except:
             msg = "Failed to write netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
+
+    def makeSoloMosaic(self, **kwargs):
+        '''
+        This replicates some of the processes of ``make_solo_mosaic`` from :cite:p:`GFDL_MSG_2021_FRE_nctools`.
+        This routine is also based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
+
+        A grid must be created or read.  This function has the following keyword arguments
+        and default values.  This is a MOM6 specific function to write out various files depending on
+        arguments passed.
+
+        **Keyword arguments**:
+
+            * *topographyGrid* (``xarray``) -- topographic grid to be used with the model grid. REQUIRED. Default: None
+            * *topographyFilename* (``string``) -- filename used to write topographic grid. Default: "ocean_topog.nc"
+            * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
+            * *oceanGridFilename* (``string``) -- filename for ocean grid file. Default: "ocean_hgrid.nc"
+            * *writeLandmask* (``boolean``) -- set True to write land mask file. Default: False
+            * *landmaskFilename* (``string``) -- filename used to write the land mask. Default: "land_mask.nc"
+            * *writeOceanmask* (``boolean``) -- set True to write ocean mask file. Default: False
+            * *oceanmaskFilename* (``string``) -- filename used to write the ocean mask. Default: "ocean_mask.nc"
+            * *tileName* (``string``) -- name to assign to the solo tile. Default: "tile1"
+            * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
+            * *MASKING_DEPTH* (``float``) -- masking depth of ocean in meters. Default: 0.0
+            * *MAXIMUM_DEPTH* (``float``) -- maximum depth of ocean in meters. Default: -99999.0
+            * *writeCouplerMosaic* (``boolean``) -- set False to skip creation of coupler mosaic file. Default: True
+            * *couplerMosaicFilename* (``string``) -- set False to skip creation of coupler mosaic file. Default: "mosaic.nc"
+            * *writeExchangeGrids* (``boolean``) -- set False to skip creation of exchange grids. Default: True
+            * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
+            * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
+            * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
+
+        .. note::
+            Using the defaults, this routine will write the following files to the ``INPUT`` directory with
+            one tile named ``tile1``:
+
+                * ``mosaic.nc``
+                * ``ocean_mosaic.nc``
+                * ``ocean_topog.nc``
+                * ``atmos_mosaic_tile1Xland_mosaic_tile1.nc``
+                * ``atmos_mosaic_tile1Xocean_mosaic_tile1.nc``
+                * ``land_mosaic_tile1Xocean_mosaic_tile1.nc``
+
+            If any of these files exist, the file will **NOT** be replaced and a warning will be issued.
+
+            For *oceanGridFile*, if the filename is not provided, the routine will attempt to use
+            the name provided when the grid was read.  The filename may need to be set if the grid
+            was just constructed using the library.
+        '''
+
+        # Check and set any defaults to kwargs
+        utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        utils.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
+        utils.checkArgument(kwargs, 'oceanGridFilename', "ocean_hgrid.nc")
+        utils.checkArgument(kwargs, 'writeLandmask', False)
+        utils.checkArgument(kwargs, 'landmaskFilename', "land_mask.nc")
+        utils.checkArgument(kwargs, 'writeOceanmask', False)
+        utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
+        utils.checkArgument(kwargs, 'tileName', "tile1")
+        utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0)
+        utils.checkArgument(kwargs, 'writeExchangeGrids', True)
+        utils.checkArgument(kwargs, 'writeCouplerMosaic', True)
+        utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
+        utils.checkArgument(kwargs, 'overwrite', False)
+        utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
+        utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+
+        if len(self.grid.variables) == 0:
+            # No grid found
+            msg = ("ERROR: A grid first must be defined by reading and existing grid or creating a new grid.")
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
+        mdl = importlib.import_module('gridtools.grids.mom6')
+        mom6 = mdl.MOM6()
+        # Supergrid is stored via GridUtils.saveGrid()
+        mom6.write_MOM6_topography_file(self, **kwargs)
+        mom6.write_MOM6_solo_mosaic_file(self, **kwargs)
+        if kwargs['writeLandmask']:
+            mom6.write_MOM6_land_mask_file(self, **kwargs)
+        if kwargs['writeOceanmask']:
+            mom6.write_MOM6_ocean_mask_file(self, **kwargs)
+        if kwargs['writeExchangeGrids']:
+            mom6.write_MOM6_exchange_grid_files(self, **kwargs)
+        if kwargs['writeCouplerMosaic']:
+            mom6.write_MOM6_coupler_mosaic_file(self, **kwargs)
     
+    # plot operations plot functions
+    # Plot Operations Plot Functions
     # Plotting specific functions
     # These functions should not care what grid is loaded. 
     # Plotting is affected by plotParameters and gridParameters.
 
-    def newFigure(self, figsize=None):
+    def newFigure(self, figsize=None, dpi=None):
         '''Establish a new matplotlib figure.'''
-        
+
         if figsize:
-            figsize = self.getPlotParameter('figsize', default=figsize)             
+            figsize = self.getPlotParameter('figsize', default=figsize)
         else:
             figsize = self.getPlotParameter('figsize', default=self.plotParameterDefaults['figsize'])
-            
-        fig = Figure(figsize=figsize)
+
+        if dpi:
+            dpi = self.getPlotParameter('dpi', default=dpi)
+        else:
+            dpi = self.getPlotParameter('dpi', default=self.plotParameterDefaults['dpi'])
+
+        fig = Figure(figsize=figsize, dpi=dpi)
         
+        #dpiVal = mpl.rcParams['figure.dpi']
+        #print(dpiVal)
+
         return fig
     
-    # insert plotGrid.ipynb here
-    
-    def plotGrid(self):
-        '''Perform a plot operation.
+    def plotGrid(self, **kwargs):
+        '''Perform a plot operation.  This function supports plotting a variable from a data
+        source or the model grid that was loaded or created.  A plot may contain both.
 
         :return: Returns a tuple of matplotlib objects (figure, axes)
         :rtype: tuple
 
-        To plot a grid, you first must have the projection set.
+        In general, a projection is necessary to plot a variable or model grid.
 
         :Example:
 
@@ -1402,16 +1823,37 @@ class GridUtils:
                         ...other projection options...,
                     },
         >>> grd.plotGrid()
+
+        **Keyword arguments**:
+
+            * *showModelGrid* (``boolean``) -- set False to hide the model grid. Default: True
+            * *plotVariables* (``dict()``) -- one or more variables and plot parameters. Default: None
+
+        **Keyword arguments for plotVariables**:
+
+            * *vals* (``xarray``) -- one dataset, variable or grid of information.
+            * *cmap* (``str or Colormap``) -- A Colormap instance or
+              registered colormap name. Default: ``rcParams["image.cmap"]`` or ``viridis``
+            * *norm* (``Normalize``) -- A Normalize instance. Default:
+              The data range is mapped to the colorbar range using linear scaling.
+            * *levels* (``list()``) -- Discrete levels for plotting. Default: None
+            * *cbar_kwargs* (``dict()``) -- Keyword arguments that are
+              applied to the colorbar. See: `matplotlib.figure.Figure.colorbar() <https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure.colorbar>`_
+              Default: dict()
+
+        Useful information on `plot shading <https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py>`_ for grid cell or centered over a grid point.  Useful example for `adjusting the colorbar <https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py>`_ and using a `different colormap <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`_.
         '''
 
-        #if not('shape' in self.gridInfo.keys()):
-        #    warnings.warn("Unable to plot the grid.  Missing its 'shape'.")
-        #    return (None, None)
+        # Set defaults for keyword arguments
+        if not('showModelGrid' in kwargs.keys()):
+            kwargs['showModelGrid'] = True
+        if not('plotVariables' in kwargs.keys()):
+            kwargs['plotVariables'] = dict()
 
         plotProjection = self.getPlotParameter('name', subKey='projection', default=None)
 
         if not(plotProjection):
-            msg = "Please set the plot 'projection' parameter 'name'"
+            msg = "ERROR: Please set the plot 'projection' parameter 'name'."
             self.printMsg(msg, level=logging.ERROR)
             return (None, None)
 
@@ -1477,39 +1919,111 @@ class GridUtils:
             nj = self.grid.dims['nyp']
             ni = self.grid.dims['nxp']
         except:
-            msg = "ERROR: Unable to plot.  Missing grid dimensions."
+            msg = "ERROR: Unable to plot. Missing grid dimensions."
             self.printMsg(msg, level=logging.ERROR)
             return (None, None)
 
-        plotAllVertices = self.getPlotParameter('showGridCells', default=False)
         iColor = self.getPlotParameter('iColor', default='k')
         jColor = self.getPlotParameter('jColor', default='k')
         transform = self.getPlotParameter('transform', default=cartopy.crs.Geodetic())
         iLinewidth = self.getPlotParameter('iLinewidth', default=1.0)
         jLinewidth = self.getPlotParameter('jLinewidth', default=1.0)
 
-        # plotting vertices
-        # For a non conforming projection, we have to plot every line between the points of each grid box
-        for i in range(0,ni+1,2):
-            if (i == 0 or i == (ni-1)) or plotAllVertices:
-                if i <= ni-1:
-                    ax.plot(self.grid['x'][:,i], self.grid['y'][:,i], iColor, linewidth=iLinewidth, transform=transform)
-        for j in range(0,nj+1,2):
-            if (j == 0 or j == (nj-1)) or plotAllVertices:
-                if j <= nj-1:
-                    ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
+        # Plot the model grid only if specified
+        if kwargs['showModelGrid']:
+            plotAllVertices = self.getPlotParameter('showGridCells', default=False)
+            #self.printMsg("Current grid parameters:", level=logging.INFO)
+
+            # plotting vertices
+            # For a non conforming projection, we have to plot every line between
+            # the points of each grid box
+            for i in range(0,ni+1,2):
+                if (i == 0 or i == (ni-1)) or plotAllVertices:
+                    if i <= ni-1:
+                        ax.plot(self.grid['x'][:,i], self.grid['y'][:,i], iColor, linewidth=iLinewidth, transform=transform)
+            for j in range(0,nj+1,2):
+                if (j == 0 or j == (nj-1)) or plotAllVertices:
+                    if j <= nj-1:
+                        ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
+
+        # Loop through provided variables
+        if kwargs['plotVariables']:
+            for pVar in kwargs['plotVariables'].keys():
+                ds = xr.Dataset()
+                ds[pVar] = (('ny','nx'), kwargs['plotVariables'][pVar]['values'])
+                s1 = ds[pVar].shape
+                s2 = self.grid['x'].shape
+                # See if we are on the same grid, if not assume the variable to plot was
+                # on the regular grid and subset our supergrid to a regular grid for plotting
+                if s1 == s2:
+                    ds['x'] = (('ny','nx'), self.grid['x'])
+                    ds['y'] = (('ny','nx'), self.grid['y'])
+                else:
+                    ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2])
+                    ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2])
+
+                # xarray plot needs coordinate variables for lon and lat
+                ds = ds.set_coords(['y', 'x'])
+
+                # Set cmap, norm, levels
+                cmap = self.setPlotCMap(kwargs['plotVariables'][pVar])
+                norm = self.setPlotNorm(kwargs['plotVariables'][pVar])
+                levels = self.setPlotLevels(kwargs['plotVariables'][pVar])
+                cbar_kwargs = self.setPlotCbarkwargs(kwargs['plotVariables'][pVar])
+
+                ds[pVar].plot(x='x', y='y', ax=ax, transform=transform, cmap=cmap,
+                    norm=norm, levels=levels, cbar_kwargs=cbar_kwargs)
+
+                # Configure plot parameters, title is covered up by the plot?
+                ax = self.updateAxes(ax, kwargs['plotVariables'][pVar])
+
+                #breakpoint()
 
         return f, ax
 
-    # Grid parameter operations
+    def setPlotCMap(self, varArgs):
+        '''Set user defined color map or use matplotlib default.'''
+        if 'cmap' in varArgs.keys():
+            return varArgs['cmap']
+
+        return mpl.cm.viridis
+
+    def setPlotNorm(self, varArgs):
+        if 'norm' in varArgs.keys():
+            return varArgs['norm']
+
+        return None
+
+    def setPlotLevels(self, varArgs):
+        if 'levels' in varArgs.keys():
+            return varArgs['levels']
+
+        return None
+
+    def setPlotCbarkwargs(self, varArgs):
+        if 'cbar_kwargs' in varArgs.keys():
+            return varArgs['cbar_kwargs']
+
+        return dict()
+
+    def updateAxes(self, ax, varArgs):
+        '''Apply figure options to axes based on parameters passed to variable.'''
+
+        if 'title' in varArgs.keys():
+            ax.set_title(varArgs['title'])
+
+        return ax
+
+    # grid parameter operations grid parameter functions
+    # Grid Parameter Operations Grid Parameter Functions
 
     def clearGridParameters(self):
         '''Clear grid parameters.  This does not erase any grid data.'''
-        self.gridInfo['gridParameters'] = {}
+        self.gridInfo['gridParameters'] = dict()
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
     def deleteGridParameters(self, gList, subKey=None):
-        """This deletes a given list of grid parameters."""
+        '''This deletes a given list of grid parameters.'''
 
         # Top level subkeys
         if subKey:
@@ -1547,56 +2061,64 @@ class GridUtils:
     
         :param gridParameters: grid parameters to set or update
         :type gridParameters: dictionary
-        :param subkey: an entry in gridParameters that contains a dictionary of information to set or update
+        :param subKey: an entry in gridParameters that contains a dictionary of information to set or update
         :type subKey: string
         :return: none
         :rtype: none
         
         .. note::
             Core gridParameter list.  See other grid functions for other potential options.  
-            Defaults are marked with an asterisk(*) below.  See the user manual for more
+            Defaults are **bold**.  See the user manual for more
             details.
             
-                'centerUnits': Grid center point units ['degrees'(*), 'meters']
-                'centerX': Grid center in the j direction [float]
-                'centerY': Grid center in the i direction [float]
-                'dx': grid length in the j direction [float]
-                'dy': grid length in the i direction [float]
-                'dxUnits': grid length units ['degrees'(*), 'meters']
-                'dyUnits': grid length units ['degrees'(*), 'meters']
-                'nx': number of grid points along the j direction [integer]
-                'ny': number of grid points along the i direction [integer]
-                'tilt': degrees to rotate the grid [float, only available in LambertConformalConic]
-                'gridResolution': grid cell size in i and j direction [float]
-                'gridResolutionX': grid cell size in the j direction [float]
-                'gridResolutionY': grid cell size in the i direction [float]
-                'gridResoultionUnits': grid cell units in the i and j direction ['degrees'(*), 'meters']
-                'gridResoultionXUnits': grid cell units in the j direction ['degrees'(*), 'meters']
-                'gridResoultionYUnits': grid cell units in the i direction ['degrees'(*), 'meters']
+            **Primary keys**
 
-                
-                SUBKEY: 'projection' (mostly follows proj.org terminology)
-                    'name': Grid projection ['LambertConformalConic','Mercator','Stereographic']
-                    'lat_0': Latitude of projection center [degrees, 0.0(*)]
-                    'lat_1': First standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_2': Second standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_ts': Latitude of true scale. Defines the latitude where scale is not distorted.
-                              Takes precedence over k_0 if both options are used together.
-                              For stereographic, if not set, will default to lat_0.
-                    'lon_0': Longitude of projection center [degrees, 0.0(*)]
-                    'ellps': [GRS80(*)]
-                    'R': Radius of the sphere given in meters.
-                    'x_0': False easting (meters, 0.0(*))
-                    'y_0': False northing (meters, 0.0(*))
-                    'k_0': Depending on projection, this value determines the scale factor for natural origin or the ellipsoid (1.0(*))
-                
-                MOM6 specific options:
-                
-                'gridMode': 2 = supergrid(*); 1 = actual grid [integer, 1 or 2(*)]
+            * *centerUnits* (``string``) -- Grid center point units [**'degrees'**, 'meters']
+            * *centerX* (``float``) -- Grid center in the j direction
+            * *centerY* (``float``) -- Grid center in the i direction
+            * *dx* (``float``) -- grid length in the j direction
+            * *dy* (``float``) -- grid length in the i direction
+            * *dxUnits* (``string``) -- grid length units [**'degrees'**, 'meters']
+            * *dyUnits* (``string``) -- grid length units [**'degrees'**, 'meters']
+            * *nx* (``integer``) -- number of grid points along the j direction
+            * *ny* (``integer``) -- number of grid points along the i direction
+            * *tilt* (``float``) -- degrees to rotate the grid (*LambertConformalConic only*)
+            * *gridResolution* (``float``) -- grid cell size in i and j direction
+            * *gridResolutionX* (``float``) -- grid cell size in the j direction
+            * *gridResolutionY* (``float``) -- grid cell size in the i direction
+            * *gridResoultionUnits* (``string``) -- grid cell units in the i and j direction [**'degrees'**, 'meters']
+            * *gridResoultionXUnits* (``string``) -- grid cell units in the j direction [**'degrees'**, 'meters']
+            * *gridResoultionYUnits* (``string``) -- grid cell units in the i direction [**'degrees'**, 'meters']
 
-            Not to be confused with plotParameters which control how this grid or other
-            information is plotted.  For instance, the grid projection and the requested plot
-            can be in different projections.
+            **subKey 'projection'**
+
+            * *name* (``string``) -- Grid projection ['LambertConformalConic','Mercator','Stereographic']
+            * *lat_0* (``float degrees``) -- Latitude of projection center [**0.0**]
+            * *lat_1* (``float degrees``) -- First standard parallel (latitude) [**0.0**]
+            * *lat_2* (``float degrees``) -- Second standard parallel (latitude) [**0.0**]
+            * *lat_ts* (``float degrees``) -- Latitude of true scale. Defines the latitude where scale is not distorted.
+              Takes precedence over ``k_0`` if both options are used together.
+              For stereographic, if not set, will default to ``lat_0``.
+            * *lon_0* (``float degrees``) -- Longitude of projection center [**0.0**]
+            * *ellps* (``string``) -- See ``proj -le`` for a list of available ellipsoids [**'GRS80'**]
+            * *R'* (``float meters``) -- Radius of the sphere given in meters. If both R and ellps are given, R takes precedence.
+            * *x_0* (``float meters``) -- False easting [**0.0**]
+            * *y_0* (``float meters``) -- False northing [**0.0**]
+            * *k_0* (``float``) -- Depending on projection, this value determines the
+              scale factor for natural origin or the ellipsoid [**1.0**]
+
+            The subkey 'projection' mostly follows proj.org terminology for any giving projection.
+            See: `Lambert Conformal Conic <https://proj.org/operations/projections/lcc.html>`_,
+            `Mercator <https://proj.org/operations/projections/merc.html>`_ and
+            `Stereographic <https://proj.org/operations/projections/stere.html>`_ for more details.
+                
+            :MOM6 specific options:
+                * *gridMode* (``integer``) -- 2 = supergrid(*); 1 = actual grid [1 or **2**]
+
+        .. warning::
+            These options are similar to :func:`setPlotParameters` which control how this
+            grid or other information is plotted.  For instance, the **grid** projection and
+            the **plot** projection can be in *different* projections.
             
         """
         
@@ -1624,7 +2146,8 @@ class GridUtils:
         else:
             self.printMsg("No grid parameters found.", level=logging.ERROR)
     
-    # Plot parameter operations
+    # plot parameter operations plot parameter routines
+    # Plot Parameter Operations Plot Parameter Routines
         
     def deletePlotParameters(self, pList, subKey=None):
         """This deletes a given list of plot parameters."""
@@ -1686,7 +2209,9 @@ class GridUtils:
             self.printMsg("No plot parameters found.", level=logging.INFO)
 
     def setPlotParameters(self, plotParameters, subKey=None):
-        """A generic method for setting plotting parameters using dictionary arguments.
+        """A generic method for setting plotting parameters using dictionary arguments.  These
+        parameters are applied to plots using the grid or any requested field.  The **grid**
+        projection may be different than the requested **plot** projection.
 
         :param plotParameters: plot parameters to set or update
         :type plotParameters: dictionary
@@ -1696,38 +2221,60 @@ class GridUtils:
         :rtype: none
         
         .. note::
-            Plot parameters persist for as long as the python object exists.
+            Plot parameters persist for as long as the python :class:`GridUtils` object exists.
 
             See the user manual for additional details.
             
-                'figsize': tells matplotlib the figure size [width, height in inches (5.0, 3.75)]
-                'extent': [x0, x1, y0, y1] map extent of given coordinate system (see extentCRS) [default is []]
-                    If no extent is given, [], then set_global() is used. 
-                    REF: https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html
-                'extentCRS': cartopy crs [cartopy.crs.PlateCarree()] 
-                    You must have the cartopy.crs module loaded to change this setting.
-                'showGrid': show the grid outline [True(*)/False]
-                'showGridCells': show the grid cells [True/False(*)]
-                'showSupergrid': show the MOM6 supergrid cells [True/False(*)]
-                'title': add a title to the plot [None(*)]
-                'iColor': matplotlib color for i vertices ['k'(*) black]
-                'jColor': matplotlib color for j vertices ['k'(*) black]
-                'iLinewidth': matplotlib linewidth for i vertices [points: 1.0(*)]
-                'jLinewidth': matplotlib linewidth for j vertices [points: 1.0(*)]
+            **Primary keys**
 
-                SUBKEY: 'projection' (mostly follows proj.org terminology)
-                    'name': Grid projection ['LambertConformalConic','Mercator','Stereographic']
-                    'lat_0': Latitude of projection center [degrees, 0.0(*)]
-                    'lat_1': First standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_2': Second standard parallel (latitude) [degrees, 0.0(*)]
-                    'lat_ts': Latitude of true scale. 
-                    'lon_0': Longitude of projection center [degrees, 0.0(*)]
-                    'ellps': See proj -le for a list of available ellipsoids [GRS80(*)]
-                    'R': Radius of the sphere given in meters.  If both R and ellps are given, R takes precedence.
-                    'x_0': False easting (meters, 0.0(*))
-                    'y_0': False northing (meters, 0.0(*))
-                    'k_0': Depending on projection, this value determines the scale factor for natural origin or the ellipsoid (1.0(*))
+            * *figsize* (``(float inches, float inches)`` -- matplotlib figure size [width, height (**5.0, 3.75**)]
+            * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see extentCRS) [**[]**]
+              If no extent is given, **[]**, then the global extent ``set_global()`` is used.
+              See `matplotlib geoaxes <https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html>`_.
+            * *extentCRS* (``cartopy.crs method``) -- cartopy crs [**cartopy.crs.PlateCarree()**]
+              You must have the cartopy.crs module loaded to change this setting.
+              See `Cartopy projection list <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html>`_.
+            * *showGrid* (``boolean``) -- show the grid outline [**True**]
+            * *showGridCells* (``boolean``) -- show the grid cells [**False**]
+            * *showSupergrid* (``boolean``) -- show the MOM6 supergrid cells [**False**]
+            * *title* (``string``) -- add a title to the plot [**None**]
+            * *iColor* (``string``) -- matplotlib color for i vertices [**'k'** (black)]
+            * *jColor* (``string``) -- matplotlib color for j vertices [**'k'** (black)]
+            * *iLinewidth* (``float points``) -- matplotlib linewidth for i vertices [**1.0**]
+            * *jLinewidth* (``float points``) -- matplotlib linewidth for j vertices [**1.0**]
+
+            Line width in matplotlib is generally defined by a numerical value over the default
+            dots per inch (dpi).  The nominal dpi value is 72 dots per inch.  A line width of
+            one (1.0) is 1/72nd of an inch at 72 dpi. A good discussion between
+            `dpi and figure size <https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size>`_
+            can be found on a stackoverflow post.
+
+            **subKey 'projection'**
+
+            * *name* (``string``) -- Grid projection ['LambertConformalConic','Mercator','Stereographic']
+            * *lat_0* (``float degrees``) -- Latitude of projection center [**0.0**]
+            * *lat_1* (``float degrees``) -- First standard parallel (latitude) [**0.0**]
+            * *lat_2* (``float degrees``) -- Second standard parallel (latitude) [**0.0**]
+            * *lat_ts* (``float degrees``) -- Latitude of true scale. Defines the latitude where scale is not distorted.
+              Takes precedence over ``k_0`` if both options are used together.
+              For stereographic, if not set, will default to ``lat_0``.
+            * *lon_0* (``float degrees``) -- Longitude of projection center [**0.0**]
+            * *ellps* (``string``) -- See ``proj -le`` for a list of available ellipsoids [**'GRS80'**]
+            * *R* (``float meters``) -- Radius of the sphere given in meters. If both R and ellps are given, R takes precedence.
+            * *x_0* (``float meters``) -- False easting [**0.0**]
+            * *y_0* (``float meters``) -- False northing [**0.0**]
+            * *k_0* (``float``) -- Depending on projection, this value determines the
+              scale factor for natural origin or the ellipsoid [**1.0**]
                 
+            The subkey 'projection' mostly follows proj.org terminology for any giving projection.
+            See: `Lambert Conformal Conic <https://proj.org/operations/projections/lcc.html>`_,
+            `Mercator <https://proj.org/operations/projections/merc.html>`_ and
+            `Stereographic <https://proj.org/operations/projections/stere.html>`_ for more details.
+
+        .. warning::
+            These options are similar to :func:`setGridParameters` which controls the representation
+            of the grid.  In this library, it is possible that the **grid** projection and
+            the **plot** projection can be in *different* projections.
         """
         
         # For now pass all keys into the plot parameter dictionary.  Sanity checking is done
@@ -1748,3 +2295,217 @@ class GridUtils:
         if not(subKey):
             self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
+    # data source operations data source routines
+    # Data source operations Data source routines
+
+    def addDataSource(self, dataSource, delete=False):
+        '''Add a data source to the catalog.  See: datasource.addDataSource()'''
+        self.dataSourcesObj.addDataSource(dataSource, delete=delete)
+
+    def checkAvailableVariables(self, dsData, varList):
+        '''Check for available variables in a data source.  If any variable is missing,
+        issue a warning and return False.  If all variables are available, return
+        True.
+        '''
+
+        allHere = True
+        dsVars = list(dsData.variables)
+        for varKey in varList:
+            if not(varKey in dsVars):
+                self.printMsg("WARNING: Requested variable (%s) was not found in dataset." % (varKey), level=logging.WARNING)
+                allHere = False
+
+        return allHere
+
+    def convertToMathExpression(self, sourceExpression):
+        '''Convert a source expression to a python expression for evaluation.
+
+           Ex: "-[elevation]" => "-dsData['elevation']"
+        '''
+
+        # Recursively replace [] with dsData[]
+        reExp = '\[([a-zA-Z0-9_].*?)\]'
+        reCmp = re.compile(reExp)
+        srch = reCmp.search(sourceExpression)
+        limitIterations = 10
+        while srch and limitIterations > 0:
+            limitIterations = limitIterations - 1
+            varName = srch.groups()[0]
+            sourceExpression = sourceExpression.replace(srch.group(), "dsData['%s']" % (varName))
+            srch = reCmp.search(sourceExpression)
+
+        return sourceExpression
+
+    def openDataset(self, dsName, chunks=None):
+        '''Open a dataset using the data source catalog or url that can
+        point to a raw dataset using a prefix file: in the data source name.
+        The url can be an OpenDAP dataset: e.g.
+        https://opendap.jpl.nasa.gov/opendap/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_AMSR_OI/2011/001/20110101-NCDC-L4LRblend-GLOB-v01-fv02_0-AVHRR_AMSR_OI.nc.bz2
+	'''
+
+        dsUrl = urllib.parse.urlparse(dsName)
+        # At this point, we assume the dsName is a local filename
+        urlToOpen = dsName
+
+        # OpenDAP
+        if dsUrl.scheme in ['http','https']:
+            urlToOpen = dsObj['url']
+            try:
+                dsData = xr.open_dataset(urlToOpen)
+            except:
+                self.printMsg("ERROR: The remote data source (%s) is was not found or could not be opened." % (urlToOpen), level=logging.ERROR)
+                return None
+            return dsData
+
+        # Local file spec
+        if dsUrl.scheme == 'file':
+            urlToOpen = dsUrl.path
+            if not(os.path.isfile(urlToOpen)):
+                self.printMsg("ERROR: The data source (%s) is was not found." % (urlToOpen), level=logging.ERROR)
+                return None
+            dsData = xr.open_dataset(urlToOpen)
+            return dsData
+
+        # Gridtools catalog entry
+        dsObj = dict()
+        if dsUrl.scheme == 'ds':
+            dsPath = dsUrl.path
+            if dsPath in self.dataSourcesObj.catalog.keys():
+                dsObj = self.dataSourcesObj.catalog[dsPath]
+            else:
+                self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
+                return None
+
+            # Parse the catalog url, what to pass to xarray open_dataset
+            # scheme='file' => path
+            # scheme='http', scheme='https' => dsObj['url']
+            dsUrl = urllib.parse.urlparse(dsObj['url'])
+            urlToOpen = None
+            if dsUrl.scheme in ['http','https']:
+                urlToOpen = dsObj['url']
+            if dsUrl.scheme == 'file':
+                urlToOpen = dsUrl.path
+            if 'chunks' in dsObj.keys():
+                if not(chunks):
+                    chunks = dsObj['chunks']
+
+        dsData = None
+        try:
+            if chunks:
+                dsData = xr.open_dataset(urlToOpen, chunks=chunks)
+            else:
+                dsData = xr.open_dataset(urlToOpen)
+        except:
+            self.printMsg("ERROR: The data source (%s) could not be opened." % (dsName), level=logging.ERROR)
+            return dsData
+
+        # Apply variableMap if dataset was read from the data source catalog
+        if dsObj and 'variableMap' in dsObj.keys():
+            dsVars = list(dsData.variables)
+            # Map variables from data source to library standard variables
+            for varTarget in dsObj['variableMap'].keys():
+                varSource = dsObj['variableMap'][varTarget]
+                if varSource in dsVars:
+                    if varSource != varTarget:
+                        dsData = dsData.rename({varSource: varTarget})
+
+        return dsData
+
+    def applyEvalMap(self, dsName, dsData):
+        '''Apply constructed equations through python eval() to manipulate data source fields.
+           Data source catalog entries must be prefixed with ds:.  If GEBCO is defined
+           as a data source in the catalog, use: ds:GEBCO.  All catalog entries start
+           with a slash.
+        '''
+
+        dsUrl = urllib.parse.urlparse(dsName)
+        dsEntry = None
+        if dsUrl.scheme != 'ds':
+            self.printMsg("ERROR: Data source catalog entries must have a ds: prefix.", level=logging.ERROR)
+            return
+        else:
+            dsEntry = dsUrl.path
+
+        dsObj = None
+        if dsEntry in self.dataSourcesObj.catalog.keys():
+            dsObj = self.dataSourcesObj.catalog[dsEntry]
+        else:
+            self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
+            return
+
+        # Apply evalMap
+        if 'evalMap' in dsObj.keys():
+            # Perform evaluations
+            # If using chunks, evaluate later
+            # Evaluations will create additional fields
+            # if the name is unique, otherwise it will overwrite the field.
+            for varTarget in dsObj['evalMap'].keys():
+                mathExpression = self.convertToMathExpression(dsObj['evalMap'][varTarget])
+                try:
+                    dsData[varTarget] = eval(mathExpression)
+                except:
+                    msg = ("ERROR: Failed to apply evalMap to (%s)." % (varTarget))
+                    self.printMsg(msg, level=logging.ERROR)
+
+    def useDataSource(self, dsObj):
+        # Attach data source object to grid tools object
+        self.dataSourcesObj = dsObj
+        # Attach grid tools object to data source object
+        dsObj.grdObj = self
+
+    # external operations external routines
+    # External Operations External Routines
+    # These routines are directly wired out to its counterparts
+
+    # bathyutils routines
+
+    def applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
+        '''This modifies a given bathymetry using an existing land mask.'''
+        from . import bathyutils
+        return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
+
+    def computeBathymetricRoughness(self, dsName, **kwargs):
+        '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
+        from . import bathyutils
+        return bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
+
+    # meshutils routines
+
+    def generateGridByRefinement(self, dsName, **kwargs):
+        '''Generates a grid from a data source using refinement regridding.'''
+        from . import meshutils
+        return meshutils.generateGridByRefinement(self, dsName, **kwargs)
+
+    def writeLandmask(self, dsData, dsVariable, outVariable, outFile, **kwargs):
+        '''Write a land mask based on provided information.'''
+        from . import meshutils
+        meshutils.writeLandmask(self, dsData, dsVariable, outVariable, outFile, **kwargs)
+        return
+
+    def writeOceanmask(self, dsData, dsVariable, outVariable, outFile, **kwargs):
+        '''Write a ocean mask based on provided information.'''
+        from . import meshutils
+        meshutils.writeOceanmask(self, dsData, dsVariable, outVariable, outFile, **kwargs)
+        return
+
+    # topoutils routines
+
+    def regridTopo(self, dsData, gridGeoLoc = "corner",
+        topoVarName = "elevation", coarsenInt = 10, method = 'conservative',
+        superGrid = True, periodic = True, gridDimX = None, gridDimY = None,
+        gridLatName = None, gridLonName = None, topoDimX = None, topoDimY = None,
+        topoLatName = None, topoLonName = None, convert_to_depth = True):
+        '''Generate a bathymetry and ocean mask for a given data source
+        topography or bathymetry.  See :func:`gridtools.topoutils.TopoUtils.regridTopo`.
+        '''
+        from . import topoutils
+
+        topoObj = topoutils.TopoUtils()
+        return topoObj.regridTopo(self, dsData, gridGeoLoc = gridGeoLoc,\
+            topoVarName = topoVarName, coarsenInt = coarsenInt, method = method,\
+            superGrid = superGrid, periodic = periodic,\
+            gridDimX = gridDimX, gridDimY = gridDimY,\
+            gridLatName = gridLatName, gridLonName = gridLonName,\
+            topoDimX = topoDimX, topoDimY = topoDimY,\
+            topoLatName = topoLatName, topoLonName = topoLonName,\
+            convert_to_depth = convert_to_depth)

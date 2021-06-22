@@ -182,7 +182,9 @@ class App:
 
     def saveRemoteGrid(self, event):
         '''Attempt to save grid to remote filesystem using last known grid filename.'''
-        self.grd.saveGrid(filename=self.gridFilenameRemote.value)
+        # TODO: sanitize input; no more than one file; no directories
+        self.grd.saveGrid(filename=self.gridFilenameRemote.value,
+                directory=self.remoteFileSelection._directory.value)
 
     def make_grid(self, event):
         updateMessage = "No errors or warnings."
