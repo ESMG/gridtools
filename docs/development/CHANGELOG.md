@@ -1,4 +1,238 @@
-# Change Log
+# Changelog
+
+# 2021-06-21
+
+ - Add more environment infomation
+ - Show stdout for pytests (-rA)
+ - Add dev and main branches for CI testing
+ - Add a pytest to show some initial hashes to check in CI output
+ - Add reference for numpypi.  Need to add URL to original and latestURL if updates were made.
+ - Updated workaround information dropping datashader and updating xesmf information.
+ - Add `source/_static` and `source/_templates` to repo as they are needed for sphinx.
+ - Pinned git repo version for datashader no longer needed
+ - `pdb.set_trace()` can be replaced with `breakpoint()` and the import pdb is no longer needed.
+ - BUG: RTD: bullet items not rendered, use "conda install docutils=0.16"
+ - Verified python script examples are still operational.
+ - Updated some documentation in the sanity module.
+ - Add reference to `gridutils.generate_regional_spherical_meters()`
+
+# 2021-06-20
+
+ - Add keyword arguments to GridUtils.plotGrid() for control over plotting
+   elements.
+ - Add dpi control to GridUtils.newFigure() and add 100.0 dpi to defaults.
+ - Bump __version__ to 0.2.0
+ - Jupyter notebooks pass initial testing towards release 0.2.0
+ - Jupyter notebooks require: %matplotlib inline for showing figures
+ - Fix code fetching __version__ tag
+ - reformat TODOs to shorter columns
+ - sysinfo: needed some self prefixes on a few objects
+ - sysinfo: stdout/stderr needed to be decoded() from bytes
+ - sysinfo: fix capture of returncode
+ - Add a common wrkDir and inputDir for examples to easier set paths to files, etc.
+ - Add default tileName of `tile1` to examples.
+ - Replace temporary `package_versions.txt` placeholder.
+ - Begin running tests to work on Release 0.2.0
+ - Fix dpi at a default value (100.0).  It can magically change between Figure() calls.
+ - xarray plot wants coordinate variables.  For MOM6, add `x` and `y`
+   to coordinates before plotting.
+ - xarray tutorial data requires python module pooch
+ - Create mkGridsExample7a notebook to experiment with xarray plotting methods.
+
+# 2021-06-19
+
+ - Add generic plotting demonstration to Example 7.  Will add more options
+   in later releases.  Not quite working yet.
+ - Add sanity module to documentation.
+ - New goals and milestones defined.  Older milestones archived.
+ - Add `**kwargs` access to `convert_ROMS_to_MOM6` function.
+ - ROMS2MOM6: Mask depths to `MASKING_DEPTH` instead of a hard coded zero(0).
+   Use xarray instead of numpy.
+ - Deployment plan firming up for generic plotting.
+ - Add default tileName to example 7.
+ - Update documentation about file specifications.
+ - Basic testing has increased confidence code that grid generation
+   and conversion is somewhat operational.
+ - NOTE: **kwargs is not updatable within function calls
+ - Update utils routine to use generic command callout function to fix extranious
+   warnings to be output when a git repo may not be present.
+ - Conversion routine ROMS_to_MOM6 did not update the kwargs topographyGrid which is
+   used later when writing out the topography and masking files.
+ - Add a sanity check module instead of repeating code.
+ - Add `*_DEPTH` specified options to metadata for topography and masking files.
+ - Restructure plotGrid to enable plotting of model grid or other variables.
+
+# 2021-06-18
+
+ - conda export environments should not include special pip packages
+ - Remove pip definitions from binder/environment.yml
+ - Document build failing: adding sphinxcontrib.bibtex
+ - Indexing across xarray and numpy is hard; need to move
+   more numpy items toward xarray.
+ - Add makeSoloMosaic to 20x30 test grid Example7
+ - Rename LandMask to Landmask
+ - Rename OceanMask to Oceanmask
+
+# 2021-06-17
+
+ - Adopt use of colorama for optional coloring of text output
+ - Debug gridtools.grids.mom6
+ - Debug gridtools.grids.roms
+ - Fixes for at least when git commands fail attempting to grab
+   git related information.
+
+# 2021-06-16
+
+ - Initial coding of ROMS to MOM6 converter and writing out a solo
+   mosaic for a new grid is complete.  Now to begin testing.
+ - Reformat keyword arguments.
+ - MOM6 default tileName = tile1
+ - Add grid geometry type to tile variable: cartesian or spherical
+ - Add proper string encoding to gridutils.removeFillValueAttributes.
+ - Continue adding routines to mom6 and roms modules.
+
+# 2021-06-15
+
+ - Replace {} with dict()
+ - Porting of ROMS to MOM6 grids will go hand in hand with general
+   solo mosaic creation routines.
+ - Created ROMS and MOM6 specific classes for dealing with their own grids
+ - Add sphinxcontrib-bibtex to requirements.txt file to see if we fix RTD build failure
+ - Add reference to FRE-nctools.
+ - Add a generic utils module for generic functions.
+ - gridutils.readGrid() does not need to do anything but note the grid type
+   in gridInfo['type'].
+ - urllib.parse: double slash denotes the next argument is a network
+   specification.  We can use file:/filename for absolute and relative paths.
+   We need to rework documentation so we can specify data sources more explicitly.
+   These are equivalent (ds:/GEBCO_2020) = (ds:///GEBCO_2020).  A relative
+   path would be ds:GEBCO_2020.  It would be an implementation decision
+   if ds:/GEBCO_2020 == ds:GEBCO_2020.
+ - Simplify Example 8 a little bit with file spec discovery.
+
+# 2021-06-14
+
+ - Add remaining modules to RTD documentation.
+ - RTD docstrings: https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
+ - Fix all the current documentation warnings.
+ - Fix some latex math.  Use double slash in math expressions.
+ - Add sysinfo.runCommand() to consolidate the ability to capture
+   output from running commands from the library.
+ - sysinfo.sysInfo() class has a grd= argument that allows connecting
+   the logging portion of the library.
+ - Ongoing expansion of documentation.
+ - Add bibtex to sphinx documentation process.
+ - bibliography.rst: Sample entry for a paper and a github repo.
+
+# 2021-06-13
+
+ - computeGridMetrics comes in two forms: spherical and cartesian.
+ - Begin construction of makeSoloMosaic that does similar work to
+   `make_solo_mosaic`.
+ - Attempts to build FRE-nctools on chinook have failed so far.
+
+# 2021-06-12
+
+ - Numpy has a method to access the indexes that match grid points
+   for any value test.
+
+# 2021-06-11
+
+ - BUG: Relative paths do not work in the new filespec scheme.
+ - Remove old Documentation.md file.
+ - Do not install the binary TeX environment or the glibc anywhere near the
+   conda gridTools environment.  The environment became tainted and began
+   to segfault.  Only activate TeX when a PDF is needed.
+ - Markdown file processing is problematic.  A module m2r2 needs some work to
+   do things the way we want. Leaving it disabled for now.
+ - Add configuration file for ReadtheDocs site
+ - Fix Example8 to set periodic=False
+ - Initial sphinx setup is complete; need to test linkage to ReadTheDocs.
+ - Adding Documentation.md to docs/development.
+ - Sphinx requires a fully operational software stack to generate documentation.
+ - Adding sphinx/doxygen to documentation proceedures.  The documentation
+   will utilize a separate enviornmnet to keep things simple.
+
+# 2021-06-10
+
+ - More TODOs.
+ - Added Example8 to demonstrate construction of depth/ocean mask grid
+   through gridtools library with new topoutils regridding method.
+ - Fix masking names for Example7.  ROMS to MOM6 calls the masking fields
+   `mask`.  If they are in the same file, we will have to put a prefix
+   on the field.
+ - Initial construction of topoutils.TopoUtils.regridTopo() is done.  Needs
+   testing.
+ - Found a way to get the prior function caller to assist debugging.  It
+   introduces a performance hit so we need to be careful about turning it
+   on.
+ - Log an ERROR if we fail to evaluate any fields for a data source.
+ - Add a note about using ... in python. Cute!
+ - Rework Example7 with a common work directory.
+ - Adding contribution from James to topoutils.py.
+ - Bug in xesmf requires temporary reference to a git repo.
+ - Be sure to rehash the new 'depth' field in bathyutils.applyExistingLandMask()
+ - Add a MOM6 message indicating diagnosed maximum ocean depth.
+ - gridtools.openDataset() can now open a catalog data source or file or
+   OpenDAP end point.  Completely rewrote this routine again.
+ - Adopt prefixes for file specs.  See doc/development/Filespec.md  No
+   filespec prefix is assumed to be filenames.  Things should work
+   if regular filenames are used.  The only thing that will break is
+   the data source catalog references.  A / must be prefixed on the
+   entries.  We can do a soft ignore in the future to allow plain
+   names to work too.
+ - Add a fileutils library for generic gridtools operations that are
+   not field or grid based.
+ - Allow chunks option to be passed for grid and data sources.
+ - openGrid now uses openDataset again
+
+# 2021-06-09
+
+ - Implement saving of ocean and land masks using a specified
+   `MASKING_DEPTH`.
+ - Adding bathyutils.applyExistingLandMask()
+ - There is a better way to use complex expressions in
+   xarray.where().  Bookmark to gist added to important information.
+ - Add various TODOs.
+ - Example 7 works.  It should be cleaned up and Example 7a should be
+   created to demonstrate using existing files created by Example 7.
+ - gridutils.removeFillValueAttributes() add a data= parameter to
+   allow use outside of grids.
+ - gridutils: Add more comments to allow searching of large sections of code
+ - Add meshutils for generic routines that we do not really have a good place
+   for at the moment.  The first routines are writing a land and ocean mask
+   file based on a supplied field.
+
+# 2021-06-08
+
+ - Integration of bathymetric roughness to allow for internal tide
+   parameterization to be used in a model run.
+ - Add a data catalogging system in the grid tools library.  The
+   catalog system can point to physical files or remote files.
+ - Move generic dataset operations into data source operations
+ - Keep grid operations separate from data source operations
+ - openDataset() for grids is now openGrid() followed by readGrid()
+ - We should keep better track of assembled code to reduce hours of
+   rediscovery should we to totally rewrite this library.
+ - Add a hook to enable passing a chunks argument to `open_dataset()`
+   for grids and data sources.
+ - Implement applying an existing land mask after getting the roughness
+   field instead of being combined with this function.
+ - Plotting of created fields will be done separately.
+ - Application of the ice9 algorithm will also be done separately.
+ - `MASKING_DEPTH` defines the land mask for MOM6.  All depths shallower
+   than `MINIMUM_DEPTH` but deeper than `MASKING_DEPTH` are rounded to
+   `MINIMUM_DEPTH`.  When the FMS coupler is involved, a separate land
+   mask is stored in the exchange grids.
+ - TODO: Create several routines for checking/updating masks.
+ - Collecting lots of TODOs for bathymetric roughness code.
+ - Using chunks with eval works but is not numpy fancy indexable.
+ - Delay evaluation of depth until the end to support chunks.
+ - variableMap will remap variables; evalMap will perform calculations
+   after the fact.  In our example, elevation was remapped to the needed
+   depth variable for input, then we invert the sign after processing.
+ - Add LICENSE.md similar to MOM6
+ - Noted quirk for xesmf
 
 # 2021-06-03
 
@@ -17,8 +251,53 @@
    - Update tutorial links so they will work after publication to main branch
  - Update todos
 
+# 2021-05-30
+
+ - Consolidate requirements lists again
+ - github CI: use quiet mode for conda and pip to make output less verbose
+ - We have a complete python venv build for UAF:chinook cluster
+ - numba requires a modern compiler
+ - A couple of dependencies require openssl: nodejs particularly
+ - libtiff is required by proj
+ - Do not use python setup.py: this is a legacy installation method
+
+# 2021-05-28
+
+ - The answer is use python -m pip; do not use python setup.py
+ - Revamped requirements for possibly a two stage install for pip?
+ - python setup.py develop mostly works; still some workarounds needed
+ - Providing install info for specific compute clusters: python3 -m venv on UAF:chinook
+ - Fixes for: python -m pip install .
+ - Add numba to gridTools conda environment and removed as TBB was old on UAF:chinook due to ancient compiler
+ - Add other dependencies: dask, colorcet and datashape
+ - Add a hack for supporting differences in package requirements for pip vs. setup.py
+
+# 2021-05-26
+
+ - Fix remote saving to correct directory as shown in the application
+ - Improve gridtools metadata output; add hashes to certain variables
+ - For pip installs, if jupyterlab<3.0.0 is required, require: jupyter labextension install @pyviz/jupyterlab_pyviz
+ - In gridutils, self.app was overwriting the app() function; changed to self.applicationObj
+ - Add a couple more try blocks on a machine without conda
+ - Add example #7 demonstrating grid generation of bathymetric roughness(h2)
+   and other bathymetric or other general field options.
+ - Add hashlib to gridutils
+ - Add package requirements to setup.py and requirements.txt
+ - Begin construction of topoutils.py based on ocean_model_topog_generator
+ - Begin construction of datasource.py that will manage data sources
+
+# 2021-05-20
+
+ - Add netCDF4 to gridTools.yml base packages; xarray needs it to read netcdf version 4 files
+ - Add a few informational links
+ - Update to push exp/bathyV1
+
 # 2021-05-18
 
+ - Add info on running dask in a cluster environment
+ - Delete duplicate conda/docs directory; not sure how that got there
+ - Create exp/bathyV1 branch
+ - Merge https://github.com/ESMG/gridtools/pull/1
  - Finish out documentation updates for PR#1
 
 # 2021-05-17

@@ -10,6 +10,10 @@
 import sys, os, logging
 from gridtools.gridutils import GridUtils
 
+# Set a place to write files
+wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
+inputDir = os.path.join(wrkDir, 'INPUT')
+
 # Initialize a grid object
 grd = GridUtils()
 grd.printMsg("At this point, we have initialized a GridUtils() object.")
@@ -17,7 +21,7 @@ grd.printMsg("")
 
 # We can turn on extra output from the module
 grd.printMsg("Set print and logging messages to the DEBUG level.")
-logFilename = 'configs/test/gridTest.log'
+logFilename = os.path.join(wrkDir, 'gridTest.log')
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -49,7 +53,8 @@ grd.setGridParameters({
     'gridMode': 2.0,
     'gridType': 'MOM6',
     'ensureEvenI': True,
-    'ensureEvenJ': True
+    'ensureEvenJ': True,
+    'tileName': 'tile1',
 })
 grd.showGridParameters()
 grd.printMsg("")
@@ -68,7 +73,7 @@ grd.makeGrid()
 
 # Save the new grid to a netCDF file
 grd.printMsg("Attempt to save the grid to a netCDF file.")
-grd.saveGrid(filename="configs/test/gridTest.nc")
+grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example3.nc"))
 
 # This prints out all the current grid parameters
 # Note: for Lambert Conformal Conic grids, two additional projection parameters are computed.
@@ -134,9 +139,9 @@ the plot.
 # You can save the figure using the savefig() method on the
 # figure object.  Many formats are possible.
 grd.printMsg("Save the figure in two different formats: jpg and pdf.")
-figure.savefig('configs/test/gridTest.jpg', dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Example3.jpg'), dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 
-figure.savefig('configs/test/gridTest.pdf', dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Example3.pdf'), dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 
