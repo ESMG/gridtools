@@ -2,21 +2,35 @@ name: gridTools
 channels:
   - pyviz
   - conda-forge
+  - defaults
 dependencies:
   - cartopy
+  - colorama
+  - colorcet
   - conda
   - coverage
+  - cython
   - dask
+  - datashader
   - docutils=0.16
   - jupyterlab
   - matplotlib
+  - m2r2
   - netCDF4
   - numba
+  - numpy
   - pandas
   - panel
+  - param
   - pip
+  - pyct
+  - pykdtree
   - pyproj
   - pytest
+  - requests
+  - scipy
+  - sphinx
+  - sphinx_rtd_theme
   - sphinxcontrib-bibtex
   - xarray
   - xesmf

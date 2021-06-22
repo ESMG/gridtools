@@ -2,11 +2,15 @@
 
 # 2021-06-21
 
- - pdb.set_trace() can be replaced with breakpoint() and the import pdb is no longer needed.
+ - Add reference for numpypi.  Need to add URL to original and latestURL if updates were made.
+ - Updated workaround information dropping datashader and updating xesmf information.
+ - Add `source/_static` and `source/_templates` to repo as they are needed for sphinx.
+ - Pinned git repo version for datashader no longer needed
+ - `pdb.set_trace()` can be replaced with `breakpoint()` and the import pdb is no longer needed.
  - BUG: RTD: bullet items not rendered, use "conda install docutils=0.16"
  - Verified python script examples are still operational.
  - Updated some documentation in the sanity module.
- - Add reference to gridutils.generate_regional_spherical_meters()
+ - Add reference to `gridutils.generate_regional_spherical_meters()`
 
 # 2021-06-20
 
@@ -23,7 +27,7 @@
  - sysinfo: fix capture of returncode
  - Add a common wrkDir and inputDir for examples to easier set paths to files, etc.
  - Add default tileName of `tile1` to examples.
- - Replace temporary package_versions.txt placeholder.
+ - Replace temporary `package_versions.txt` placeholder.
  - Begin running tests to work on Release 0.2.0
  - Fix dpi at a default value (100.0).  It can magically change between Figure() calls.
  - xarray plot wants coordinate variables.  For MOM6, add `x` and `y`
@@ -37,8 +41,8 @@
    in later releases.  Not quite working yet.
  - Add sanity module to documentation.
  - New goals and milestones defined.  Older milestones archived.
- - Add **kwargs access to convert_ROMS_to_MOM6 function.
- - ROMS2MOM6: Mask depths to MASKING_DEPTH instead of a hard coded zero(0).
+ - Add `**kwargs` access to `convert_ROMS_to_MOM6` function.
+ - ROMS2MOM6: Mask depths to `MASKING_DEPTH` instead of a hard coded zero(0).
    Use xarray instead of numpy.
  - Deployment plan firming up for generic plotting.
  - Add default tileName to example 7.

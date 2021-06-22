@@ -115,7 +115,7 @@ or [clone](https://github.com/ESMG/gridtools.git) the
 [ESMG/gridtools](https://github.com/ESMG/gridtools) repository.
 
 The `python setup.py install` method is now considered a legacy installation
-method.  Please use the `python -m pip install` method.
+method.  Please use the `python -m pip install .` method.
 
 ### pip
 
@@ -124,6 +124,8 @@ $ cd gridtools
 $ python -m pip install .
 ```
 
+If using **conda**, only minimal changes will be noted.
+
 # Workarounds
 
 These are the current workarounds that are required for the grid
@@ -131,24 +133,7 @@ toolset package.  You may need to perform these steps once if you
 plan to install a copy of the grid generation software.
 
 NOTE: These workarounds should be automatically installed with
-an installation of gridtools.
-
-## datashader
-
-The lastest version from github is required for proper operation of
-bokeh, holoviews and panel which are used by the interactive portions
-of the grid generation library.
-
-[REPO](https://github.com/holoviz/datashader)
-
-Installation:
-  * Download or clone this repository.
-  * Change directory to the datashader directory.
-  * Make sure your conda enviroment is active.
-  * `pip install -e .`
-
-NOTE: The datashader library should be automatically installed as a
-dependency of gridtools.
+an installation of gridtools in step 2 using pip.
 
 ## numpypi
 
@@ -156,6 +141,15 @@ Portable intrinsics for numpy ([REPO](https://github.com/adcroft/numpypi)).
 For bitwise-the-same reproducable results, a numpy subset of computational functions are
 provided.  These routines are slower than the numpy native routines.
 A repackaged installable [REPO](https://github.com/jr3cermak/numpypi/tree/dev) of the library.
+
+## xesmf
+
+A slight modification to xesmf is required to fix a periodic boundary
+problem when regridding.  Note that conda loads an older version of
+xesmf and then pip replaces it with a fixed copy.
+
+Users using **venv**, a working compiled copy of ESMF and ESMPy need to
+be installed prior to installing gridutils via pip.
 
 # Code contributions
 

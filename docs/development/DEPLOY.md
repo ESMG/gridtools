@@ -8,8 +8,9 @@ release folder as X.Y.Z.md and fill out.
  - [ ] Verify operation of example notebooks
  - [ ] Verify operation of example scripts
  - [ ] Resync environments
+   - [ ] Pip requirements.txt should closely mirror gridTools.yml
+   - [ ] Update any special needs in requirements.txt
    - [ ] Resync gridTools_export-linux-64.yml without pip modules
-   - [ ] Add minimal pip modules to requirements.txt
    - [ ] Ensure `binder/environment.yml` is in sync
          with `conda/gridTools_export-linux-64.yml`
  - [ ] Ensure release/version is properly updated in `gridtools/__init__.py`
