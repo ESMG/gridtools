@@ -1,5 +1,14 @@
 # Changelog
 
+# 2021-06-23
+
+ - branch exp/maskeditorV1 opened
+ - consolidate credits and citations
+ - fix more main README.md links
+ - Updated pyroms install information for the brave
+ - bibtex authors are separated by and and not commas
+ - Add citation for pyroms
+
 # 2021-06-22
 
  - PR#8 submitted to main.  Making final checks of CI, RTD and mybinder.

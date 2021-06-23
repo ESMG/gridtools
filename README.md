@@ -151,20 +151,6 @@ xesmf and then pip replaces it with a fixed copy.
 Users using **venv**, a working compiled copy of ESMF and ESMPy need to
 be installed prior to installing gridutils via pip.
 
-# Code contributions
-
-## Lambert Conformal Conic Grid Generation
-Author: Niki Zadeh [REPO](https://github.com/nikizadehgfdl/grid_generation)
- * [regional_grid_spheical.ipynb](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb)
-
-## Portable intrinsics for numpy
-Author: Alistair Adcroft [REPO](https://github.com/adcroft/numpypi)
- * To obtain bitwise-the-same floating-point values in certain non-time-critical calculations.
-
-## ROMS to MOM6 Grid Converter
-Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
- * [convert_ROMS_grid_to_MOM6.py](https://raw.githubusercontent.com/ESMG/pyroms/python3/examples/grid_MOM6/convert_ROMS_grid_to_MOM6.py)
-
 # More
 
 Until we can activate Sphinx to create our body of documentation we will have to resort
@@ -174,17 +160,17 @@ Documentation:
   * [conda](docs/conda/README.md)
   * [development](docs/development)
     * [CHANGELOG](docs/development/CHANGELOG.md): Development log of changes
-    * [CREDITS](docs/development/CREDITS.md)
+    * [CREDITS](docs/development/CREDITS.md) and citations
     * [Documentation](docs/development/Documentation.md)
     * [DEPLOY](docs/development/DEPLOY.md)
     * [Design](docs/development/Design.md): Design elements for the grid generation library
     * [Important References](docs/development/ImportantReferences.md): Things that helped this project work
     * [Jupyter](docs/development/Jupyter.md): Notes on embeddeding applications within a notebook
     * [python](docs/development/python)
-      * [leaflet](docs/development/python/leaflet.md)
-      * [panel](docs/development/python/panel.md)
-      * [pyroms](docs/development/python/pyroms.md)
-      * [xesmf](docs/development/python/xesmf.md)
+      * [leaflet](docs/development/python/libraries/leaflet.md)
+      * [panel](docs/development/python/libraries/panel.md)
+      * [pyroms](docs/development/python/libraries/pyroms.md)
+      * [xesmf](docs/development/python/libraries/xesmf.md)
     * [TODO](docs/development/TODO.md): Milestones, tasks, todos and wish list items
       * [archive](docs/archive) -- Archive of completed TODOs
       * [releases](docs/releases) -- Release information

@@ -1,41 +1,6 @@
 # Important references
 
-These are people, references and bookmarks that provided useful information to make this project go.
-
-## Alistair Adcroft
- * numpypi: https://github.com/adcroft/numpypi
-
-   Last update from:
-     https://github.com/jr3cermak/numpypi/tree/dev#40b7b0d6a33aabc5da6cf7bb188ce25345985f83
-
-## James Simkins
- * Conservative regridding (:cite:p:`Simkins_2021`)
-
-## Mehmet Ilicak; Alistair Adcroft; Matthew Harrison
- * ROMS to MOM6 grid converter (:cite:p:`Ilicak_2020`)
-
-## Niki Zadeh
- * Lambert Conformal Conic grid generation provided by:
-   https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb
-
-   Last update from:
-     https://github.com/nikizadehgfdl/grid_generation/tree/dev/jupynotebooks#eae6a19c84508d4518a83cdd00d441d14fb3d8cc
-
- * A set of tools to generate model topography given model grid and observation data:
-   Branch: create_spear_grid (generates tri-polar grids)
-   https://github.com/nikizadehgfdl/ocean_model_topog_generator
-
-   Last update from:
-     https://github.com/jr3cermak/ocean_model_topog_generator/tree/devRob#73ecb15ff41f9a14821b95208838b6fe876dc54a
-
-   Adcroft, A., 2013: Representation of topography by porous barriers and objective
-   interpolation of topographic data. Ocean Modelling, doi:10.1016/j.ocemod.2013.03.002.
-   (http://dx.doi.org/10.1016/j.ocemod.2013.03.002)
-
-## Raphael Dussin
- * Use of pyproj to convert coordinates in 2D array
- * https://github.com/raphaeldussin/regrid_weights_bedmachine_gebco/blob/master/create_grids.py
- * Commit:16c85a9c544d54808abaaec223aa834a8c46d6fd
+[CREDITS](CREDITS.md) and citations have been consolidated.
 
 ## Bookmarks
  * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
