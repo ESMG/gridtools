@@ -148,3 +148,21 @@ grd.setPlotParameters(
 figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Bathy_Example8.png'), dpi=None, facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
 
+# Plot the fractional ocean mask
+
+# Plot the new bathy grid
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'oceanMask': {
+            'values': resultGrids['ocean_mask'],
+            'title': 'GEBCO 2020 applied to GridUtils.regridTopo()',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
+        }
+    },
+)
+
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OceanMask_Example8.png'), dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)

@@ -127,6 +127,7 @@
    - [ ] Allow paper mode: portrait
    - [ ] Allow paper mode: landscape
    - [ ] Allow paper mode: custom/poster
+   - [ ] Colorbar text should show UNITS not the variable label
  - [ ] Add "Refresh Plot" buttons to other Plot tabs or figure out how
        to squeeze a single plot button into the layout
  - [ ] Do we have to declare everything in __init__ first or can be

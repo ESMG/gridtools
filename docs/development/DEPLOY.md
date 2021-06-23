@@ -29,6 +29,7 @@ release folder as X.Y.Z.md and fill out.
    - [ ] Ensure MDs on github renders correctly
  - [ ] Add and commit a tag with x.y.z
  - [ ] Run through a Release on the github site
+ - [ ] Place a release notice on the MOM6 forum
 
 # General Release Notes
 
