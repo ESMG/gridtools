@@ -70,7 +70,8 @@
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources
-   - [X] option to create land mask fraction
+   - [X] option to create ocean mask fraction
+     - [ ] investigate artifact generated in the grid corners
    - [ ] option to use source grid as a supergrid for coarsening
    - [ ] refactor function arguments into kwargs
    - [ ] refactor print statements to use gridtools logging facility

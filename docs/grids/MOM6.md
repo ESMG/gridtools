@@ -4,7 +4,7 @@
 
 References:
  * [Gridspec: A standard for description of grids used in Earth System models](https://arxiv.org/abs/1911.08638v1)
- * [Mosaic Tool User Guid](https://data1.gfdl.noaa.gov/~arl/pubrel/r/mom4p1/src/mom4p1/doc/mosaic_tool.html)
+ * [Mosaic Tool User Guide](https://data1.gfdl.noaa.gov/~arl/pubrel/r/mom4p1/src/mom4p1/doc/mosaic_tool.html)
  * [A Guide to Grid Coupling in FMS](https://www.gfdl.noaa.gov/guide-to-grid-coupling-in-fms/)
  * [FRE-NCtools](https://github.com/NOAA-GFDL/FRE-NCtools)
  * [Python gridtools](https://github.com/ESMG/gridtools/)

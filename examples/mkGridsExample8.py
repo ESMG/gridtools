@@ -149,8 +149,6 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Bathy_Example8.png'), dpi=None, f
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
 
 # Plot the fractional ocean mask
-
-# Plot the new bathy grid
 (figure, axes) = grd.plotGrid(
     showModelGrid=False,
     plotVariables={
