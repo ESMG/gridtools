@@ -170,11 +170,12 @@ Authors: Mehmet Ilicak; Alistair Adcroft [REPO](https://github.com/ESMG/pyroms)
 Until we can activate Sphinx to create our body of documentation we will have to resort
 to upkeep of a manual index.
 
-[Documentation](docs/development/Documentation.md)
+Documentation:
   * [conda](docs/conda/README.md)
   * [development](docs/development)
     * [CHANGELOG](docs/development/CHANGELOG.md): Development log of changes
     * [CREDITS](docs/development/CREDITS.md)
+    * [Documentation](docs/development/Documentation.md)
     * [DEPLOY](docs/development/DEPLOY.md)
     * [Design](docs/development/Design.md): Design elements for the grid generation library
     * [Important References](docs/development/ImportantReferences.md): Things that helped this project work
@@ -183,7 +184,10 @@ to upkeep of a manual index.
       * [leaflet](docs/development/python/leaflet.md)
       * [panel](docs/development/python/panel.md)
       * [pyroms](docs/development/python/pyroms.md)
-    * [TODO](docs/development/TODO.md): Milestones, tasks, todos and wishes
+      * [xesmf](docs/development/python/xesmf.md)
+    * [TODO](docs/development/TODO.md): Milestones, tasks, todos and wish list items
+      * [archive](docs/archive) -- Archive of completed TODOs
+      * [releases](docs/releases) -- Release information
   * [grids](docs/grids)
     * [Examples](docs/grids/Examples.md): Descriptions of grids used in examples
     * [Grids](docs/grids/Grids.md)
@@ -193,8 +197,12 @@ to upkeep of a manual index.
   * [manual](docs/manual/GridUtils.md): User manual for the GridUtils library
     * [Installation tutorial](docs/manual/local_installation_tutorial.ipynb)
     * [Gridtools application tutorial](docs/manual/gridtoolAppTutorial.ipynb)
+    * API : Gridtools library
+      * [stable](https://mom6gridtools.readthedocs.io/en/stable/) -- latest release version
+      * [dev](https://mom6gridtools.readthedocs.io/en/dev/) -- follows `dev` branch
+      * [latest](https://mom6gridtools.readthedocs.io/en/latest/) -- usually follows an experimental branch
   * [resources](docs/resources)
-    * [Bathymetry](docs/resources/Bathymetry)
+    * [Bathymetry](docs/resources/Bathymetry.md)
 
 # Development
 
