@@ -128,7 +128,7 @@ class ROMS(object):
         be passed, even if the file is large, as only the values that
         are required will be retrieved from the file.
 
-        This function is based on code from :cite:p:`IESMG_pyroms_2021`.
+        This function is based on code from :cite:p:`ESMG_pyroms_2021`.
         """
 
         #in this first call to ROMS_gridinfo, we pass in the history file
@@ -164,9 +164,9 @@ class ROMS(object):
 
         #if it is type byte, then convert to string
         try:
-          spherical=spherical.decode('utf8')
+          spherical = spherical.decode('utf8')
         except:
-          print('Assuming spherical is integer',spherical, type(spherical))
+          print('Assuming spherical is integer', spherical, type(spherical))
 
         #Get horizontal grid
         if ((spherical == 0) or (spherical == 'F')):
@@ -395,7 +395,7 @@ class ROMS_Grid(object):
 
     ROMS Grid object combining horizontal and vertical grid
 
-    This class is based on code from :cite:p:`IESMG_pyroms_2021`.
+    This class is based on code from :cite:p:`ESMG_pyroms_2021`.
     """
 
     def __init__(self, name, hgrid=CGrid, vgrid=s_coordinate):
@@ -424,7 +424,7 @@ class ROMS_gridinfo(object):
     grid information so that the grid and history files do not be
     included in subsequent calls.
 
-    This class is based on code from :cite:p:`IESMG_pyroms_2021`.
+    This class is based on code from :cite:p:`ESMG_pyroms_2021`.
     '''
 
     # Shared variables across all ROMS_gridinfo objects
@@ -445,7 +445,6 @@ class ROMS_gridinfo(object):
       else:
         #nope, we need to get the information from gridid.txt or from
         #the grid and history files from the model
-        print("Passed gridid=", gridid)
         self.id = gridid
         self._get_grid_info(grid_file,hist_file)
 

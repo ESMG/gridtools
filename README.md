@@ -108,6 +108,11 @@ provided.  Once software and libraries are installed, the remaining
 software should be installable via pip and/or python's virtual
 environment (venv).
 
+**WARNING**: If a new enviroment is to be prepared with `conda/gridTools.yml`,
+be prepared to wait a VERY LONG TIME for conda to resolve the
+environment.  It is highly recommened to load a new environment with
+`conda/gridTools_export.yml` or `conda/gridTools_explicit-linux-64.txt`.
+
 ## Step 2
 
 [Download](https://github.com/ESMG/gridtools/archive/refs/heads/main.zip)

@@ -2,7 +2,10 @@
 
 # 2021-06-24
 
- - Additiona package requirements: geoviews, hvplot, nodejs, pooch, owslib 
+ - Experimenting with hvplot quadmesh.  With a large grid, it takes a long time.
+   May want to consider partitioning the grid for plotting?  Sliding views?
+ - Add note to README
+ - Additional package requirements: geoviews, hvplot, nodejs, pooch, owslib 
  - May be able to use jupyter for the editor
  - Return references to the created plot object or the event
    hooks go away.

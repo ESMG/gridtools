@@ -901,8 +901,8 @@ class CGrid_geo(CGrid):
                     lon_v=None, lat_v=None, lon_psi=None, lat_psi=None, dx=None, dy=None, \
                     dndx=None, dmde=None, angle_rho=None):
 
-        print(lon_vert)
-        print(lat_vert)
+        #print(lon_vert)
+        #print(lat_vert)
         #x, y = proj(lon_vert, lat_vert)
         #PROJSTRING = "+proj=merc +lat_0=0 +lon_0=0"
         #p = Proj(PROJSTRING, preserve_units=False)
@@ -1288,7 +1288,7 @@ class edit_mask_mesh(object):
     """
 
     def _on_key(self, event):
-        print(event.key)
+        #print(event.key)
         if event.key == 'e':
             self._clicking = not self._clicking
             plt.title('Editing %s -- click "e" to toggle' % self._clicking)
@@ -1296,7 +1296,7 @@ class edit_mask_mesh(object):
 
     def _on_click(self, event):
         x, y = event.xdata, event.ydata
-        print(x,y)
+        #print(x,y)
         if event.button==1 and event.inaxes is not None and self._clicking == True:
             d = (x-self._xc)**2 + (y-self._yc)**2
             if isinstance(self.xv, np.ma.MaskedArray):
