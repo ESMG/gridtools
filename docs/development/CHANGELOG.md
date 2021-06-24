@@ -2,8 +2,13 @@
 
 # 2021-06-23
 
+ - Copied needed modules from pyroms and made some modifications
+ - Added new modules to `__init__` for grids module
+ - Added (object) to all current classes
+ - Starting ipython and pasting code from mkGridsExample9 will launch a window
+ - editing only works via `ipython --pylab`
+ - a plot shows up but the transformations are off
  - investigating replacement for Basemap() for conversion of (lon, lat) to (x, y)
- - copied large blocks of code from pyroms
  - branch exp/maskeditorV1 opened
  - consolidate credits and citations
  - fix more main README.md links
