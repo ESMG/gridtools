@@ -15,6 +15,7 @@
  * https://docs.github.com/en/github/writing-on-github/autolinked-references-and-urls
  * https://docs.python.org/3/library/json.html
  * https://docs.python.org/3/reference/compound_stmts.html#function-definitions
+ * https://docs.python.org/3/tutorial/classes.html
  * https://docs.pytest.org/en/6.2.x/getting-started.html
  * https://docs.pytest.org/en/6.2.x/skipping.html
  * https://en.wikipedia.org/wiki/Arakawa_grids
@@ -27,7 +28,6 @@
  * https://github.com/pydata/xarray/issues/2899
  * https://github.com/SciTools/cartopy/issues/787
  * https://guides.github.com/features/mastering-markdown/
- * https://www.jertype.com/upgrading-glibc/
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
  * http://mathworld.wolfram.com
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/image_masked.html
@@ -81,9 +81,13 @@
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
  * https://www.earthdatascience.org/courses/intro-to-earth-data-science/open-reproducible-science/get-started-open-reproducible-science/
  * https://www.git-tower.com/learn/git/faq/delete-remote-branch/
+ * https://www.jertype.com/upgrading-glibc/
+ * https://www.kite.com/python/answers/how-to-get-the-angle-between-two-vectors-in-python
  * https://www.kite.com/python/answers/how-to-hide-a-figure-from-being-shown-in-matplotlib-in-python
+ * https://www.linuxtoday.com/blog/mpi-in-thirty-minutes.html
  * https://www.mathsisfun.com/geometry/interior-angles-polygons.html
  * https://www.myroms.org/wiki/Numerical_Solution_Technique
+ * https://www.omnicalculator.com/math/angle-between-two-vectors
  * https://www.programiz.com/python-programming/methods/built-in/eval
  * https://www.python.org/dev/peps/pep-0008/#package-and-module-names
  * https://xarray.pydata.org/en/stable/examples/ROMS_ocean_model.html

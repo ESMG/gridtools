@@ -26,7 +26,7 @@ from . import utils
 from . import sanity
 from . import sysinfo
 
-class GridUtils:
+class GridUtils(object):
 
     def __init__(self, app=dict()):
         # Constants

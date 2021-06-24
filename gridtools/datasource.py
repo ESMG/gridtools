@@ -3,7 +3,7 @@
 import os, json, yaml
 import pdb
 
-class DataSource:
+class DataSource(object):
 
     def __init__(self):
 

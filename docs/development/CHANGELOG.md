@@ -2,6 +2,8 @@
 
 # 2021-06-23
 
+ - investigating replacement for Basemap() for conversion of (lon, lat) to (x, y)
+ - copied large blocks of code from pyroms
  - branch exp/maskeditorV1 opened
  - consolidate credits and citations
  - fix more main README.md links

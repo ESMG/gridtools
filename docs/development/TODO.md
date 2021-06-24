@@ -67,6 +67,8 @@
      - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
            `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
      - [ ] needs upgrade from basemap()
+     - [ ] convert to xarray
+       - [ ] grids.roms.ROMS_gridinfo._get_grid_info()
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources

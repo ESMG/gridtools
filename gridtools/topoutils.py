@@ -8,7 +8,7 @@ import pdb
 # Referencing other internal routines
 from . import datasource
 
-class TopoUtils:
+class TopoUtils(object):
 
     def __init__(self):
         # Constants

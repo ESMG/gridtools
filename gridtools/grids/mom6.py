@@ -10,7 +10,7 @@ import xarray as xr
 from .. import utils
 from .. import spherical
 
-class MOM6:
+class MOM6(object):
 
     def __init__(self):
         self._grid_type = "MOM6"

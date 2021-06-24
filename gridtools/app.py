@@ -16,7 +16,7 @@ pn.extension()
 # This is called by GridTools() and can't be
 # called by itself.
 
-class App:
+class App(object):
 
     def __init__(self, grd=None):
 

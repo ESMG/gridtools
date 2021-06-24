@@ -29,7 +29,7 @@ def is_mesh_uniform(lon,lat):
     #pdb.set_trace()
     return compare(lat) and compare(lon.T)
 
-class MeshRefinement:
+class MeshRefinement(object):
     """Describes 2D meshes for ESMs.
 
     Meshes have shape=(nj,ni) cells with (nj+1,ni+1) vertices with coordinates (lon,lat).

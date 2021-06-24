@@ -2,7 +2,7 @@ import os, sys, re
 import psutil, shlex, subprocess
 import logging
 
-class SysInfo:
+class SysInfo(object):
     '''
     A small helper class to provide basic system information and misc
     operating system utilities.  Useful for debugging module or system
