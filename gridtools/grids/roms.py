@@ -387,7 +387,7 @@ class ROMS(object):
     def edit_mask_mesh(self, hgrid, proj=None, crs=None):
 
         # Call out to masked hgrid_roms function
-        edit_mask_mesh(hgrid, proj=proj, crs=crs)
+        return edit_mask_mesh(hgrid, proj=proj, crs=crs)
 
 class ROMS_Grid(object):
     """

@@ -25,7 +25,7 @@ crs = ccrs.Stereographic(central_latitude=90.0, central_longitude=160.0)
 #map = cartopy.crs.NorthPolarStereo(central_longitude=160.0)
 
 #breakpoint()
-romsObj.edit_mask_mesh(romsGrd.hgrid, proj=map, crs=crs)
+plotObj = romsObj.edit_mask_mesh(romsGrd.hgrid, proj=map, crs=crs)
 
 '''
  (lon)

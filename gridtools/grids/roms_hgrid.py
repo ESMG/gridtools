@@ -1288,6 +1288,7 @@ class edit_mask_mesh(object):
     """
 
     def _on_key(self, event):
+        print(event.key)
         if event.key == 'e':
             self._clicking = not self._clicking
             plt.title('Editing %s -- click "e" to toggle' % self._clicking)
@@ -1295,6 +1296,7 @@ class edit_mask_mesh(object):
 
     def _on_click(self, event):
         x, y = event.xdata, event.ydata
+        print(x,y)
         if event.button==1 and event.inaxes is not None and self._clicking == True:
             d = (x-self._xc)**2 + (y-self._yc)**2
             if isinstance(self.xv, np.ma.MaskedArray):
@@ -1357,13 +1359,30 @@ class edit_mask_mesh(object):
         cm = plt.matplotlib.colors.ListedColormap([land_color, sea_color],
                                                  name='land/sea')
 
+        fig = plt.figure()
+
         if self.proj is None:
             self._pc = plt.pcolor(xv, yv, mask, cmap=cm, vmin=0, vmax=1, edgecolor='k', **kwargs)
         else:
-            xv, yv = self.proj(xv, yv)
+            #print("*lon")
+            #print(xv)
+            #print("*lat")
+            #print(yv)
+            # REF: https://stackoverflow.com/questions/56491181/how-to-convert-to-map-projection-from-geographic-like-in-basemap
+            # This does not work apparently
+            #xv, yv = self.proj(xv, yv)
+            out_xyz = crs.transform_points(cartopy.crs.Geodetic(), xv, yv)
+            xv = out_xyz[:,:,0]
+            yv = out_xyz[:,:,1]
+            #print("*x")
+            #print(xv)
+            #print("*y")
+            #print(yv)
+            #breakpoint()
             #self._pc = Basemap.pcolor(self.proj, xv, yv, mask, cmap=cm, vmin=0, vmax=1, edgecolor='k', **kwargs)
-            breakpoint()
-            ax = plt.axes(projection=crs)
+            #breakpoint()
+            #ax = plt.axes([0, 0, 1, 1], projection=crs)
+            ax = fig.add_axes([0, 0, 1, 1], projection=crs)
             self._pc = ax.pcolor(xv, yv, mask, cmap=cm, transform=crs, vmin=0, vmax=1, edgecolor='k', **kwargs)
             ax.add_feature(cartopy.feature.OCEAN, zorder=0)
             ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black')
@@ -1377,8 +1396,10 @@ class edit_mask_mesh(object):
         else:
             self._mask = mask.flatten()
 
-        plt.connect('button_press_event', self._on_click)
-        plt.connect('key_press_event', self._on_key)
+        #plt.connect('button_press_event', self._on_click)
+        cid_click = fig.canvas.mpl_connect('button_press_event', self._on_click)
+        #plt.connect('key_press_event', self._on_key)
+        cid_button = fig.canvas.mpl_connect('key_press_event', self._on_key)
         self._clicking = False
         plt.title('Editing %s -- click "e" to toggle' % self._clicking)
         plt.draw()
