@@ -13,16 +13,21 @@ dependencies:
   - dask
   - datashader
   - docutils=0.16
+  - geoviews
+  - hvplot
   - jupyterlab
   - matplotlib
   - m2r2
   - netCDF4
+  - nodejs
   - numba
   - numpy
+  - owslib
   - pandas
   - panel
   - param
   - pip
+  - pooch
   - pyct
   - pykdtree
   - pyproj

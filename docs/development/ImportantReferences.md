@@ -2,7 +2,7 @@
 
 [CREDITS](CREDITS.md) and citations have been consolidated.
 
-## Bookmarks
+## Bookmarks 2021
  * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
  * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
  * https://cfconventions.org/standard-names.html
@@ -21,6 +21,7 @@
  * https://en.wikipedia.org/wiki/Arakawa_grids
  * https://en.wikipedia.org/wiki/World_Geodetic_System
  * https://edbennett.github.io/high-performance-python/11-dask/index.html
+ * https://www.geeksforgeeks.org/matplotlib-figure-figure-add_axes-in-python/amp/
  * https://geohackweek.github.io/nDarrays/09-masking/
  * https://gist.github.com/TomTom101/25e0e76f11a5da57523a60fb280005c1 (Multiple conditions on xarray Data Array)
  * https://github.com/binder-examples/conda
@@ -35,6 +36,8 @@
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py
  * https://matplotlib.org/stable/tutorials/colors/colormaps.html
  * https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py
+ * https://matplotlib.org/stable/users/event_handling.html
+ * https://matplotlib.org/stable/users/interactive.html
  * https://matthewrocklin.com/blog/work/2017/07/03/scaling
  * https://mpi4py.readthedocs.io/en/stable/tutorial.html
  * https://nsidc.org/support/42415620-Mapx-Map-Transformations-Library
@@ -72,9 +75,11 @@
  * https://stackoverflow.com/questions/27175400/how-to-find-the-index-of-a-value-in-2d-array-in-python
  * https://stackoverflow.com/questions/29870629/pip-install-test-dependencies-for-tox-from-setup-py
  * https://stackoverflow.com/questions/32234156/how-to-unimport-a-python-module-which-is-already-imported
+ * https://stackoverflow.com/questions/43326680/what-are-the-differences-between-add-axes-and-add-subplot
  * https://stackoverflow.com/questions/44412432/cartopy-zoom-in-to-a-region
  * https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size
  * https://stackoverflow.com/questions/51357691/python-logging-only-for-own-imported-modules
+ * https://stackoverflow.com/questions/56491181/how-to-convert-to-map-projection-from-geographic-like-in-basemap
  * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://unidata.github.io/MetPy/latest/examples/Four_Panel_Map.html
  * https://www.anomaly.net.au/blog/running-pre-and-post-install-jobs-for-your-python-packages/

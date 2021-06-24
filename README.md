@@ -135,6 +135,15 @@ plan to install a copy of the grid generation software.
 NOTE: These workarounds should be automatically installed with
 an installation of gridtools in step 2 using pip.
 
+## nodejs
+
+OPTIONAL: This package is optional.  If not using **conda**, this package
+is needed to avoid a warning when starting up jupyter.
+
+```
+Could not determine jupyterlab build status without nodejs.
+```
+
 ## numpypi
 
 Portable intrinsics for numpy ([REPO](https://github.com/adcroft/numpypi)).

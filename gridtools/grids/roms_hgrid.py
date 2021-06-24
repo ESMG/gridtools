@@ -1368,7 +1368,6 @@ class edit_mask_mesh(object):
             #print(xv)
             #print("*lat")
             #print(yv)
-            # REF: https://stackoverflow.com/questions/56491181/how-to-convert-to-map-projection-from-geographic-like-in-basemap
             # This does not work apparently
             #xv, yv = self.proj(xv, yv)
             out_xyz = crs.transform_points(cartopy.crs.Geodetic(), xv, yv)

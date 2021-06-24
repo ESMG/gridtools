@@ -1,5 +1,14 @@
 # Changelog
 
+# 2021-06-24
+
+ - Additiona package requirements: geoviews, hvplot, nodejs, pooch, owslib 
+ - May be able to use jupyter for the editor
+ - Return references to the created plot object or the event
+   hooks go away.
+ - The coordinate system is a little different in cartopy.  Found
+   a reference that helped fix the issue.
+
 # 2021-06-23
 
  - Copied needed modules from pyroms and made some modifications
