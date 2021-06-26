@@ -80,6 +80,7 @@
  * https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size
  * https://stackoverflow.com/questions/51357691/python-logging-only-for-own-imported-modules
  * https://stackoverflow.com/questions/56491181/how-to-convert-to-map-projection-from-geographic-like-in-basemap
+ * https://stackoverflow.com/questions/58758480/xarray-select-nearest-lat-lon-with-multi-dimension-coordinates
  * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://unidata.github.io/MetPy/latest/examples/Four_Panel_Map.html
  * https://www.anomaly.net.au/blog/running-pre-and-post-install-jobs-for-your-python-packages/
@@ -102,6 +103,8 @@
 
 ## Paywall Bookmarks
 
+ * https://medium.com/@petehouston/calculate-distance-of-two-locations-on-earth-using-python-1501b1944d97
+ * https://medium.com/analytics-vidhya/tutorial-removing-large-files-from-git-78dbf4cf83a
  * https://medium.com/techtofreedom/3-uses-of-the-ellipsis-in-python-25795aac723d
  * https://towardsdatascience.com/10-examples-to-master-args-and-kwargs-in-python-6f1e8cc30749
 

@@ -3,12 +3,12 @@
 ## Milestones
 
  - [ ] Release 0.3
-   - [ ] Port ROMS mask editor as-is to gridtools under ipython/pylab
-         so it works with MOM6/ROMS grids
+   - [ ] Port ROMS mask editor as-is to gridtools for MOM6/ROMS grids
+   - [X] ipython/pylab version of mask editor
+   - [X] Jupyter version of mask editor
+   - [X] Improve mask editor speed for each click using adaptive subgrids
  - [ ] Release 0.x
    - [ ] Application improvements
-   - [ ] Improve mask editor grid location on click
-   - [ ] Enable mask editor to work under Jupyter
    - [ ] Boundery condition grid creation and support (OBCs)
      - [ ] Save only the points we need instead of the whole supergrid
    - [ ] Sponge data preparation
@@ -62,13 +62,24 @@
      - [ ] Unify code that adjusts lon (PR#1)
    - [ ] Verify unification of radius (R) throughout code
  - [ ] grid mask editor (land, etc)
+     - [X] needs upgrade from basemap()
+     - [X] create an editor that works in jupyter
      - [ ] add routines for mask checking
      - [ ] add routines for updating the exchange grid masks
-     - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
-           `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
-     - [ ] needs upgrade from basemap()
-     - [ ] convert to xarray
-       - [ ] grids.roms.ROMS_gridinfo._get_grid_info()
+     - [ ] jupyter
+       - [X] adaptive mask editing; subgrids
+       - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
+             `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
+       - [ ] show outline of full grid
+       - [ ] show other underlying fields - topo?
+     - [ ] ipython --pylab
+       - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
+             `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
+       - [ ] adaptive mask editing; subgrids
+       - [ ] show outline of full grid
+       - [ ] convert to xarray
+         - [ ] grids.roms.ROMS_gridinfo._get_grid_info()
+       - [ ] show other underlying fields - topo?
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources

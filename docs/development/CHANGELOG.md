@@ -1,5 +1,16 @@
 # Changelog
 
+# 2021-06-25
+
+ - Added an adaptive method to the mask editor.  User can specify size of
+   grid subset.  Subset grid is centered over the last mouse click.
+ - Mask value is toggled between 1 and 0.
+ - With 2D lon, lat grids we have to resort to a great circle calcuation
+   of all the points to find our clicked grid point.  This computation is
+   fast.  The rendering of many points is slow.
+ - Make sure to reset the kernel and wipe out any cells on notebooks to
+   keep the repository size down.
+
 # 2021-06-24
 
  - Experimenting with hvplot quadmesh.  With a large grid, it takes a long time.
