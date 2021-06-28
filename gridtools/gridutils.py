@@ -1822,6 +1822,7 @@ class GridUtils(object):
                         'name': 'Mercator',
                         ...other projection options...,
                     },
+                })
         >>> grd.plotGrid()
 
         **Keyword arguments**:

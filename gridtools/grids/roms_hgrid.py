@@ -1,7 +1,7 @@
 # encoding: utf-8
 '''Tools for creating and working with Arakawa C-Grids
 
-This module is a modified copy from :cite:p:`IESMG_pyroms_2021`.
+This module is a modified copy from :cite:p:`ESMG_pyroms_2021`.
 '''
 __docformat__ = "restructuredtext en"
 
@@ -1338,7 +1338,7 @@ class edit_mask_mesh(object):
             self._pc.changed()
             plt.draw()
 
-    def __init__(self, grd, proj=None, crs=None, **kwargs):
+    def __init__(self, grd, proj=None, **kwargs):
 
         if type(grd).__name__ == 'ROMS_Grid':
             try:
@@ -1396,7 +1396,7 @@ class edit_mask_mesh(object):
         else:
             # This does not work apparently
             #xv, yv = self.proj(xv, yv)
-            out_xyz = crs.transform_points(cartopy.crs.Geodetic(), xv, yv)
+            out_xyz = proj.transform_points(cartopy.crs.Geodetic(), xv, yv)
             xv = out_xyz[:,:,0]
             yv = out_xyz[:,:,1]
 
@@ -1408,9 +1408,9 @@ class edit_mask_mesh(object):
 
             #breakpoint()
             #self._pc = Basemap.pcolor(self.proj, xv, yv, mask, cmap=cm, vmin=0, vmax=1, edgecolor='k', **kwargs)
-            ax = fig.add_subplot(1, 1, 1, projection=crs)
+            ax = fig.add_subplot(1, 1, 1, projection=proj)
             #breakpoint()
-            self._pc = ax.pcolor(xv, yv, mask, cmap=cm, transform=crs, vmin=0, vmax=1, edgecolor='k', **kwargs)
+            self._pc = ax.pcolor(xv, yv, mask, cmap=cm, transform=proj, vmin=0, vmax=1, edgecolor='k', **kwargs)
             # Have to render the full extent first, then zoom in
             #self._pc = ax.pcolor(
             #        xv[self.firstY:self.lastY, self.firstX:self.lastX], 

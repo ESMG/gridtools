@@ -1,5 +1,15 @@
 # Changelog
 
+# 2021-06-28
+
+ - Add controls to jupyter mask editor
+ - Jupyter mask editor is now wrapped in a class
+ - create two more classes in gridtools: maskEditor() and maskEditorPylab()
+ - Performing integration of mask editors into gridtools.
+ - Before use of pylab class in jupyter, a user must have a cell
+   that calls `%pylab` first.
+ - fix typo in example for gridutils.plotGrid()
+
 # 2021-06-27
 
  - map() does not work well with numpy/xarray
