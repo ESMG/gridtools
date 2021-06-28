@@ -8,6 +8,7 @@
  * https://cfconventions.org/standard-names.html
  * https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
  * https://devguide.python.org/documenting/
+ * https://discourse.holoviz.org/t/how-to-create-a-conditional-custom-hover-tool-for-a-holoviews-plot/311
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
  * https://docs.github.com/en/actions/quickstart
@@ -29,6 +30,7 @@
  * https://github.com/pydata/xarray/issues/2899
  * https://github.com/SciTools/cartopy/issues/787
  * https://guides.github.com/features/mastering-markdown/
+ * http://holoviews.org/user_guide/Dashboards.html
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
  * http://mathworld.wolfram.com
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/image_masked.html

@@ -1,5 +1,18 @@
 # Changelog
 
+# 2021-06-27
+
+ - map() does not work well with numpy/xarray
+ - pyplot will require a rewrite to optimize speed; the full map is rendered and
+   underlying data is changed and requested to redraw on update.
+ - need to add a control to jupyter editor to enable/disable mask edits but still
+   allow moving the subgrid on each click.
+
+# 2021-06-26
+
+ - Working on trying to get jupyter and pyplot displays to be more similar to
+   each other.
+
 # 2021-06-25
 
  - Added an adaptive method to the mask editor.  User can specify size of

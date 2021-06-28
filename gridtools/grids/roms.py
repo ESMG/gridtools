@@ -263,6 +263,7 @@ class ROMS(object):
                 lon_psi = nc.variables['lon_psi'][:]
                 lat_psi = nc.variables['lat_psi'][:]
                 #compute verts from rho and psi point
+                #print("Geo: using rho_to_vert_geo()")
                 lon_vert, lat_vert = rho_to_vert_geo(lon_rho, lat_rho, lon_psi, lat_psi)
             else:
                 raise ValueError('NetCDF file must contain lon_vert and lat_vert \
@@ -384,10 +385,10 @@ class ROMS(object):
 
         return vgrid
 
-    def edit_mask_mesh(self, hgrid, proj=None, crs=None):
+    def edit_mask_mesh(self, hgrid, proj=None, crs=None, **kwargs):
 
         # Call out to masked hgrid_roms function
-        return edit_mask_mesh(hgrid, proj=proj, crs=crs)
+        return edit_mask_mesh(hgrid, proj=proj, crs=crs, **kwargs)
 
 class ROMS_Grid(object):
     """

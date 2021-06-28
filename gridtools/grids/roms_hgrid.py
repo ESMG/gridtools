@@ -895,7 +895,6 @@ class CGrid_geo(CGrid):
             angle = 0.5 * (az_forward[1:,:] + az_forward[:-1,:])
             self.angle_rho = (90 - angle) * np.pi/180.
 
-
     def __init__(self, lon_vert, lat_vert, proj, use_gcdist=True, ellipse='WGS84', \
                     lon_rho=None, lat_rho=None, lon_u=None, lat_u=None, \
                     lon_v=None, lat_v=None, lon_psi=None, lat_psi=None, dx=None, dy=None, \
@@ -977,7 +976,6 @@ class CGrid_geo(CGrid):
         self.f = 2.0 * 7.29e-5 * np.sin(self.lat_rho * np.pi / 180.0)
         self.spherical = 'T'
 
-
     def mask_polygon_geo(lonlat_verts, mask_value=0.0):
         lon, lat = list(zip(*lonlat_verts))
         x, y = proj(lon, lat, inverse=True)
@@ -986,13 +984,10 @@ class CGrid_geo(CGrid):
     lon = property(lambda self: self.lon_vert, None, None, 'Shorthand for lon_vert')
     lat = property(lambda self: self.lat_vert, None, None, 'Shorthand for lat_vert')
 
-
-
 class Gridgen(CGrid):
     """
     docstring for Gridgen
     """
-
 
     def generate_grid(self):
 
@@ -1061,8 +1056,6 @@ class Gridgen(CGrid):
         #     super(Gridgen, self).__init__(lon, lat, proj=self.proj)
         # else:
         super(Gridgen, self).__init__(x, y)
-
-
 
     def __init__(self, xbry, ybry, beta, shape, ul_idx=0, \
                  focus=None, proj=None, \
@@ -1287,6 +1280,30 @@ class edit_mask_mesh(object):
         e : toggle between Editing/Viewing mode
     """
 
+    def _set_gridSubset(self, pointY, pointX, grd):
+
+        grdShape = grd.shape
+
+        self.firstY = pointY - self.gridSubset
+        self.lastY = pointY + self.gridSubset
+        self.firstX = pointX - self.gridSubset
+        self.lastX = pointX + self.gridSubset
+
+        if self.firstY < 0:
+            self.firstY = 0
+            self.lastY = gridSubset - 1
+        if self.firstX < 0:
+            self.firstX = 0
+            self.lastX = gridSubset - 1
+        if self.lastY > grdShape[0]-1:
+            self.firstY = grdShape[0] - gridSubset
+            self.lastY = grdShape[0] - 1
+        if self.lastX > grdShape[0]-1:
+            self.firstX = grdShape[0] - gridSubset
+            self.lastX = grdShape[0] - 1
+
+        return
+
     def _on_key(self, event):
         #print(event.key)
         if event.key == 'e':
@@ -1306,6 +1323,9 @@ class edit_mask_mesh(object):
             self._mask[idx] = float(not self._mask[idx])
             j, i = np.argwhere(d == d.min())[0]
             self.mask[j, i] = float(not self.mask[j, i])
+
+            self._set_gridSubset(j, i, self._xc)
+
             #open output file
             f = open('mask_change.txt','a')
             #value = (i, j, self.mask[i, j])
@@ -1349,6 +1369,14 @@ class edit_mask_mesh(object):
         self.xv = xv
         self.yv = yv
 
+        self.gridSubset = kwargs.pop('gridSubset', 50)
+        self.lastClickY = -1
+        self.lastClickX = -1
+        self.firstX = -1
+        self.lastX = -1
+        self.firstY = -1
+        self.lastY = -1
+
         self.mask = mask
 
         self.proj = proj
@@ -1359,30 +1387,36 @@ class edit_mask_mesh(object):
         cm = plt.matplotlib.colors.ListedColormap([land_color, sea_color],
                                                  name='land/sea')
 
+        #fig = plt.figure()
+        #fig = plt.figure(figsize=plt.figaspect(0.5))
         fig = plt.figure()
 
         if self.proj is None:
             self._pc = plt.pcolor(xv, yv, mask, cmap=cm, vmin=0, vmax=1, edgecolor='k', **kwargs)
         else:
-            #print("*lon")
-            #print(xv)
-            #print("*lat")
-            #print(yv)
             # This does not work apparently
             #xv, yv = self.proj(xv, yv)
             out_xyz = crs.transform_points(cartopy.crs.Geodetic(), xv, yv)
             xv = out_xyz[:,:,0]
             yv = out_xyz[:,:,1]
-            #print("*x")
-            #print(xv)
-            #print("*y")
-            #print(yv)
+
+            if self.lastClickY == -1:
+                self.lastClickY = int(xv.shape[0] / 2)
+            if self.lastClickX == -1:
+                self.lastClickX = int(xv.shape[1] / 2)
+                self._set_gridSubset(self.lastClickY, self.lastClickX, xv)
+
             #breakpoint()
             #self._pc = Basemap.pcolor(self.proj, xv, yv, mask, cmap=cm, vmin=0, vmax=1, edgecolor='k', **kwargs)
+            ax = fig.add_subplot(1, 1, 1, projection=crs)
             #breakpoint()
-            #ax = plt.axes([0, 0, 1, 1], projection=crs)
-            ax = fig.add_axes([0, 0, 1, 1], projection=crs)
             self._pc = ax.pcolor(xv, yv, mask, cmap=cm, transform=crs, vmin=0, vmax=1, edgecolor='k', **kwargs)
+            # Have to render the full extent first, then zoom in
+            #self._pc = ax.pcolor(
+            #        xv[self.firstY:self.lastY, self.firstX:self.lastX], 
+            #        yv[self.firstY:self.lastY, self.firstX:self.lastX], 
+            #        mask[self.firstY:self.lastY-1, self.firstX:self.lastX-1],
+            #        cmap=cm, transform=crs, vmin=0, vmax=1, edgecolor='k', **kwargs)
             ax.add_feature(cartopy.feature.OCEAN, zorder=0)
             ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black')
             #self.proj.drawcoastlines()
@@ -1402,8 +1436,6 @@ class edit_mask_mesh(object):
         self._clicking = False
         plt.title('Editing %s -- click "e" to toggle' % self._clicking)
         plt.draw()
-
-
 
 class edit_mask_mesh_ij(object):
     """
