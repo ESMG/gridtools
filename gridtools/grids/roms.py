@@ -15,9 +15,14 @@ from . import roms_io as io
 
 class ROMS(object):
 
-    def __init__(self):
+    def __init__(self, grd=None):
         self._grid_type = "ROMS"
         self.roms_grid = dict()
+
+        # Allow passing of gridtools object primarily
+        # to allow for a logging facility for scattered
+        # print statements.
+        self.grd = grd
 
     def getGrid(self, variable=None):
         '''Return the ROMS grid to the caller.
@@ -165,14 +170,14 @@ class ROMS(object):
 
         #if it is type byte, then convert to string
         try:
-          spherical = spherical.decode('utf8')
+            spherical = spherical.decode('utf8')
         except:
-          print('Assuming spherical is integer', spherical, type(spherical))
+            print('ROMS: Assuming spherical is integer', spherical, type(spherical))
 
         #Get horizontal grid
         if ((spherical == 0) or (spherical == 'F')):
             #cartesian grid
-            print('Load cartesian grid from file')
+            print('ROMS: Load cartesian grid from file')
             if 'x_vert' in list(nc.variables.keys()) and 'y_vert' in list(nc.variables.keys()):
                 x_vert = nc.variables['x_vert'][:]
                 y_vert = nc.variables['y_vert'][:]
@@ -247,7 +252,7 @@ class ROMS(object):
 
         else:
             #geographical grid
-            print('Load geographical grid from file')
+            print('ROMS: Load geographical grid from file')
             #proj = Basemap(projection='merc', resolution=None, lat_0=0, lon_0=0)
             PROJSTRING = "+proj=merc +lat_0=0 +lat_0=0"
             #crs = CRS.from_proj4(PROJSTRING)
@@ -527,7 +532,7 @@ class ROMS_gridinfo(object):
     and hist_file are not passed to the object when it is created, the
     information is retrieved from gridid.txt.
     To add new grid please edit your gridid.txt. You need to define
-    an environment variable PYROMS_GRIDID_FILE pointing to your
+    an environment variable ROMS_GRIDID_FILE pointing to your
     gridid.txt file. Just copy an existing grid and modify the
     definition accordingly to your case (Be carefull with
     space and blank line).
@@ -570,7 +575,7 @@ class ROMS_gridinfo(object):
       #check if the grid_file and hist_files are both null; if so get data from gridid.txt
       if (type(grid_file) == type(None)) & (type(hist_file) == type(None)):
         #print 'CJMP> gridid not in dictionary, data will be retrieved from gridid.txt'
-        gridid_file = os.getenv("PYROMS_GRIDID_FILE")
+        gridid_file = os.getenv("ROMS_GRIDID_FILE")
         data = open(gridid_file,'r')
         lines = data.readlines()
         data.close()

@@ -1,5 +1,5 @@
 # General imports and definitions
-import os, re, sys, datetime, logging, importlib
+import os, re, sys, datetime, logging, importlib, copy
 import cartopy, warnings, hashlib
 import numpy as np
 import xarray as xr
@@ -42,6 +42,8 @@ class GridUtils(object):
         self.xrOpen = False
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        # Native grid variable (ROMS, etc)
+        self.nativeGrid = None
         # Allow setting of chunk parameter for grids
         self.xrChunks = None
         # Internal parameters
@@ -450,6 +452,7 @@ class GridUtils(object):
         self.xrFilename = None
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        self.nativeGrid = None
         self.xrChunks = None
         self.gridInfo = dict()
         self.gridInfo['dimensions'] = dict()
@@ -1578,24 +1581,48 @@ class GridUtils(object):
             self.printMsg(msg, level=logging.INFO)
             return
             
-    def openGrid(self, inputUrl, chunks=None):
-        '''Open a grid file.  The file pointer is internal to the gridtools object.
+    def openGrid(self, inputUrl, **kwargs):
+        '''Open a grid file.  This creates and open
+        file pointer which is local to the gridtools object.
 
 	Specify with file: or OpenDAP (http://, https://) or ds:.
 
-        To access it, use: obj.xrDS or obj.grid'''
+        To access the opened grid, use: `obj.xrDS`.  This grid now needs
+        to be formally read by `readGrid()` and the grid will be
+        available to `obj.grid` and `obj.nativeGrid`.
+        '''
 
         # If we have a file pointer and it is open, close it and re-open the new file
         if self.xrOpen:
             self.closeGrid()
+
+        # Process keyword arguments
+        gridType = kwargs.pop('gridType', 'MOM6')
+        chunks = kwargs.pop('chunks', None)
+
+        # Some keyword arguments need to be kept upstream
+        kwargs['chunks'] = chunks
+
+        if gridType == 'ROMS':
+            gridid = kwargs.pop('gridid', None)
+            if gridid:
+                self.gridInfo['ROMS_gridid'] = gridid
+
+            # If just the gridid is supplied, then just return
+            # the grid is read in readGrid().
+            if not(inputUrl) or inputUrl is None:
+                self.xrOpen = True
+                self.gridInfo['type'] = gridType
+                return
             
         try:
             if chunks:
-                self.xrDS = self.openDataset(inputUrl, chunks=self.xrChunks)
-            else:
-                self.xrDS = self.openDataset(inputUrl)
+                self.xrChunks = chunks
+
+            self.xrDS = self.openDataset(inputUrl, **kwargs)
             self.xrOpen = True
             self.xrFilename = inputUrl
+            self.gridInfo['type'] = gridType
         except:
             msg = "ERROR: Unable to load grid: %s" % (inputUrl)
             self.printMsg(msg, level=logging.ERROR)
@@ -1603,13 +1630,33 @@ class GridUtils(object):
             self.xrOpen = False
             # If in DEBUG mode, stop on error to load the inputUrl
             self.debugMsg("DEBUG: Stopping on read error of grid file.")
-            
-    def readGrid(self, opts={'type': 'MOM6'}, local=None, localFilename=None):
-        '''Read a grid.
+
+    def readGrid(self, **kwargs):
+        '''Read a grid.  This is more of a convenience function for applications
+        that need to pass grids to gridtools instead of using the openGrid function.
         
         This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc).
         This routine does not verify the read grid vs. type of grid specified.
+
+        .. note::
+            A copy of the native grid native structure can be found
+            by using `obj.nativeGrid`.  The `obj.grid` variable may
+            be modified by the gridtools library.
+
         '''
+
+        # Process keyword arguments
+        defaultModelType = 'MOM6'
+        if 'type' in self.gridInfo.keys():
+            defaultModelType = self.gridInfo['type']
+
+        gridType = kwargs.pop('gridType', defaultModelType)
+        local = kwargs.pop('local', None)
+        localFilename = kwargs.pop('localFilename', None)
+
+        if localFilename:
+            self.xrFilename = localFilename
+
         # if a dataset is being loaded via readGrid(local=), close any existing dataset
         if local:
             if self.xrOpen:
@@ -1617,14 +1664,50 @@ class GridUtils(object):
             self.xrOpen = True
             self.xrDS = local
             self.grid = local
-        else:
-            if self.xrOpen:
-                # Save grid metadata
-                self.gridInfo['type'] = opts['type']
-                self.grid = self.xrDS
+            # This should be an xarray with an available copy method
+            self.nativeGrid = local.copy()
+            return
+
+        if self.xrOpen:
+            # Save grid metadata
+            self.gridInfo['type'] = gridType
+            self.grid = self.xrDS
+            # This will be None until a recognized grid type is found
+            self.nativeGrid = None
+
+            # Do specific grid type reads and place into nativeGrid object
+            if gridType == 'MOM6':
+                self.nativeGrid = self.xrDS.copy()
+
+            if gridType == 'ROMS':
+
+                if 'ROMS_gridid' in self.gridInfo.keys():
+                    sourceGridModule = gridType.lower()
+                    try:
+                        mdlSource = importlib.import_module('gridtools.grids.%s' % (sourceGridModule))
+                    except:
+                        msg = ('ERROR: Failed to load grid module for %s.' % (sourceGrid))
+                        self.printMsg(msg, level=logging.ERROR)
+                        return
+
+                    romsMdl = mdlSource.ROMS()
+                    self.nativeGrid = romsMdl.get_ROMS_grid(self.gridInfo['ROMS_gridid'])
+
+                # If we loaded a ROMS grid via gridid, then we need to populate the gridutils
+                # variable with native items.
+                if len(self.grid) == 0:
+                    # Lon and Lat center grid points
+                    self.grid['lon'] = (('ny', 'nx'), self.nativeGrid.hgrid.lon_rho)
+                    self.grid['lat'] = (('ny', 'nx'), self.nativeGrid.hgrid.lat_rho)
+
+                    # Ocean mask values
+                    self.grid['mask'] = (('ny', 'nx'), self.nativeGrid.hgrid.mask)
+
+                    self.grid = self.grid.set_coords(['lon', 'lat'])
+                else:
+                    breakpoint()
+
         
-        if localFilename:
-            self.xrFilename = localFilename
 
     def removeFillValueAttributes(self, data=None, stringVars=None):
         '''Helper function to format the netCDF file to emulate the
@@ -2337,12 +2420,20 @@ class GridUtils(object):
 
         return sourceExpression
 
-    def openDataset(self, dsName, chunks=None):
+    def openDataset(self, dsName, **kwargs):
         '''Open a dataset using the data source catalog or url that can
         point to a raw dataset using a prefix file: in the data source name.
         The url can be an OpenDAP dataset: e.g.
         https://opendap.jpl.nasa.gov/opendap/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_AMSR_OI/2011/001/20110101-NCDC-L4LRblend-GLOB-v01-fv02_0-AVHRR_AMSR_OI.nc.bz2
+
+        **Keyword arguments**
+
+            * *chunks* (``int, tuple of int or mapping of hashable to int``) -- xarray chunk description.
+            * *gridid* (``ROMS model grid ID``) -- Model grid identification using the gridid.txt file.
+              The environment variable `ROMS_GRIDID_FILE` must be set.
 	'''
+        # Process keyword arguments
+        chunks = kwargs.pop('chunks', None)
 
         dsUrl = urllib.parse.urlparse(dsName)
         # At this point, we assume the dsName is a local filename

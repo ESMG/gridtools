@@ -72,14 +72,17 @@
              `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
        - [ ] show outline of full grid
        - [ ] show other underlying fields - topo?
+       - [ ] ROMS: write edited mask
+       - [ ] MOM6: write edited mask
      - [ ] ipython --pylab
        - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
              `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
-       - [ ] adaptive mask editing; subgrids
+       - [ ] adaptive mask editing; subgrids; requires full rewrite of function
        - [ ] show outline of full grid
        - [ ] convert to xarray
          - [ ] grids.roms.ROMS_gridinfo._get_grid_info()
        - [ ] show other underlying fields - topo?
+       - [ ] MOM6: write edited mask
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources
@@ -209,11 +212,14 @@
  - [ ] Compute `angle_dy` for testing of grid conformality.  Theoretically,
        we can do this check for all grid and supergrid cells.
  - [ ] tripolar grids: use FRE-NCtools via cython?
- - [ ] Bring in code that converts ROMS grids to MOM6 grids
+ - [ ] Grid conversion
+   - [X] Allow conversion of ROMS grids to MOM6 grids
    - [ ] Allow conversion of MOM6 grids to ROMS grids
- - [ ] grid reading and plot parameter defaults should be dynamic with
-       grid type declaration and potentially split out into separate
-       library modules? lib/gridTools/grids/{MOM6,ROMS,WRF}
+ - [ ] dynamic plot parameters based on grid type
+ - [ ] dynamic reading of grids
+   - [ ] grid type declaration
+   - [X] MOM6 grid module
+   - [ ] ROMS grid module
  - [ ] Place additional metadata into MOM6 grid files
    - [X] Grid parameters
    - [X] Software stack, git information

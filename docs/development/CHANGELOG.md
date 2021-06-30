@@ -1,5 +1,12 @@
 # Changelog
 
+# 2021-06-29
+
+ - Continue configuration of jupyter mask editer.
+ - Integration of ROMS grids into openGrid/readGrid infrastructure.
+ - Rename variable `PYROMS_GRIDID_FILE` to `ROMS_GRIDID_FILE`.
+ - Move to more generic keywarg arguments to openDataset, openGrid and readGrid.
+
 # 2021-06-28
 
  - Add controls to jupyter mask editor

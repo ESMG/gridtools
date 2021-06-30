@@ -1111,7 +1111,7 @@ class maskEditor(object):
 
         return plt
 
-    def maskEditor(self):
+    def createMaskEditorApp(self):
 
         tap_stream = hv.streams.Tap()
         dmap = gv.DynamicMap(self.plotMap, streams=[tap_stream])
