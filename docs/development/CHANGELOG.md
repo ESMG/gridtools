@@ -1,5 +1,10 @@
 # Changelog
 
+# 2021-06-30
+
+ - Allow modification of a MOM6 grid.
+ - Now need to work on save and application of edited grid.
+
 # 2021-06-29
 
  - Continue configuration of jupyter mask editer.
