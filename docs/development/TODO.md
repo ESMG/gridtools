@@ -3,11 +3,13 @@
 ## Milestones
 
  - [ ] Release 0.3
-   - [ ] Port ROMS mask editor as-is to gridtools for MOM6/ROMS grids
-   - [X] ipython/pylab version of mask editor
    - [X] Jupyter version of mask editor
    - [X] Improve mask editor speed for each click using adaptive subgrids
+   - [X] Apply edited land or ocean mask to existing bathy grid
+   - [X] Rewrite mosaic files based on new bathymetry
  - [ ] Release 0.x
+   - [ ] Finish port ROMS mask editor as-is to gridtools for MOM6/ROMS grids (pylab)
+   - [ ] Optimize pylab mask editor
    - [ ] Application improvements
    - [ ] Boundery condition grid creation and support (OBCs)
      - [ ] Save only the points we need instead of the whole supergrid
@@ -22,6 +24,7 @@
      - [ ] implement ROMS.extend_ROMS_grid()
    - [ ] Grid filling options (flooding) (ice9)
    - [ ] Enable gridtools library to be installable via conda
+   - [ ] Leverage features of FRE-NCtools with gridtools
 
 # BUGS
  - [ ] latitude is not reliably reproduced between platforms; other
@@ -104,6 +107,8 @@
    - [ ] implement useFixByOverlapQHGridShift so a regular grid can be
          used without a shift
    - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingLandMask()
+   - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingOceanMask()
+   - [ ] Check depth points for values that exceed `MAXIMUM_DEPTH`
  - [ ] improve reproducibility
    - [X] include a dump of conda environment in the grid file (nc)
    - [X] add sha256 to grid and variable arrays
@@ -194,12 +199,15 @@
 
 # WISH
 
+ - [ ] Update gridTools.yml with some pinned versions to help package resolution
  - [ ] Write example program(s) that utilizes dask
    - [ ] Example 4: mkGridsEample4a.ipynb is incomplete
  - [ ] Support for multiple tiles for a model grid
  - [ ] Harmonize filename operations in functions
  - [ ] Teach grid tools to use "input.nml" to find grid related things
        for model runs.
+ - [ ] Do a head-to-head comparison of FRE-NCtools vs gridtools using an example
+       grid.  See if we can leverage both tools abilities.
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
        there things that we could use there instead of recreating many wheels.
        There are lot of FRE-NCtool references in the ROMS to MOM6
@@ -214,6 +222,7 @@
  - [ ] tripolar grids: use FRE-NCtools via cython?
  - [ ] Grid conversion
    - [X] Allow conversion of ROMS grids to MOM6 grids
+     - [ ] improve just clobbering shallower points with masking_depth
    - [ ] Allow conversion of MOM6 grids to ROMS grids
  - [ ] dynamic plot parameters based on grid type
  - [ ] dynamic reading of grids
@@ -230,7 +239,7 @@
    - [X] Update conda capture code so a temporary file is not necessary
  - [ ] Work with generic non-mapping reference systems for use with
        some of the sample MOM6 problems
-   - [ ] MOM6-examples: double_gyre
+   - [ ] MOM6-examples: `double_gyre`
      - [ ] https://github.com/NOAA-GFDL/MOM6-examples/blob/dev/gfdl/ocean_only/double_gyre/Visualizing%20and%20animating%20sea-surface%20height.ipynb
      - [ ] https://gist.github.com/adcroft/2a2b91d66625fd534372
    - [ ] MOM6 dumbbell: https://github.com/NOAA-GFDL/MOM6/search?q=dumbbell

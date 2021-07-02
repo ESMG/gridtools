@@ -81,6 +81,7 @@
  * https://stackoverflow.com/questions/44412432/cartopy-zoom-in-to-a-region
  * https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size
  * https://stackoverflow.com/questions/51357691/python-logging-only-for-own-imported-modules
+ * https://stackoverflow.com/questions/53322952/creating-a-land-ocean-mask-in-cartopy
  * https://stackoverflow.com/questions/56491181/how-to-convert-to-map-projection-from-geographic-like-in-basemap
  * https://stackoverflow.com/questions/58758480/xarray-select-nearest-lat-lon-with-multi-dimension-coordinates
  * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
@@ -109,6 +110,7 @@
  * https://medium.com/analytics-vidhya/tutorial-removing-large-files-from-git-78dbf4cf83a
  * https://medium.com/techtofreedom/3-uses-of-the-ellipsis-in-python-25795aac723d
  * https://towardsdatascience.com/10-examples-to-master-args-and-kwargs-in-python-6f1e8cc30749
+ * https://towardsdatascience.com/stop-using-print-to-debug-in-python-use-icecream-instead-79e17b963fcc
 
 ## Python Packaging
 

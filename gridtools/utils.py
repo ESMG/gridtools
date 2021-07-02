@@ -3,7 +3,8 @@
 Generic utility functions
 '''
 
-import datetime, subprocess
+import datetime, hashlib, subprocess
+import numpy as np
 from . import sysinfo
 
 def checkArgument(vDict, vKey, vVal):
@@ -56,3 +57,9 @@ def get_history_entry(argv):
     today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
     command = ' '.join(argv)
     return today + ': ' + command
+
+def sha256sum(xrData):
+    """Utility function that returns a hash of the data provided.
+    """
+
+    return hashlib.sha256( np.array( xrData ) ).hexdigest()

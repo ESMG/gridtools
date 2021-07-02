@@ -2,9 +2,8 @@
 Generic class and utility funtions for handling MOM6 grids.
 '''
 
-import hashlib, logging, os
+import logging, os
 import numpy
-import numpy as np
 import xarray as xr
 
 from .. import utils
@@ -39,13 +38,13 @@ class MOM6(object):
             ds['x'] = (('nyp','nxp'), lonGrid)
             ds['x'].attrs['standard_name'] = 'geographic_longitude'
             ds['x'].attrs['units'] = 'degrees_east'
-            ds['x'].attrs['sha256'] = hashlib.sha256( np.array( lonGrid ) ).hexdigest()
+            ds['x'].attrs['sha256'] = utils.sha256sum( lonGrid )
 
             latGrid = self.mom6_grid['supergrid']['lat']
             ds['y'] = (('nyp','nxp'), latGrid)
             ds['y'].attrs['standard_name'] = 'geographic_latitude'
             ds['y'].attrs['units'] = 'degrees_north'
-            ds['y'].attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
+            ds['y'].attrs['sha256'] = utils.sha256sum( latGrid )
 
             ds.tile.attrs['geometry'] = "spherical"
         else:
@@ -53,28 +52,28 @@ class MOM6(object):
             ds['x'] = (('nyp','nxp'), xGrid)
             ds['x'].attrs['standard_name'] = 'geographic_longitude'
             ds['x'].attrs['units'] = 'meters'
-            ds['x'].attrs['sha256'] = hashlib.sha256( np.array( xGrid ) ).hexdigest()
+            ds['x'].attrs['sha256'] = utils.sha256sum( xGrid )
 
             yGrid = self.mom6_grid['supergrid']['y']
             ds['y'] = (('nyp','nxp'), yGrid)
             ds['y'].attrs['standard_name'] = 'geographic_latitude'
             ds['y'].attrs['units'] = 'meters'
-            ds['y'].attrs['sha256'] = hashlib.sha256( np.array( yGrid ) ).hexdigest()
+            ds['y'].attrs['sha256'] = utils.sha256sum( yGrid )
 
             ds.tile.attrs['geometry'] = "cartesian"
 
         ds['dx'] = (('nyp', 'nx'), self.mom6_grid['supergrid']['dx'])
         ds['dx'].attrs['units'] = 'meters'
-        ds['dx'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['dx'] ) ).hexdigest()
+        ds['dx'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['dx'] )
         ds['dy'] = (('ny', 'nxp'), self.mom6_grid['supergrid']['dy'])
         ds['dy'].attrs['units'] = 'meters'
-        ds['dy'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['dy'] ) ).hexdigest()
+        ds['dy'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['dy'] )
         ds['area'] = (('ny','nx'), self.mom6_grid['supergrid']['area'])
         ds['area'].attrs['units'] = 'meters^2'
-        ds['area'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['area'] ) ).hexdigest()
+        ds['area'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['area'] )
         ds['angle_dx'] = (('nyp','nxp'), self.mom6_grid['supergrid']['angle'])
         ds['angle_dx'].attrs['units'] = 'radians'
-        ds['angle_dx'].attrs['sha256'] = hashlib.sha256( np.array( self.mom6_grid['supergrid']['angle'] ) ).hexdigest()
+        ds['angle_dx'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['angle'] )
 
         self._add_global_attributes(ds)
 
@@ -160,7 +159,7 @@ class MOM6(object):
 
         # Determine values from other possible arguments
         minimum_depth = 0.0
-        masking_depth = 0.0
+        masking_depth = -99999.0
         maximum_depth = -99999.0
         if 'MINIMUM_DEPTH' in kwargs.keys():
             minimum_depth = kwargs['MINIMUM_DEPTH']
@@ -168,6 +167,12 @@ class MOM6(object):
             maximum_depth = kwargs['MAXIMUM_DEPTH']
         if 'MASKING_DEPTH' in kwargs.keys():
             masking_depth = kwargs['MASKING_DEPTH']
+
+        # MINIMUM_DEPTH < MASKING_DEPTH, if MASKING_DEPTH is undefined, set it to MINIMUM_DEPTH
+        if minimum_depth < masking_depth:
+            masking_depth = minimum_depth
+        if masking_depth < -99990.0:
+            masking_depth = minimum_depth
 
         ny, nx = roms_grid['rho']['lon'].shape # trimmed
         self.mom6_grid['cell_grid']['nx'] = nx
@@ -199,8 +204,9 @@ class MOM6(object):
         # "missing" values, which we'll assume to be water
         mask = roms_grid['rho']['mask']
         #mask[mask != 0] = 1
-        mask = np.where(mask != 0, 1, 0)
+        mask = numpy.where(mask != 0, 1, 0)
         #self.mom6_grid['cell_grid']['depth'] = roms_grid['rho']['h'] * mask
+        # TODO: This can be improved instead of just clobbering land points with masking_depth
         self.mom6_grid['cell_grid']['depth'] = xr.where(mask, roms_grid['rho'][kwargs['topographyVariable']], masking_depth)
         self.mom6_grid['cell_grid']['ocean_mask'] = mask
         self.mom6_grid['cell_grid']['land_mask'] = numpy.logical_not(mask)
@@ -260,7 +266,7 @@ class MOM6(object):
         ds['depth'] = (('ny', 'nx'), kwargs['topographyGrid'])
         ds['depth'].attrs['units'] = 'meters'
         ds['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
-        ds['depth'].attrs['sha256'] = hashlib.sha256( np.array( kwargs['topographyGrid'] ) ).hexdigest()
+        ds['depth'].attrs['sha256'] = utils.sha256sum( kwargs['topographyGrid'] )
 
         #    # Variables & Values
         #    hdepth = topog_ds.createVariable('depth', 'f4', ('ny','nx',))
@@ -376,6 +382,22 @@ class MOM6(object):
         ds['mask'] = (('ny', 'nx'), landMask)
         ds['mask'].attrs['standard_name'] = 'land fraction at T-cell centers'
         ds['mask'].attrs['units'] = 'none'
+        ds['mask'].attrs['sha256'] = utils.sha256sum( ds['mask'] )
+
+        if 'supergrid' in self.mom6_grid:
+            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2])
+        else:
+            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2])
+        ds['x'].attrs['sha256'] = utils.sha256sum( ds['x'] )
+        ds['x'].attrs['standard_name'] = 'longitude'
+        ds['x'].attrs['units'] = 'degrees_east'
+        if 'supergrid' in self.mom6_grid:
+            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2])
+        else:
+            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2])
+        ds['y'].attrs['sha256'] = utils.sha256sum( ds['y'] )
+        ds['y'].attrs['standard_name'] = 'latitude'
+        ds['y'].attrs['units'] = 'degrees_north'
 
         # Global attributes
         self._add_global_attributes(ds)
@@ -419,6 +441,22 @@ class MOM6(object):
         ds['mask'] = (('ny', 'nx'), oceanMask)
         ds['mask'].attrs['standard_name'] = 'ocean fraction at T-cell centers'
         ds['mask'].attrs['units'] = 'none'
+        ds['mask'].attrs['sha256'] = utils.sha256sum( ds['mask'] )
+
+        if 'supergrid' in self.mom6_grid:
+            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2])
+        else:
+            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2])
+        ds['x'].attrs['sha256'] = utils.sha256sum( ds['x'] )
+        ds['x'].attrs['standard_name'] = 'longitude'
+        ds['x'].attrs['units'] = 'degrees_east'
+        if 'supergrid' in self.mom6_grid:
+            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2])
+        else:
+            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2])
+        ds['y'].attrs['sha256'] = utils.sha256sum( ds['y'] )
+        ds['y'].attrs['standard_name'] = 'latitude'
+        ds['y'].attrs['units'] = 'degrees_north'
 
         # Global attributes
         self._add_global_attributes(ds)
@@ -468,7 +506,8 @@ class MOM6(object):
             dsCombined = xr.Dataset()
             dsCombined['area'] = (('ny','nx'), self.mom6_grid['cell_grid']['area'])
             dsCombined['mask'] = mask
-            idx = np.nonzero(mask==1)
+            dsCombined['sha256'] = utils.sha256sum( self.mom6_grid['cell_grid']['area'] )
+            idx = numpy.nonzero(mask==1)
 
             #breakpoint()
             #xgrid_area = self.mom6_grid['cell_grid']['area'][mask == 1]
@@ -734,6 +773,18 @@ class MOM6(object):
         parameters `MINIMUM_DEPTH`, `MASKING_DEPTH` and `MAXIMUM_DEPTH` may also
         be specified.
 
+        **Keyword arguments**:
+
+        * *epsilon* (``float``) -- Depth removed from masking depth to ensure new
+          depth is deeper than the applied masking or minimum depth. Default: 1.0e-14
+        * *MINIMUM_DEPTH* (``float``) --
+          Minimum ocean depth. Default: 0.0
+        * *MASKING_DEPTH* (``float``) --
+          Ocean depths equal or shallower are set to land mask. Default: undefined
+        * *MAXIMUM_DEPTH* (``float``) --
+          Maximum depth of the ocean.  Defaults to maximum depth from data source
+          if not specified or is negative. Default: undefined
+
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
 
@@ -742,7 +793,7 @@ class MOM6(object):
 
         # Determine values from other possible arguments
         minimum_depth = 0.0
-        masking_depth = 0.0
+        masking_depth = -99999.0
         maximum_depth = -99999.0
         if 'MINIMUM_DEPTH' in kwargs.keys():
             minimum_depth = kwargs['MINIMUM_DEPTH']
@@ -757,11 +808,10 @@ class MOM6(object):
             maximum_depth = depthGrid.max().values.tolist()
             #msg = ("The (diagnosed) maximum depth of the ocean %f meters." % (maximum_depth))
             #grd.printMsg(msg, level=logging.INFO)
-        # Negative values are set back to zero for MINIMUM_DEPTH and MASKING_DEPTH
-        if minimum_depth < 0.0:
-            minimum_depth = 0.0
-        if masking_depth < 0.0:
-            masking_depth = 0.0
+
+        # MINIMUM_DEPTH must be defined.  If MASKING_DEPTH is not defined, it is set to MINIMUM_DEPTH.
+        if masking_depth < -99990.0:
+            masking_depth = minimum_depth
 
         if maskType == 'land':
             return xr.where(depthGrid <= masking_depth, 1, 0)

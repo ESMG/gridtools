@@ -1,7 +1,29 @@
 # Changelog
 
+# 2021-07-02
+
+ - Xarray items have to have consistent dimensions and coordinates work smoothly.
+ - In bathyutils, after applying mask to correct ocean points, check the depths
+   against the `MINIMUM_DEPTH` for points that need to be capped as well.
+ - Update some MOM6 notes about bathymetry and related parameters.
+
+# 2021-07-01
+
+ - Set undefined depth of ocean to -99999.0
+ - Refactor codes to use utils.sha256sum()
+ - Apply `MASKING_DEPTH` and `MINIMUM_DEPTH` to ocean points in
+   bathyutils.applyExistingLandmask() and bathyutils.applyExistingOceanmask().
+ - Make sure we write hashes for files created by gridutils.makeSoloMosaic().
+ - Create a utility function: utils.sha256sum() for all objects
+ - Include variable coord as variables to ignore in gridutils.removeFillValueAttributes()
+ - Handle single variables passed to gridutils.removeFillValueAttributes()
+ - Change test for data in gridutils.removeFillValueAttributes()
+ - Revising mask modification for bathyutils.applyExistingLandmask() and
+   bathyutils.applyExistingOceanmask().
+
 # 2021-06-30
 
+ - MOM6 PR#1428 `MASKING_DEPTH` may be unspecified or shallower than `MINIMUM_DEPTH`.
  - Allow modification of a MOM6 grid.
  - Now need to work on save and application of edited grid.
 

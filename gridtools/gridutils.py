@@ -1494,8 +1494,6 @@ class GridUtils(object):
             self.printMsg(msg, level=logging.ERROR)
             return
 
-        # Check kwargs
-
         # Check and set any defaults to kwargs
         utils.checkArgument(kwargs, 'writeTopography', False)
         utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
@@ -1508,8 +1506,8 @@ class GridUtils(object):
         utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
         utils.checkArgument(kwargs, 'tileName', "tile1")
         utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
-        utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
-        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0)
+        utils.checkArgument(kwargs, 'MASKING_DEPTH', -9999.0)
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', 99999.0)
         utils.checkArgument(kwargs, 'writeExchangeGrids', False)
         utils.checkArgument(kwargs, 'writeCouplerMosaic', False)
         utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
@@ -1520,9 +1518,13 @@ class GridUtils(object):
         # ROMS specific kwargs
         utils.checkArgument(kwargs, 'topographyVariable', 'h')
 
-        # Sanity checks
+        # Sanity checks for *_DEPTH arguments
+        if kwargs['MASKING_DEPTH'] > kwargs['MINIMUM_DEPTH']:
+            msg = ('WARNING: convertGrid: MASKING_DEPTH is deeper than MINIMUM_DEPTH and therefore ignored.')
+            self.printMsg(msg, level=logging.WARNING)
+            kwargs['MASKING_DEPTH'] = -9999.0
         if not(sanity.saneDepthOptions(**kwargs)):
-            msg = ('ERROR: Invalid *_DEPTH options passed. (MAXIMUM_DEPTH(%f) <= MINIMUM_DEPTH(%f) <= MASKING_DEPTH(%f))' %\
+            msg = ('ERROR: Invalid *_DEPTH options passed. (MAXIMUM_DEPTH(%f) >= MINIMUM_DEPTH(%f) >= MASKING_DEPTH(%f))' %\
                 (kwargs['MAXIMUM_DEPTH'], kwargs['MINIMUM_DEPTH'], kwargs['MASKING_DEPTH']))
             self.printMsg(msg, level=logging.INFO)
             return
@@ -1728,8 +1730,18 @@ class GridUtils(object):
         '''
 
         ncEncoding = dict()
-        if data:
-            ncVars = list(data.variables)
+        ncVars = []
+        if data is not None:
+            # The data object may be a single variable
+            if not(hasattr(data, 'variables')):
+                if hasattr(data, 'name'):
+                    ncVars = list([data.name])
+            else:
+                ncVars = list(data.variables)
+
+            # Also apply to coordinate variables
+            if hasattr(data, 'coords'):
+                ncVars = ncVars + list(data.coords)
         else:
             ncVars = list(self.grid.variables)
 
@@ -2503,6 +2515,109 @@ class GridUtils(object):
 
         return dsData
 
+    def saveDataset(self, dsName, dsData, **kwargs):
+        '''This allows saving variables to a file.
+
+        :param dsName: data source name or filename
+        :type dsName: string
+        :param dsData: dataset, data array or data object
+        :type dsData: xarray object
+        :return: none
+        :rtype: none
+
+        **Keyword arguments**
+
+            * *overwrite* (``boolean``) -- set to True to allow overwriting. Default: False
+            * *hashVariables* (``list()``) -- names of variables to add a sha256sum attribute
+            * *mapVariables* (``dict()``) -- map variable names to names stored in the
+              output file.  This argument takes precidence over all arguments.
+
+        .. note::
+            (Unimplemented) If the `dsName` is a data source (`ds:`) any variable map
+            specified will be reversed before writing the final file.
+        '''
+
+        # Process keyword arguments
+        overwrite = kwargs.pop('overwrite', False)
+        hashVariables = kwargs.pop('hashVariables', list())
+        mapVariables = kwargs.pop('mapVariables', dict())
+
+        dsUrl = urllib.parse.urlparse(dsName)
+        # At this point, we assume the dsName is a local filename
+        urlToOpen = dsName
+
+        # OpenDAP
+        if dsUrl.scheme in ['http','https']:
+            urlToOpen = dsObj['url']
+            msg = ("WARNING: Saving to a remote location is unimplemented.")
+            self.printMsg(msg, level=logging.WARNING)
+            return
+
+        # Local file spec
+        if dsUrl.scheme == 'file':
+            urlToOpen = dsUrl.path
+            if not(os.path.isfile(urlToOpen)):
+                self.printMsg("ERROR: The data source (%s) is was not found." % (urlToOpen), level=logging.ERROR)
+                return None
+
+        # Gridtools catalog entry
+        dsObj = dict()
+        if dsUrl.scheme == 'ds':
+            dsPath = dsUrl.path
+            if dsPath in self.dataSourcesObj.catalog.keys():
+                dsObj = self.dataSourcesObj.catalog[dsPath]
+            else:
+                self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
+                return None
+
+            # Parse the catalog url, what to pass to xarray open_dataset
+            # scheme='file' => path
+            # scheme='http', scheme='https' => dsObj['url']
+            dsUrl = urllib.parse.urlparse(dsObj['url'])
+            urlToOpen = None
+            if dsUrl.scheme in ['http','https']:
+                msg = ("WARNING: Saving to a remote location is unimplemented.")
+                self.printMsg(msg, level=logging.WARNING)
+                return
+            if dsUrl.scheme == 'file':
+                urlToOpen = dsUrl.path
+
+        # Apply variable map to make sure variables are named correctly
+        for vKey in mapVariables.keys():
+            if vKey in dsData or dsData.coords:
+                dsData = dsData.rename({vKey: mapVariables[vKey]})
+            else:
+                if not(hasattr(dsData, 'variables')) and hasattr(dsData, 'name'):
+                    if dsData.name == vKey:
+                        dsData.name == mapVariables[vKey]
+
+        # Provide a new hash to selected variables
+        if len(hashVariables) > 0:
+            for hVar in hashVariables:
+                if hVar in dsData or hVar in dsData.coords:
+                    dsData[hVar].attrs['sha256'] = utils.sha256sum(dsData[hVar])
+            # Edge case where dsData is only one variable
+            if not(hasattr(dsData, 'variables')):
+                if hasattr(dsData, 'name'):
+                    if dsData.name in hashVariables:
+                        dsData.attrs['sha256'] = utils.sha256sum(dsData)
+
+        if os.path.isfile(urlToOpen) and not(overwrite):
+            msg = ("WARNING: Use overwrite=True to overwrite existing file (%s)." % (urlToOpen))
+            self.printMsg(msg, level=logging.WARNING)
+            return
+
+        try:
+            dsData.to_netcdf(urlToOpen, encoding=self.removeFillValueAttributes(data=dsData))
+            msg = ("INFO: Successfully wrote to file (%s)." % (urlToOpen))
+            self.printMsg(msg, level=logging.INFO)
+        except:
+            raise
+            msg = ("ERROR: Unable to save data to file (%s). The object passed to dsData should be a xarray." %\
+                    (urlToOpen))
+            self.printMsg(msg, level=logging.WARNING)
+            return
+
     def applyEvalMap(self, dsName, dsData):
         '''Apply constructed equations through python eval() to manipulate data source fields.
            Data source catalog entries must be prefixed with ds:.  If GEBCO is defined
@@ -2555,6 +2670,11 @@ class GridUtils(object):
         '''This modifies a given bathymetry using an existing land mask.'''
         from . import bathyutils
         return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
+
+    def applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
+        '''This modifies a given bathymetry using an existing ocean/Users/cermak  mask.'''
+        from . import bathyutils
+        return bathyutils.applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def computeBathymetricRoughness(self, dsName, **kwargs):
         '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
