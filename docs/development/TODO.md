@@ -256,7 +256,7 @@
  - [ ] Dask optimizations
    - [ ] creating the native IBCAO grid is too big for mybinder.org
  - [ ] Subset any grid for running with MOM6
-   - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
+   - [ ] `https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files`
    - [ ] May be especially useful for debugging situations; Arctic6
  - [ ] Allow gridtools to be used without xesmf and xgcm; enable module
        detection for available capabilities
@@ -286,5 +286,13 @@
 
 # QUESTIONS
 
- - [ ] ntiles,1 is written in write_MOM6_topography_file, is this
+ - [ ] ntiles,1 is written in `write_MOM6_topography_file`, is this
        required for MOM6?
+
+# FOLLOWING
+
+ - [ ] julia: https://julialang.org/
+   - faster and interchangeable between python and julia and julia and python
+   - already integrated into the jupyter notebook framework
+ - [ ] pyston: https://github.com/pyston/pyston
+   - 30% speed improvement over Python

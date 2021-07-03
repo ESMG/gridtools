@@ -2,6 +2,13 @@
 
 # 2021-07-02
 
+ - Create release/0.3.0.md to begin a release cycle.
+ - Update DEPLOY.md template; includes RTD fix
+ - RTD: point environment to `conda/gridTools_export-linux-64-RTD.yml`
+ - Remove pip entries and nodejs from `gridTools_export.yml` to
+   fix RTD using `gridTools_export-linux-64-RTD.yml`
+ - In conda, rename `gridTools_export.yml` to `gridTools_export-linux-64.yml`
+ - RTD(dev) is broken; unresolvable nodejs
  - Xarray items have to have consistent dimensions and coordinates work smoothly.
  - In bathyutils, after applying mask to correct ocean points, check the depths
    against the `MINIMUM_DEPTH` for points that need to be capped as well.
