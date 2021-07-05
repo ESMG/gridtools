@@ -1,5 +1,10 @@
 # Changelog
 
+# 2021-07-05
+
+ - Change pytest grid example to match Example 1 for platform
+   comparisons (LLC grid tilt 30 degrees).
+
 # 2021-07-04
 
  - Cause an error if a ROMS gridid.txt file cannot be found.
