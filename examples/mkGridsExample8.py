@@ -15,7 +15,6 @@ from gridtools.datasource import DataSource
 # California coast.
 
 # Setup a work directory
-#wrkDir = '/home/cermak/mom6/configs/zOutput'
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 
 # Initialize a grid object

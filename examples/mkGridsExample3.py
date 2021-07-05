@@ -7,7 +7,7 @@
 #  * ipython
 #  * jupyter lab console
 
-import sys, os, logging
+import sys, os, logging, cartopy
 from gridtools.gridutils import GridUtils
 
 # Set a place to write files
@@ -37,9 +37,10 @@ gtilt = 0.0
 grd.printMsg("Initial grid parameters are set:")
 grd.setGridParameters({
     'projection': {
-        'name': 'LambertConformalConic',
+        'name': 'Mercator',
         'lon_0': 230.0,
-        'lat_0': 40.0
+        'lat_0': 40.0,
+        'ellps': 'WGS84'
     },
     'centerX': 230.0,
     'centerY': 40.0,
@@ -50,6 +51,7 @@ grd.setGridParameters({
     'dyUnits': 'degrees',
     'tilt': gtilt,
     'gridResolution': 1.0,
+    'gridResolutionUnits': 'degrees',
     'gridMode': 2.0,
     'gridType': 'MOM6',
     'ensureEvenI': True,
@@ -62,7 +64,7 @@ grd.printMsg("")
 # To set or update dictionary items in 'projection', you can use the dictionary format above with a direct assigment
 # or use the subKey parameter as in below.
 #grd.setGridParameters({
-#    'name': 'LambertConformalConic',
+#    'name': 'Mercator',
 #    'lon_0': 230.0,
 #    'lat_0': 40.0
 #}, subKey='projection')
@@ -73,14 +75,11 @@ grd.makeGrid()
 
 # Save the new grid to a netCDF file
 grd.printMsg("Attempt to save the grid to a netCDF file.")
-grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example3.nc"))
+grd.saveGrid(filename=os.path.join(wrkDir, "MERC_20x30_Example3.nc"))
 
 # This prints out all the current grid parameters
-# Note: for Lambert Conformal Conic grids, two additional projection parameters are computed.
-#       First and second parallel for the grid (lat_1 and lat_2)
 grd.printMsg("""
-This shows the current grid parameters.  Note that for Lambert Conformal Grids, lat_1 and
-lat_2 have been computed and added to the grid parameters.
+This shows the current grid parameters.
 
 """)
 grd.showGridParameters()
@@ -97,7 +96,7 @@ grd.setPlotParameters(
     {
         'figsize': (8,8),
         'projection': {
-            'name': 'NearsidePerspective',
+            'name': 'Mercator',
             'lat_0': 40.0,
             'lon_0': 230.0
         },
@@ -105,7 +104,9 @@ grd.setPlotParameters(
         'iLinewidth': 1.0,
         'jLinewidth': 1.0,
         'showGridCells': True,
-        'title': "Nearside Perspective: 1x1 with %.1f degree tilt" % (gtilt),
+        'title': "Mercator: 0.5 deg x 0.5 deg" % (gtilt),
+        'satelliteHeight': 35785831.0,
+        'transform': cartopy.crs.PlateCarree(),
         'iColor': 'k',
         'jColor': 'k'
     }
@@ -116,7 +117,7 @@ grd.printMsg("")
 # Projection may be specified separately
 grd.setPlotParameters(
     {
-        'name': 'NearsidePerspective',
+        'name': 'Mercator',
         'lat_0': 40.0,
         'lon_0': 230.0        
     }, subKey='projection'
@@ -132,16 +133,15 @@ grd.printMsg('''
 Place a call to actually plot the grid using plotGrid().  This function returns
 a figure and axes object that can be further modified before displaying or saving
 the plot.
-
 ''')
 (figure, axes) = grd.plotGrid()
 
 # You can save the figure using the savefig() method on the
 # figure object.  Many formats are possible.
 grd.printMsg("Save the figure in two different formats: jpg and pdf.")
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Example3.jpg'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.jpg'), dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Example3.pdf'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.pdf'), dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 

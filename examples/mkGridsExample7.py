@@ -10,7 +10,6 @@ from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
 
 # Setup a work directory
-#wrkDir = '/home/cermak/mom6/configs/zOutput'
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 inputDir = os.path.join(wrkDir, "INPUT")
 
@@ -171,7 +170,7 @@ grd.setPlotParameters(
         'iColor': 'k',
         'jColor': 'k',
         'transform': cartopy.crs.PlateCarree(),
-        'satellite_height': 35785831.0,
+        'satelliteHeight': 35785831.0,
     }
 )
 

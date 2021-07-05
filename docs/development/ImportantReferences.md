@@ -27,6 +27,7 @@
  * https://gist.github.com/TomTom101/25e0e76f11a5da57523a60fb280005c1 (Multiple conditions on xarray Data Array)
  * https://github.com/binder-examples/conda
  * https://github.com/marketplace/actions/setup-miniconda
+ * https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
  * https://github.com/pydata/xarray/issues/2899
  * https://github.com/SciTools/cartopy/issues/787
  * https://guides.github.com/features/mastering-markdown/
@@ -72,6 +73,8 @@
  * https://stackoverflow.com/questions/6999621/how-to-use-extent-in-matplotlib-pyplot-imshow
  * https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
+ * https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+ * https://stackoverflow.com/questions/20180543/how-to-check-version-of-python-modules
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/21778118/counting-the-number-of-non-nan-elements-in-a-numpy-ndarray-in-python
  * https://stackoverflow.com/questions/27175400/how-to-find-the-index-of-a-value-in-2d-array-in-python
@@ -116,6 +119,15 @@
 
  * https://ewencp.org/blog/a-brief-introduction-to-packaging-python/index.html
 
+## Conda Hosting
+
+ * https://sionwilliams.com/posts/2019-02-04_conda_channel/
+ * https://superuser.com/questions/979800/how-do-i-create-a-local-update-server-for-anaconda-python
+
+## Conda Packaging
+
+ * https://conda.io/projects/conda-build/en/latest/user-guide/tutorials/build-pkgs.html
+
 ## For Review Later
 
  * https://github.com/nsidc/mapx
@@ -127,3 +139,9 @@
 
  * m2r2 - Markdown to reStructuredText converter
    * https://github.com/CrossNox/m2r2
+
+ * gridtools ESA-ESDL
+   * https://github.com/esa-esdl/gridtools
+
+ * pygridtools
+   * https://github.com/Geosyntec/pygridtools

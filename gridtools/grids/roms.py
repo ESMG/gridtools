@@ -576,7 +576,13 @@ class ROMS_gridinfo(object):
       if (type(grid_file) == type(None)) & (type(hist_file) == type(None)):
         #print 'CJMP> gridid not in dictionary, data will be retrieved from gridid.txt'
         gridid_file = os.getenv("ROMS_GRIDID_FILE")
-        data = open(gridid_file,'r')
+        try:
+            data = open(gridid_file,'r')
+        except:
+            print("ERROR: Unable to find ROMS model grid.  It is possible that the environment variable")
+            print("ROMS_GRIDID_FILE is not properly defined.  This needs to be set to the path so")
+            print("the script can locate the gridid.txt file and load the appropriate ROMS model grid.")
+            sys.exit()
         lines = data.readlines()
         data.close()
 

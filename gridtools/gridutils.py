@@ -359,7 +359,7 @@ class GridUtils(object):
                 2=raise an exception
                 3=stop at breakpoints
         '''
-        self.printMsg("New DEBUG level (%d)" % (newLevel))
+        self.printMsg("Debug level now (%d)" % (newLevel))
         self.debugLevel = newLevel
 
     def setLogLevel(self, newLevel):
@@ -490,33 +490,38 @@ class GridUtils(object):
         #self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
         #self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
 
-        try:
-            self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-        except:
-            self.grid.attrs['conda_env'] = "Conda environment not found."
+        #try:
+        #    self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+        #except:
+        #    self.grid.attrs['conda_env'] = "Conda environment not found."
 
-        try:
-            #os.system("conda list --explicit > package_versions.txt")
-            #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
-            sysObj = sysinfo.SysInfo(grd=self)
-            cmd = "conda list --explicit"
-            (out, err, rc) = sysObj.runCommand(cmd)
-            self.grid.attrs['package_versions'] = out
-            #self.grid.attrs['package_versions'] = "/n".join(out)
-        except:
-            #raise
-            try:
-                self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-            except:
-                self.grid.attrs['conda_env'] = "Conda environment not found."
+        #try:
+        #    #os.system("conda list --explicit > package_versions.txt")
+        #    #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+        #    sysObj = sysinfo.SysInfo(grd=self)
+        #    cmd = "conda list --explicit"
+        #    (out, err, rc) = sysObj.runCommand(cmd)
+        #    self.grid.attrs['package_versions'] = out
+        #    #self.grid.attrs['package_versions'] = "/n".join(out)
+        #except:
+        #    #raise
+        #    try:
+        #        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+        #    except:
+        #        self.grid.attrs['conda_env'] = "Conda environment not found."
+        #
+        #    self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
 
-            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
+        #try:
+        #    response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
+        #    self.grid.attrs['software_version'] =  print(response.json()["name"])
+        #except:
+        #    self.grid.attrs['software_version'] = ""
 
-        try:
-            response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
-            self.grid.attrs['software_version'] =  print(response.json()["name"])
-        except:
-            self.grid.attrs['software_version'] = ""
+        # Collect system metadata
+        sysObj = sysinfo.SysInfo(grd=self)
+        sysObj.loadVersionData()
+        self.grid.attrs['software_version'] = sysObj.dumpVersionData()
 
         try:
             self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
@@ -694,12 +699,19 @@ class GridUtils(object):
         # Review gridResolution, gridResolutionX and gridResolutionY,
         #    gridResolutionUnits, gridResolutionXUnits and gridResolutionY
         # parameters
-        gridResolution = self.getGridParameter('gridResolution', default='Error')
-        gridResolutionX = self.getGridParameter('gridResolutionX', default='Error')
-        gridResolutionY = self.getGridParameter('gridResolutionY', default='Error')
-        gridResolutionUnits = self.getGridParameter('gridResolutionUnits', default='degrees')
-        gridResolutionXUnits = self.getGridParameter('gridResolutionXUnits', default='degrees')
-        gridResolutionYUnits = self.getGridParameter('gridResolutionYUnits', default='degrees')
+
+        # We suppress warning messages here and check these parameters later
+        gridResolution = self.getGridParameter('gridResolution', default='Error', inform=False)
+        gridResolutionX = self.getGridParameter('gridResolutionX', default='Error', inform=False)
+        gridResolutionY = self.getGridParameter('gridResolutionY', default='Error', inform=False)
+
+        # Emit warnings only if a parameter above is set.
+        gridResolutionUnits = self.getGridParameter('gridResolutionUnits', default='degrees',
+                inform=(gridResolution!='Error'))
+        gridResolutionXUnits = self.getGridParameter('gridResolutionXUnits', default='degrees',
+                inform=(gridResolutionX!='Error'))
+        gridResolutionYUnits = self.getGridParameter('gridResolutionYUnits', default='degrees',
+                inform=(gridResolutionY!='Error'))
 
         # Review tilt parameter
         tilt = float(self.getGridParameter('tilt', default="0.0"))
@@ -1622,9 +1634,11 @@ class GridUtils(object):
                 self.xrChunks = chunks
 
             self.xrDS = self.openDataset(inputUrl, **kwargs)
-            self.xrOpen = True
-            self.xrFilename = inputUrl
-            self.gridInfo['type'] = gridType
+            # Update only if we are not None
+            if self.xrDS is not None:
+                self.xrOpen = True
+                self.xrFilename = inputUrl
+                self.gridInfo['type'] = gridType
         except:
             msg = "ERROR: Unable to load grid: %s" % (inputUrl)
             self.printMsg(msg, level=logging.ERROR)
@@ -1963,7 +1977,7 @@ class GridUtils(object):
         lat_1 = self.getPlotParameter('lat_1', subKey='projection', default=0.0)
         lat_2 = self.getPlotParameter('lat_2', subKey='projection', default=0.0)
         standard_parallels = (lat_1, lat_2)
-        satellite_height = self.getPlotParameter('satellite_height', default=35785831.0)
+        satelliteHeight = self.getPlotParameter('satelliteHeight', default=35785831.0)
         true_scale_latitude = self.getPlotParameter('lat_ts', subKey='projection', default=central_latitude)
 
         # declare varying crs based on plotProjection
@@ -1976,7 +1990,7 @@ class GridUtils(object):
             crs = cartopy.crs.Mercator(central_longitude=central_longitude)
         if plotProjection == 'NearsidePerspective':
             crs = cartopy.crs.NearsidePerspective(central_longitude=central_longitude,
-                central_latitude=central_latitude, satellite_height=satellite_height)
+                central_latitude=central_latitude, satellite_height=satelliteHeight)
         if plotProjection == 'Stereographic':
             if central_latitude not in (-90., 90.):
                 msg = "ERROR: Stereographic projection requires lat_0 to be +90.0 or -90.0 degrees."
@@ -2137,8 +2151,11 @@ class GridUtils(object):
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
-    def getGridParameter(self, gkey, subKey=None, default=None):
-        '''Return the requested grid parameter or the default if none is available.'''
+    def getGridParameter(self, gkey, subKey=None, default=None, inform=True):
+        '''Return the requested grid parameter or the default if none is available.
+        The routine will emit a message by default.  Use inform=False to suppress
+        messages emitted by this function.
+        '''
         if subKey:
             if subKey in self.gridInfo['gridParameterKeys']:
                 if gkey in self.gridInfo['gridParameters'][subKey].keys():
@@ -2148,8 +2165,9 @@ class GridUtils(object):
         if gkey in self.gridInfo['gridParameterKeys']:
             return self.gridInfo['gridParameters'][gkey]
         
-        msg = "WARNING: Using (%s) for default parameter for (%s)." % (default, gkey)
-        self.printMsg(msg, level=logging.DEBUG)
+        if inform:
+            msg = "WARNING: Using (%s) for default parameter for (%s)." % (default, gkey)
+            self.printMsg(msg, level=logging.DEBUG)
         return default
         
     def setGridParameters(self, gridParameters, subKey=None):
@@ -2264,10 +2282,13 @@ class GridUtils(object):
                 
         self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
-    def getPlotParameter(self, pkey, subKey=None, default=None):
+    def getPlotParameter(self, pkey, subKey=None, default=None, inform=True):
         '''Return the requested plot parameter or the default if none is available.
         
            To access dictionary values in projection, use the subKey argument.
+
+           This function will emit an informational message when a default parameter
+           is being used.  Use inform=False to suppress the messages.
         '''
 
         # Top level subkey access

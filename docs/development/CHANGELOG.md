@@ -1,7 +1,37 @@
 # Changelog
 
+# 2021-07-04
+
+ - Cause an error if a ROMS gridid.txt file cannot be found.
+ - Ocean and land masks did not have a hash created.  Added to meshutils
+   functions.
+ - FRE-NCtools does not like `GEBCO_2020`.  Will try ETOPO1 and ETOPO2.
+ - Change Example3 to Mercator so we can work up an example comparing
+   gridtools with FRE-NCtools.
+ - Change an information message in the change debug level to avoid confusion.
+ - Include platform and python version in software list for saved netCDF files.
+ - The warnings for gridResolution parameters do not make sense if
+   some are properly defined. Revised.
+ - Add to favorite shortcuts to jupyter.
+ - Update jupyter MD notes.
+ - Fix CI as we changed the source of the requirements file
+   in binder which is also used by github Actions.
+ - Fix spelling of notebook in bokeh.
+ - Update the README.md in examples.
+ - RT: Bugs in mkGridIterative notebook.  Refactoring software
+   metadata discovery.
+ - Packages versions are typically seen only at the root
+   element, so optimize on that.
+
+# 2021-07-03
+
+ - Rework sysinfo and utils modules to allow more flexible software
+   and detection in different environments.
+
 # 2021-07-02
 
+ - RTD is fixed.
+ - Add roms modules to RTD docs.
  - Create release/0.3.0.md to begin a release cycle.
  - Update DEPLOY.md template; includes RTD fix
  - RTD: point environment to `conda/gridTools_export-linux-64-RTD.yml`

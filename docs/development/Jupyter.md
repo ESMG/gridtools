@@ -40,15 +40,22 @@ show(bkapp, notebook_url="http://192.168.131.54:8888")
 
 You can install the shortcuts within JupyterLab web interface through Settings,
 Advanced Setting Editor and Keyboard Shortcuts and edit the "User Preferences"
-pane.  Or copy "shortcuts.jupyterlab-settings" to:
+pane or copy "shortcuts.jupyterlab-settings" to:
 
 ```text
 ${HOME}/.jupyter/lab/user-settings/@jupyterlab/shortcuts-extension/shortcuts.jupyterlab-settings
 ```
+NOTE: The location of this may be different on other systems.
 
-The current shortcuts add two keyboard shortcuts to the notebook editor:
+The following keyboard shortcuts are added to the notebook editor
+(one we are just calling out):
  * Ctrl Shift ArrowUp: move cell up
  * Ctrl Shift ArrowDown: move cell down
+ * Ctrl Shift E: Restart kernel and run all cells
+ * Ctrl Shift R: Restart kernel and clear all cells
+ * Ctrl Shift Q: Shutdown and close current notebook (jupyter default)
+ * Ctrl Shift K: Shutdown jupyter
 
-You must not be editing the cell. The cell to move must be selected just to the
-left and is denoted by a vertical bar highlighting the cell.
+For cell movement, you must not be editing the cell. The cell to move
+must be selected just to the left and is denoted by a vertical bar
+highlighting the cell.

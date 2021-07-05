@@ -27,6 +27,7 @@
    - [ ] Leverage features of FRE-NCtools with gridtools
 
 # BUGS
+
  - [ ] latitude is not reliably reproduced between platforms; other
        fields show reproducibility.
  - [ ] A nested dictionary will clobber other nested elements instead
@@ -37,6 +38,8 @@
 
 # TASKS
 
+ - [ ] Create our own conda repository since there is now a name conflict with
+       at least PyPi.
  - [ ] Sponge data preparation
    - [ ] Current scripts generate u,v fields on h-points; this needs
          to be changed to C-grid u/v-points instead
@@ -208,6 +211,12 @@
        for model runs.
  - [ ] Do a head-to-head comparison of FRE-NCtools vs gridtools using an example
        grid.  See if we can leverage both tools abilities.
+   - [ ] Debug FRE-NCtools; no topography works at the moment; segfaults all around
+   - [ ] GEBCO 2020 does not work
+   - [ ] Try ETOPO1
+   - [ ] Try ETOPO2
+     - REF: https://data1.gfdl.noaa.gov/~arl/pubrel/r/mom4p1/src/mom4p1/doc/mosaic_tool.html
+     - REF: https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
  - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
        there things that we could use there instead of recreating many wheels.
        There are lot of FRE-NCtool references in the ROMS to MOM6
