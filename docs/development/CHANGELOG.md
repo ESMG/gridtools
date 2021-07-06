@@ -2,6 +2,11 @@
 
 # 2021-07-06
 
+ - conda vs pip: pyqt vs PyQt5
+ - ROMS grid writing is confirmed operational
+ - Added coastline plotting to pylab grid editor.
+ - CI failed with added pyqt requirement.
+ - Fix example 9 for projection parameter in use instead of crs.
  - Need to debug/test further on our big node.
  - For the aarch64 platform, the virtualenv (venv) cannot be used due
    to missing pyqt support for pylab.  The conda package manager

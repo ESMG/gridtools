@@ -391,7 +391,7 @@ class ROMS(object):
 
         return vgrid
 
-    def edit_mask_mesh(self, hgrid, proj=None, crs=None, **kwargs):
+    def edit_mask_mesh(self, hgrid, proj=None, **kwargs):
 
         # Call out to masked hgrid_roms function
         return edit_mask_mesh(hgrid, proj=proj, **kwargs)

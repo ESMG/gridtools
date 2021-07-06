@@ -24,10 +24,9 @@ grd = GridUtils()
 romsObj = roms.ROMS()
 romsGrd = romsObj.get_ROMS_grid('ARCTIC6')
 
-PROJSTRING = "+proj=stere +lon_0=160.0"
-map_crs = ccrs.Stereographic(central_latitude=90.0, central_longitude=160.0)
+map_proj = ccrs.Stereographic(central_latitude=90.0, central_longitude=160.0)
 
-plotObj = romsObj.edit_mask_mesh(romsGrd.hgrid, crs=map_crs)
+plotObj = romsObj.edit_mask_mesh(romsGrd.hgrid, proj=map_proj)
 
 # When finished editing, copy and paste this command
 # into ipython.

@@ -1419,6 +1419,7 @@ class edit_mask_mesh(object):
             #        cmap=cm, transform=crs, vmin=0, vmax=1, edgecolor='k', **kwargs)
             ax.add_feature(cartopy.feature.OCEAN, zorder=0)
             ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black')
+            ax.coastlines(resolution='10m')
             #self.proj.drawcoastlines()
 
         self._xc = 0.25*(xv[1:,1:]+xv[1:,:-1]+xv[:-1,1:]+xv[:-1,:-1])

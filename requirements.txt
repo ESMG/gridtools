@@ -22,8 +22,8 @@ pip
 pyct
 pykdtree
 pyproj
-pyqt
-pyqt5-sip
+PyQt5
+PyQt5-sip
 pytest
 requests
 scipy

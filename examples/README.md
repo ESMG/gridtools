@@ -127,18 +127,31 @@ interpreter must be launched with pylab:
 `ipython --pylab`.  Code copy and pasted into
 ipython.
 
+After editing, the function to write out a ROMS
+grid does function.
+
+```
+In [2]: romsObj.write_ROMS_grid(romsGrd, filename='grid_py.nc')
+ ... wrote  theta_s
+ ... wrote  theta_b
+ ... wrote  Tcline
+ ...
+```
+
+### matplotlib pylab
+
 The backend must be able to open an interactive
 window.  The `agg` backend is not sufficient:
 
 ```
-$ ipython --pylab --gui='qt5'
+$ ipython --pylab
 Python 3.8.10 (default, Jun  2 2021, 10:49:15)
 Type 'copyright', 'credits' or 'license' for more information
 IPython 7.24.0 -- An enhanced Interactive Python. Type '?' for help.
 Using matplotlib backend: agg
 ```
 
-### aarch64
+#### aarch64
 The python venv does not support installation of pyqt
 at the moment.  The module exists, but it fails to
 install via `pip`.  The conda package manager does
