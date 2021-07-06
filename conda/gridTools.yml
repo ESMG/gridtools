@@ -31,6 +31,8 @@ dependencies:
   - pyct
   - pykdtree
   - pyproj
+  - pyqt
+  - pyqt5-sip
   - pytest
   - requests
   - scipy

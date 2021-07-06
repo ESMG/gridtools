@@ -5,6 +5,7 @@
 ## Bookmarks 2021
  * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
  * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
+ * https://askubuntu.com/questions/704534/python3-ipython-pylab-on-ubuntu-14-04
  * https://cfconventions.org/standard-names.html
  * https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
  * https://devguide.python.org/documenting/
@@ -76,6 +77,7 @@
  * https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
  * https://stackoverflow.com/questions/20180543/how-to-check-version-of-python-modules
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
+ * https://stackoverflow.com/questions/20961287/what-is-pylab
  * https://stackoverflow.com/questions/21778118/counting-the-number-of-non-nan-elements-in-a-numpy-ndarray-in-python
  * https://stackoverflow.com/questions/27175400/how-to-find-the-index-of-a-value-in-2d-array-in-python
  * https://stackoverflow.com/questions/29870629/pip-install-test-dependencies-for-tox-from-setup-py
@@ -87,7 +89,6 @@
  * https://stackoverflow.com/questions/53322952/creating-a-land-ocean-mask-in-cartopy
  * https://stackoverflow.com/questions/56491181/how-to-convert-to-map-projection-from-geographic-like-in-basemap
  * https://stackoverflow.com/questions/58758480/xarray-select-nearest-lat-lon-with-multi-dimension-coordinates
- * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://unidata.github.io/MetPy/latest/examples/Four_Panel_Map.html
  * https://www.anomaly.net.au/blog/running-pre-and-post-install-jobs-for-your-python-packages/
  * https://www.digitalocean.com/community/tutorials/how-to-use-args-and-kwargs-in-python-3
@@ -113,7 +114,9 @@
  * https://medium.com/analytics-vidhya/tutorial-removing-large-files-from-git-78dbf4cf83a
  * https://medium.com/techtofreedom/3-uses-of-the-ellipsis-in-python-25795aac723d
  * https://towardsdatascience.com/10-examples-to-master-args-and-kwargs-in-python-6f1e8cc30749
+ * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://towardsdatascience.com/stop-using-print-to-debug-in-python-use-icecream-instead-79e17b963fcc
+ * https://towardsdatascience.com/why-decorators-in-python-are-pure-genius-1e812949a81e
 
 ## Python Packaging
 

@@ -1,7 +1,16 @@
 # Changelog
 
+# 2021-07-06
+
+ - Need to debug/test further on our big node.
+ - For the aarch64 platform, the virtualenv (venv) cannot be used due
+   to missing pyqt support for pylab.  The conda package manager
+   provides sufficient pyqt support.
+
 # 2021-07-05
 
+ - Rename a few of the examples so they sort nicely in UNIX `ls`.
+ - Hashes match between github `x86_64` and `aarch64`. Good!
  - Change pytest grid example to match Example 1 for platform
    comparisons (LLC grid tilt 30 degrees).
 

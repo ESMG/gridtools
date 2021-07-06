@@ -23,7 +23,7 @@ grid using the programming language.  The
 script also demonstrates loading and displaying
 existing model grids.
 
-## mkGridsExample1.py
+## mkGridsExample01.py
 
 This script demonstrates creation of a model grid
 over California.  It is Lambert Conformal Conic
@@ -39,7 +39,7 @@ If a parameter is not defined, a warning or
 informational message may be emitted indicating
 the default value that the library is using.
 
-## mkGridsExample2.py
+## mkGridsExample02.py
 
 This script demonstrates some of the logging
 and debugging methods integrated into the
@@ -51,7 +51,7 @@ This scripts demonstrates how to access logging
 from other python modules should it become
 necessary for debugging problems.
 
-## mkGridsExample3.py
+## mkGridsExample03.py
 
 This example generates a Mercator grid off
 the west coast.  This will become an example
@@ -62,40 +62,40 @@ using `make_topog` at the moment.  We have
 only been successful in creating a similar
 grid.  See our TODO list.
 
-## mkGridsExample4.ipynb
+## mkGridsExample04.ipynb
 
 This example demonstrates the manual
 reconstruction of the IBCAO grid and
 the use of gridtools to construct the
 same grid.
 
-## mkGridsExample4a.ipynb
+## mkGridsExample04a.ipynb
 
 (INCOMPLETE): This example is the same program
 from Example 4 except there is an attempt to
 use dask.
 
-## mkGridsExample5.py
+## mkGridsExample05.py
 
 This example demonstrates the manual
 reconstruction of the IBCAO grid and
 the use of gridtools to construct the
 same grid.
 
-## mkGridsExmaple5a.py
+## mkGridsExmaple05a.py
 
 This example is the same as Example 5 except
 a slightly different radius of the Earth is
 chosen to show how it impacts model grid
 creation.
 
-## mkGridsExample6.py
+## mkGridsExample06.py
 
 This creates a mini IBCAO grid that will fit
 on smaller memory systems.  The plot of the
 grid shows the grid cells.
 
-## mkGridsExample7.py
+## mkGridsExample07.py
 
 This is currently a full fledged example of
 creating a grid, creating a topography,
@@ -105,12 +105,12 @@ MOM6 modeling operation.  See the manual
 for an expanded description of this
 example.
 
-## mkGridsExample7a.ipynb
+## mkGridsExample07a.ipynb
 
 This example is just Example 7 but in a
 jupyter notebook form.
 
-## mkGridsExample8.py
+## mkGridsExample08.py
 
 This example exercises the gridtools.regridTopo()
 function that provides a bathymetry and ocean
@@ -120,17 +120,44 @@ mask that is a fraction instead of 0 and 1 bits.
 to run.  This example will **NOT** run on a machine
 with 8 GB of RAM.
 
-## mkGridsExample9.py
+## mkGridsExample09.py
 
-This script fragment helps launch the ported version
-of the ROMS model grid editor.
+This example requires the use of ipython.  The
+interpreter must be launched with pylab:
+`ipython --pylab`.  Code copy and pasted into
+ipython.
 
-## mkGridsExample9a.ipynb
+The backend must be able to open an interactive
+window.  The `agg` backend is not sufficient:
+
+```
+$ ipython --pylab --gui='qt5'
+Python 3.8.10 (default, Jun  2 2021, 10:49:15)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.24.0 -- An enhanced Interactive Python. Type '?' for help.
+Using matplotlib backend: agg
+```
+
+### aarch64
+The python venv does not support installation of pyqt
+at the moment.  The module exists, but it fails to
+install via `pip`.  The conda package manager does
+seem to support ipython pylab:
+
+```
+$ ipython --pylab
+Python 3.9.4 | packaged by conda-forge | (default, May 10 2021, 22:03:40)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.24.0 -- An enhanced Interactive Python. Type '?' for help.
+Using matplotlib backend: Qt5Agg
+```
+
+## mkGridsExample09a.ipynb
 
 This example is a jupyter notebook that opens
 a ROMS model grid for ocean mask editing.
 
-## mkGridsExample9b.ipynb
+## mkGridsExample09b.ipynb
 
 This example is a jupyter notebook that opens
 a MOM6 model grid for ocean mask editing.

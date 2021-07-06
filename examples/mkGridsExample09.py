@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 # Open the land mask editor for an existing
-# ROMS grid
+# ROMS grid.  When finished, save the model
+# grid.
 
-# This code at present has to be copy and pasted
-# into ipython prompt started at the command
-# line: ipython --pylab
+# This code requires that you start ipython --pylab
+# first and then copy and paste the code below
+# into the ipython iterpreter.
 
 import os, sys
 from gridtools.gridutils import GridUtils
@@ -28,8 +29,6 @@ map_crs = ccrs.Stereographic(central_latitude=90.0, central_longitude=160.0)
 
 plotObj = romsObj.edit_mask_mesh(romsGrd.hgrid, crs=map_crs)
 
-# Still need to port the ability to save the
-# edited mask.
-
-# When finished editing, uncomment and run this cell
+# When finished editing, copy and paste this command
+# into ipython.
 # romsObj.write_ROMS_grid(romsGrd, filename='grid_py.nc')
