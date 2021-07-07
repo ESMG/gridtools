@@ -2,6 +2,8 @@
 
 # 2021-07-06
 
+ - Try to save an artifact to github actions: conda dump
+ - All examples are functional on aarch64
  - Clear all outputs in notebooks again
  - Fix title bar on pylab plot
  - conda vs pip: pyqt vs PyQt5

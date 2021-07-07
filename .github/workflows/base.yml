@@ -45,17 +45,21 @@ jobs:
           echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
           echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
           echo "🖥️ The workflow is now ready to test your code on the runner."
-          uname -a
-          pwd
-          df -h
-          printenv
+          mkdir -f output
+          uname -a > output/env.txt
+          pwd >> output/env.txt
+          df -h >> output/env.txt
+          df -h . >> output/env.txt
+          printenv >> output/env.txt
 
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
           conda env create -q -f conda/gridTools_export-linux-64.yml
           conda activate gridTools
+          conda list > output/conda.txt
           python -m pip install -q -e .
+          pip list > output/pip.txt
 
       # Run tests
       - name: Tests
@@ -64,5 +68,9 @@ jobs:
           conda activate gridTools
           cd tests
           pytest -rA
-
-
+      # Archive output to github artifacts
+      - name: Archive
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifact-output
+          path: output/*.txt
