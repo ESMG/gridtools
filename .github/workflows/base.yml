@@ -45,7 +45,7 @@ jobs:
           echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
           echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
           echo "🖥️ The workflow is now ready to test your code on the runner."
-          mkdir -f output
+          mkdir -p output
           uname -a > output/env.txt
           pwd >> output/env.txt
           df -h >> output/env.txt
