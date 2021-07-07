@@ -2,6 +2,8 @@
 
 # 2021-07-06
 
+ - Clear all outputs in notebooks again
+ - Fix title bar on pylab plot
  - conda vs pip: pyqt vs PyQt5
  - ROMS grid writing is confirmed operational
  - Added coastline plotting to pylab grid editor.

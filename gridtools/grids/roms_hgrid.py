@@ -922,6 +922,7 @@ class CGrid_geo(CGrid):
         self.lon_vert = lon_vert
         self.lat_vert = lat_vert
         self.proj = proj
+        self.name = None
 
         self.use_gcdist = use_gcdist
         self.ellipse = ellipse
@@ -1390,6 +1391,7 @@ class edit_mask_mesh(object):
         #fig = plt.figure()
         #fig = plt.figure(figsize=plt.figaspect(0.5))
         fig = plt.figure()
+        fig.canvas.manager.set_window_title(grd.name)
 
         if self.proj is None:
             self._pc = plt.pcolor(xv, yv, mask, cmap=cm, vmin=0, vmax=1, edgecolor='k', **kwargs)

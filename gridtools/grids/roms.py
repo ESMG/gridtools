@@ -148,6 +148,7 @@ class ROMS(object):
         #gridinfo file will already have been initialized by the call to
         #ROMS_gridinfo above.
         hgrd = self.get_ROMS_hgrid(gridid)
+        hgrd.name = gridinfo.name
         vgrid = self.get_ROMS_vgrid(gridid, zeta=zeta)
 
         #Get ROMS grid
