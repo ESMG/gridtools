@@ -1065,7 +1065,7 @@ class maskEditor(object):
         return dist
 
     def plotMap(self, x, y):
-    
+
         self.lon = x
         self.lat = y
 

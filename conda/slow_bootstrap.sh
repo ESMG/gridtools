@@ -1,5 +1,5 @@
 # Use this technique to slowly bootstrap
-# an environment.  
+# an environment.
 # conda create -y -q -n gridTools python==3.7.10
 # conda activate gridTools
 conda install -q -y geoviews=1.9.1

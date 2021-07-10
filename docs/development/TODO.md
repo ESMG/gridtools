@@ -28,8 +28,7 @@
 
 # BUGS
 
- - [ ] latitude is not reliably reproduced between platforms; other
-       fields show reproducibility.
+ - [ ] Investigate reliably of produced grids between platforms
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
        `setGridParameters` to recursively update dictionary elements.
@@ -67,7 +66,7 @@
      - [X] convert lon [+0,+360] to [-180,+180]
      - [ ] Unify code that adjusts lon (PR#1)
    - [ ] Verify unification of radius (R) throughout code
- - [ ] grid mask editor (land, etc)
+ - [ ] grid mask editor (ocean, etc)
      - [X] needs upgrade from basemap()
      - [X] create an editor that works in jupyter
      - [ ] add routines for mask checking
@@ -79,7 +78,7 @@
        - [ ] show outline of full grid
        - [ ] show other underlying fields - topo?
        - [ ] ROMS: write edited mask
-       - [ ] MOM6: write edited mask
+       - [X] MOM6: write edited mask
      - [ ] ipython --pylab
        - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
              `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
@@ -89,6 +88,7 @@
          - [ ] grids.roms.ROMS_gridinfo._get_grid_info()
        - [ ] show other underlying fields - topo?
        - [ ] MOM6: write edited mask
+       - [X] ROMS: write edited mask
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources
@@ -112,13 +112,9 @@
    - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingLandMask()
    - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingOceanMask()
    - [ ] Check depth points for values that exceed `MAXIMUM_DEPTH`
- - [ ] improve reproducibility
-   - [X] include a dump of conda environment in the grid file (nc)
-   - [X] add sha256 to grid and variable arrays
-   - [ ] if conda environment does not exist, do some other snooping
  - [ ] Add option to use numpypi package (Alistair) as a configurable
        option in gridtools
- - [X] add datashader and numpypi from github sources; see postBuild script
+ - [X] add xesmf and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
  - [ ] on load of a grid into gridtool library
@@ -217,11 +213,10 @@
    - [ ] Try ETOPO2
      - REF: https://data1.gfdl.noaa.gov/~arl/pubrel/r/mom4p1/src/mom4p1/doc/mosaic_tool.html
      - REF: https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
- - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
-       there things that we could use there instead of recreating many wheels.
-       There are lot of FRE-NCtool references in the ROMS to MOM6
-       conversion tool.
- - [ ] Migrate to use of file:// or http://, https:// for file specifications.
+   - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
+         there things that we could use there instead of recreating many wheels.
+         There are lot of FRE-NCtool references in the ROMS to MOM6
+         conversion tool.
  - [ ] Allow gridtools to continue to operate with some disabled
        routines that use xesmf.
  - [ ] app:Save remote files; additional sanity checks
@@ -297,11 +292,3 @@
 
  - [ ] ntiles,1 is written in `write_MOM6_topography_file`, is this
        required for MOM6?
-
-# FOLLOWING
-
- - [ ] julia: https://julialang.org/
-   - faster and interchangeable between python and julia and julia and python
-   - already integrated into the jupyter notebook framework
- - [ ] pyston: https://github.com/pyston/pyston
-   - 30% speed improvement over Python

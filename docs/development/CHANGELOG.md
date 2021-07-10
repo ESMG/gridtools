@@ -1,8 +1,12 @@
 # Changelog
 
+# 2021-07-10
+
+ - Working through deployment checklist.
+
 # 2021-07-09
 
- - For UAF/chinook with old glibc, it is best to bootstrap with python and 
+ - For UAF/chinook with old glibc, it is best to bootstrap with python and
    geoviews up front and then load all the other packages.  All examples
    and editors work.
 

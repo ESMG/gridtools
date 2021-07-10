@@ -155,3 +155,11 @@
 
  * ParaView
    * https://www.paraview.org/gallery/
+
+ * Julia: https://julialang.org/
+   - faster and interchangeable between python and julia and julia and python
+   - already integrated into the jupyter notebook framework
+
+ * Pyston: https://github.com/pyston/pyston
+   - 30% speed improvement over Python
+
