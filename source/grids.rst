@@ -7,3 +7,7 @@ grids
 
    mom6
    roms
+   roms_hgrid
+   roms_io
+   roms_vgrid
+   greatcircle

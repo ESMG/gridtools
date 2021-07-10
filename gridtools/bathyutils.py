@@ -30,24 +30,31 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
 
     **Keyword arguments**:
 
+        * *epsilon* (``float``) -- When a point is declared an ocean point, if the
+          depth is shallower than the masking depth, the depth is set to
+          the minimum depth.  If the masking depth is undefined or equal to the
+          minimum depth, the new depth is set deeper by epsilon to avoid becoming
+          masked as land. Default: 1.0e-14
         * *MINIMUM_DEPTH* (``float``) --
           Minimum ocean depth. Default: 0.0
         * *MASKING_DEPTH* (``float``) --
-          Ocean points equal or shallower are set to land mask. Default: 0.0
+          Ocean depths equal or shallower than the masking depth are masked as land.
+          Default: undefined
         * *MAXIMUM_DEPTH* (``float``) --
-          Maximum depth of the ocean.  Defaults to maximum depth from data source if not specified or is negative.
+          Maximum depth of the ocean.  Defaults to maximum depth from data source if
+          not specified.
         * *TOPO_EDITS_FILE* (``string``) --
           Changed mask points in the MOM6 zEdits format will be
           recorded to the specified filename. (Unimplemented)
 
     .. note::
-        A negative MASKING_DEPTH or MAXIMUM_DEPTH is ignored.
+        For ocean points, if a depth is shallower than the MINIMUM_DEPTH
+        but deeper than the MASKING_DEPTH, the depth will be set to
+        the MINIMUM_DEPTH.
 
-        If a depth is shallower than the MINIMUM_DEPTH but deeper than
-        the MASKING_DEPTH, the depth will be set to the MINIMUM_DEPTH.
-
-        Water points that will become masked by the existing land
-        mask will be set to the MASKING_DEPTH.
+        Ocean points that are to become land will be set to the
+        MASKING_DEPTH.  If MASKING_DEPTH is not defined, MINIMUM_DEPTH
+        is used as the masking depth.
     '''
 
     if not(os.path.isfile(maskFile)):
@@ -58,11 +65,12 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
     # Find input land mask variable
     maskData = xr.open_dataset(maskFile)
     try:
-        originalLandMask = maskData[maskVariable]
+        originalLandMask = maskData[maskVariable].copy()
     except:
         msg = ("ERROR: Mask file does not have requested variable (%s)" % (maskVariable))
         grd.printMsg(msg, level=logging.ERROR)
         return
+    maskData.close()
 
     # Check for supplied depth variable
     try:
@@ -73,9 +81,12 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
         return
 
     # Determine values from other possible arguments
+    epsilon_depth = 1.0e-14
     minimum_depth = 0.0
-    masking_depth = 0.0
+    masking_depth = -99999.0
     maximum_depth = -99999.0
+    if 'epsilon' in kwargs.keys():
+        epsilon_depth = kwargs['epsilon']
     if 'MINIMUM_DEPTH' in kwargs.keys():
         minimum_depth = kwargs['MINIMUM_DEPTH']
     if 'MAXIMUM_DEPTH' in kwargs.keys():
@@ -83,17 +94,19 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
     if 'MASKING_DEPTH' in kwargs.keys():
         masking_depth = kwargs['MASKING_DEPTH']
 
-    # As is done in MOM6, if maximum is negative, it is defined by the maximum of
-    # the 'depth' grid passed.
-    if maximum_depth < 0.0:
+    # As is done in MOM6, if maximum is undefined, it is defined by the maximum of
+    # the 'depth' grid passed to this function.
+    if maximum_depth < -99990.0:
         maximum_depth = depthGrid.max().values.tolist()
-        msg = ("The (diagnosed) maximum depth of the ocean %f meters." % (maximum_depth))
+        msg = ("The (diagnosed) maximum depth of the ocean is %f meters." % (maximum_depth))
         grd.printMsg(msg, level=logging.INFO)
-    # Negative values are set back to zero for MINIMUM_DEPTH and MASKING_DEPTH
-    if minimum_depth < 0.0:
-        minimum_depth = 0.0
-    if masking_depth < 0.0:
-        masking_depth = 0.0
+
+    # MINIMUM_DEPTH < MASKING_DEPTH or if MASKING_DEPTH is undefined,
+    # set MASKING_DEPTH to MINIMUM_DEPTH
+    if minimum_depth < masking_depth:
+        masking_depth = minimum_depth
+    if masking_depth < -99990.0:
+        masking_depth = minimum_depth
 
     # To use xr.where the data and mask have to be in the same Dataset()
     workData = xr.Dataset()
@@ -103,31 +116,199 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
     workData['land_mask'].attrs['minimum_depth'] = minimum_depth
     workData['land_mask'].attrs['maximum_depth'] = maximum_depth
 
-    # If the point is a land_mask point and
-    # depth is deeper than the masking_depth,
-    # make it land otherwise do not touch it.
+    msg = ("Beginning application of new land mask (changes noted, if any).")
+    grd.printMsg(msg, level=logging.INFO)
+
+    # 1. Test points that should be makred as land.  If they are deeper
+    #    than the masking depth, set them to the masking depth.  If
+    #    the masking depth is not defined, use the minimum depth.
+
     # MOM6 RULE: A depth equal or shallower than MASKING_DEPTH is masked as land.
-    condExp = (workData['land_mask']==1) & (workData['depth'] > masking_depth)
+    condExp = (workData['land_mask'] == 1) & (workData['depth'] > masking_depth)
     # This returns the number of matching points
     nPts = condExp.data.ravel().sum()
-    msg = ("Application of land mask changed %d grid points." % (nPts))
-    grd.printMsg(msg, level=logging.INFO)
+    if nPts > 0:
+        msg = (" * Number of land mask points with new depth of %f: %d" % (masking_depth, nPts))
+        grd.printMsg(msg, level=logging.INFO)
     workData['newDepth'] = xr.where(condExp, masking_depth, workData['depth'])
 
-    # Check ocean points
-    condExp = (workData['land_mask']==0) & (workData['newDepth'] < minimum_depth)
-    nPts = condExp.data.ravel().sum()
-    if nPts > 0:
-        msg = ("Application of MINIMUM_DEPTH changed %d grid points." % (nPts))
-        grd.printMsg(msg, level=logging.INFO)
-        workData['newDepth'] = xr.where(condExp, minimum_depth, workData['newDepth'])
+    # 2. Test points that should be marked as ocean.  If they are shallower than
+    #    the masking depth, then set them to the minimum depth.  If
+    #    masking depth is undefined, set them to the minimum depth + epsilon.
 
-    condExp = (workData['land_mask']==0) & (workData['newDepth'] < masking_depth)
+    condExp = (workData['land_mask'] == 0) & (workData['newDepth'] < masking_depth)
     nPts = condExp.data.ravel().sum()
     if nPts > 0:
-        msg = ("Application of MASKING_DEPTH changed %d grid points." % (nPts))
+        if masking_depth == minimum_depth:
+            msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth + epsilon_depth, nPts))
+            workData['newDepth'] = xr.where(condExp, minumum_depth + epsilon_depth, workData['newDepth'])
+        else:
+            msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth, nPts))
+            workData['newDepth'] = xr.where(condExp, minimum_depth, workData['newDepth'])
         grd.printMsg(msg, level=logging.INFO)
-        workData['newDepth'] = xr.where(condExp, masking_depth, workData['newDepth'])
+
+    # 3. If masking depth is defined, check ocean points that might violate minimum depth.
+    if masking_depth < minimum_depth:
+        condExp = (workData['land_mask'] == 0) & (workData['newDepth'] < minimum_depth)
+        nPts = condExp.data.ravel().sum()
+        if nPts > 0:
+            msg = (" * Number of ocean points set to minimum depth: %d" % (nPts))
+            workData['newDepth'] = xr.where(condExp, minimum_depth, workData['newDepth'])
+            grd.printMsg(msg, level=logging.INFO)
+
+    # Update hash for the new grid
+    workData['newDepth'].attrs['sha256'] = hashlib.sha256( np.array( workData['newDepth'] ) ).hexdigest()
+
+    return workData['newDepth']
+
+def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwargs):
+    '''Modify a given bathymetry using a specified ocean mask.
+
+    :param grd: class object
+    :type grd: GridUtils
+    :param dsData: data source data object
+    :type dsData: xarray
+    :param dsVariable: data source variable name
+    :type dsVariable: string
+    :param maskFile: filename
+    :type maskFile: string
+    :param maskVariable: variable name in maskFile
+    :type maskVariable: string
+    :param \**kwargs:
+        See below
+
+    **Keyword arguments**:
+
+        * *epsilon* (``float``) -- When a point is declared an ocean point, if the
+          depth is shallower than the masking depth, the depth is set to
+          the minimum depth.  If the masking depth is undefined or equal to the
+          minimum depth, the new depth is set deeper by epsilon to avoid becoming
+          masked as land. Default: 1.0e-14
+        * *MINIMUM_DEPTH* (``float``) --
+          Minimum ocean depth. Default: 0.0
+        * *MASKING_DEPTH* (``float``) --
+          Ocean depths equal or shallower than the masking depth are masked as land.
+          Default: undefined
+        * *MAXIMUM_DEPTH* (``float``) --
+          Maximum depth of the ocean.  Defaults to maximum depth from data source if
+          not specified.
+        * *TOPO_EDITS_FILE* (``string``) --
+          Changed mask points in the MOM6 zEdits format will be
+          recorded to the specified filename. (Unimplemented)
+
+    .. note::
+        For ocean points, if a depth is shallower than the MINIMUM_DEPTH
+        but deeper than the MASKING_DEPTH, the depth will be set to
+        the MINIMUM_DEPTH.
+
+        Ocean points that are to become land will be set to the
+        MASKING_DEPTH.  If MASKING_DEPTH is not defined, MINIMUM_DEPTH
+        is used as the masking depth.
+    '''
+
+    if not(os.path.isfile(maskFile)):
+        msg = ("ERROR: Existing mask file not found (%s)" % (maskFile))
+        grd.printMsg(msg, level=logging.ERROR)
+        return None
+
+    # Find input land mask variable
+    maskData = xr.open_dataset(maskFile)
+    try:
+        originalOceanMask = maskData[maskVariable].copy()
+    except:
+        msg = ("ERROR: Mask file does not have requested variable (%s)" % (maskVariable))
+        grd.printMsg(msg, level=logging.ERROR)
+        return
+    maskData.close()
+
+    # Check for supplied depth variable
+    try:
+        depthGrid = dsData[dsVariable]
+    except:
+        msg = ("ERROR: The depth variable (%s) could not be found in the supplied data source." % (dsVariable))
+        grd.printMsg(msg, level=logging.ERROR)
+        return
+
+    # Determine values from other possible arguments
+    epsilon_depth = 1.0e-14
+    minimum_depth = 0.0
+    masking_depth = -99999.0
+    maximum_depth = -99999.0
+    if 'epsilon' in kwargs.keys():
+        epsilon_depth = kwargs['epsilon']
+    if 'MINIMUM_DEPTH' in kwargs.keys():
+        minimum_depth = kwargs['MINIMUM_DEPTH']
+    if 'MAXIMUM_DEPTH' in kwargs.keys():
+        maximum_depth = kwargs['MAXIMUM_DEPTH']
+    if 'MASKING_DEPTH' in kwargs.keys():
+        masking_depth = kwargs['MASKING_DEPTH']
+
+    # As is done in MOM6, if maximum is undefined, it is defined by the maximum of
+    # the 'depth' grid passed to this function.
+    if maximum_depth < -99990.0:
+        maximum_depth = depthGrid.max().values.tolist()
+        msg = ("The (diagnosed) maximum depth of the ocean is %f meters." % (maximum_depth))
+        grd.printMsg(msg, level=logging.INFO)
+
+    # MINIMUM_DEPTH < MASKING_DEPTH or if MASKING_DEPTH is undefined,
+    # set MASKING_DEPTH to MINIMUM_DEPTH
+    if minimum_depth < masking_depth:
+        masking_depth = minimum_depth
+    if masking_depth < -99990.0:
+        masking_depth = minimum_depth
+
+    # To use xr.where the data and mask have to be in the same Dataset()
+    workData = xr.Dataset()
+    workData['depth'] = depthGrid
+    workData['ocean_mask'] = originalOceanMask
+    workData['ocean_mask'].attrs['masking_depth'] = masking_depth
+    workData['ocean_mask'].attrs['minimum_depth'] = minimum_depth
+    workData['ocean_mask'].attrs['maximum_depth'] = maximum_depth
+
+    msg = ("Beginning application of new ocean mask (changes noted, if any).")
+    grd.printMsg(msg, level=logging.INFO)
+
+    # With the given ocean mask, we now test points that need to change
+    # based on given depths and given parameters.
+
+    # 1. Test points that should be marked as land.  If they are deeper
+    #    than the masking depth, set them to the masking depth.  If
+    #    masking depth is undefined, use minimum depth.
+
+    # MOM6 RULES: A depth equal or shallower than MASKING_DEPTH is masked as land.
+    #             If MASKING_DEPTH is undefined, use MINIMUM_DEPTH for MASKING_DEPTH.
+    condExp = (workData['ocean_mask'] == 0) & (workData['depth'] > masking_depth)
+    # This returns the number of matching points
+    nPts = condExp.data.ravel().sum()
+    if nPts > 0:
+        msg = (" * Number of land mask points with new depth of %f: %d" % (masking_depth, nPts))
+        grd.printMsg(msg, level=logging.INFO)
+
+    workData['newDepth'] = xr.where(condExp, masking_depth, workData['depth'])
+
+    # 2. Test points that should be marked as ocean.  If they are shallower than
+    #    the masking depth, then set them to the minimum depth.  If
+    #    masking depth is undefined, set them to the minimum depth + epsilon.
+
+    condExp = (workData['ocean_mask'] == 1) & (workData['newDepth'] < masking_depth)
+    nPts = condExp.data.ravel().sum()
+    if nPts > 0:
+        if masking_depth == minimum_depth:
+            msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth + epsilon_depth, nPts))
+            workData['newDepth'] = xr.where(condExp, minimum_depth + epsilon_depth, workData['newDepth'])
+        else:
+            msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth, nPts))
+            workData['newDepth'] = xr.where(condExp, minimum_depth, workData['newDepth'])
+        grd.printMsg(msg, level=logging.INFO)
+
+    # 3. If masking depth is defined, check ocean points that might violate minimum depth.
+    if masking_depth < minimum_depth:
+        condExp = (workData['ocean_mask'] == 1) & (workData['newDepth'] < minimum_depth)
+        nPts = condExp.data.ravel().sum()
+        if nPts > 0:
+            msg = (" * Number of ocean points set to minimum depth: %d" % (nPts))
+            workData['newDepth'] = xr.where(condExp, minimum_depth, workData['newDepth'])
+            grd.printMsg(msg, level=logging.INFO)
 
     # Update hash for the new grid
     workData['newDepth'].attrs['sha256'] = hashlib.sha256( np.array( workData['newDepth'] ) ).hexdigest()

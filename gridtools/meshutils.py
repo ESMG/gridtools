@@ -1,6 +1,7 @@
 # Generic mesh or field manipulation routines
 
 import xarray as xr
+from . import utils
 
 def writeLandmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     '''Write a land mask based on provided information.  This routine
@@ -19,6 +20,7 @@ def writeLandmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
 
     dsDataset = xr.Dataset()
     dsDataset[outVariable] = xr.where(dsData[dsVariable] <= masking_depth, 1.0, 0.0)
+    dsDataset[outVariable].attrs['sha256'] = utils.sha256sum(dsDataset[outVariable])
     dsDataset['x'] = dsData['x']
     dsDataset['y'] = dsData['y']
     dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))
@@ -42,6 +44,7 @@ def writeOceanmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
 
     dsDataset = xr.Dataset()
     dsDataset[outVariable] = xr.where(dsData[dsVariable] > masking_depth, 1.0, 0.0)
+    dsDataset[outVariable].attrs['sha256'] = utils.sha256sum(dsDataset[outVariable])
     dsDataset['x'] = dsData['x']
     dsDataset['y'] = dsData['y']
     dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))

@@ -15,7 +15,6 @@ from gridtools.datasource import DataSource
 # California coast.
 
 # Setup a work directory
-#wrkDir = '/home/cermak/mom6/configs/zOutput'
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 
 # Initialize a grid object
@@ -127,7 +126,7 @@ grd.setPlotParameters(
         'iColor': 'k',
         'jColor': 'k',
         'transform': cartopy.crs.PlateCarree(),
-        'satellite_height': 35785831.0,
+        'satelliteHeight': 35785831.0,
     }
 )
 

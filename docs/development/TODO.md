@@ -3,12 +3,14 @@
 ## Milestones
 
  - [ ] Release 0.3
-   - [ ] Port ROMS mask editor as-is to gridtools under ipython/pylab
-         so it works with MOM6/ROMS grids
+   - [X] Jupyter version of mask editor
+   - [X] Improve mask editor speed for each click using adaptive subgrids
+   - [X] Apply edited land or ocean mask to existing bathy grid
+   - [X] Rewrite mosaic files based on new bathymetry
  - [ ] Release 0.x
+   - [ ] Finish port ROMS mask editor as-is to gridtools for MOM6/ROMS grids (pylab)
+   - [ ] Optimize pylab mask editor
    - [ ] Application improvements
-   - [ ] Improve mask editor grid location on click
-   - [ ] Enable mask editor to work under Jupyter
    - [ ] Boundery condition grid creation and support (OBCs)
      - [ ] Save only the points we need instead of the whole supergrid
    - [ ] Sponge data preparation
@@ -22,10 +24,11 @@
      - [ ] implement ROMS.extend_ROMS_grid()
    - [ ] Grid filling options (flooding) (ice9)
    - [ ] Enable gridtools library to be installable via conda
+   - [ ] Leverage features of FRE-NCtools with gridtools
 
 # BUGS
- - [ ] latitude is not reliably reproduced between platforms; other
-       fields show reproducibility.
+
+ - [ ] Investigate reliably of produced grids between platforms
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and
        `setGridParameters` to recursively update dictionary elements.
@@ -34,6 +37,8 @@
 
 # TASKS
 
+ - [ ] Create our own conda repository since there is now a name conflict with
+       at least PyPi.
  - [ ] Sponge data preparation
    - [ ] Current scripts generate u,v fields on h-points; this needs
          to be changed to C-grid u/v-points instead
@@ -61,12 +66,30 @@
      - [X] convert lon [+0,+360] to [-180,+180]
      - [ ] Unify code that adjusts lon (PR#1)
    - [ ] Verify unification of radius (R) throughout code
- - [ ] grid mask editor (land, etc)
+ - [ ] grid mask editor (ocean, etc)
+     - [X] create a working example for binder.org
+     - [X] needs upgrade from basemap()
+     - [X] create an editor that works in jupyter
      - [ ] add routines for mask checking
      - [ ] add routines for updating the exchange grid masks
-     - [ ] Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
-           `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
-     - [ ] needs upgrade from basemap()
+     - [ ] jupyter
+       - [X] adaptive mask editing; subgrids
+       - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
+             `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
+       - [ ] show outline of full grid
+       - [ ] show other underlying fields - topo?
+       - [ ] ROMS: write edited mask
+       - [X] MOM6: write edited mask
+     - [ ] ipython --pylab
+       - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
+             `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
+       - [ ] adaptive mask editing; subgrids; requires full rewrite of function
+       - [ ] show outline of full grid
+       - [ ] convert to xarray
+         - [ ] grids.roms.ROMS_gridinfo._get_grid_info()
+       - [ ] show other underlying fields - topo?
+       - [ ] MOM6: write edited mask
+       - [X] ROMS: write edited mask
  - [ ] integration of data sources
    - [ ] generic regridder for creating boundary files (OBCs) from data sources
    - [ ] xesmf regridder for bathymetry sources
@@ -88,13 +111,11 @@
    - [ ] implement useFixByOverlapQHGridShift so a regular grid can be
          used without a shift
    - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingLandMask()
- - [ ] improve reproducibility
-   - [X] include a dump of conda environment in the grid file (nc)
-   - [X] add sha256 to grid and variable arrays
-   - [ ] if conda environment does not exist, do some other snooping
+   - [ ] Implement `TOPO_EDITS_FILE` in bathytools.applyExistingOceanMask()
+   - [ ] Check depth points for values that exceed `MAXIMUM_DEPTH`
  - [ ] Add option to use numpypi package (Alistair) as a configurable
        option in gridtools
- - [X] add datashader and numpypi from github sources; see postBuild script
+ - [X] add xesmf and numpypi from github sources; see postBuild script
    - [ ] implement and document in application
    - [ ] implement and document for programming use
  - [ ] on load of a grid into gridtool library
@@ -178,17 +199,25 @@
 
 # WISH
 
+ - [ ] Update gridTools.yml with some pinned versions to help package resolution
  - [ ] Write example program(s) that utilizes dask
    - [ ] Example 4: mkGridsEample4a.ipynb is incomplete
  - [ ] Support for multiple tiles for a model grid
  - [ ] Harmonize filename operations in functions
  - [ ] Teach grid tools to use "input.nml" to find grid related things
        for model runs.
- - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
-       there things that we could use there instead of recreating many wheels.
-       There are lot of FRE-NCtool references in the ROMS to MOM6
-       conversion tool.
- - [ ] Migrate to use of file:// or http://, https:// for file specifications.
+ - [ ] Do a head-to-head comparison of FRE-NCtools vs gridtools using an example
+       grid.  See if we can leverage both tools abilities.
+   - [ ] Debug FRE-NCtools; no topography works at the moment; segfaults all around
+   - [ ] GEBCO 2020 does not work
+   - [ ] Try ETOPO1
+   - [ ] Try ETOPO2
+     - REF: https://data1.gfdl.noaa.gov/~arl/pubrel/r/mom4p1/src/mom4p1/doc/mosaic_tool.html
+     - REF: https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
+   - [ ] Investigate the differences between FRE-NCtools vs gridutils.  Are
+         there things that we could use there instead of recreating many wheels.
+         There are lot of FRE-NCtool references in the ROMS to MOM6
+         conversion tool.
  - [ ] Allow gridtools to continue to operate with some disabled
        routines that use xesmf.
  - [ ] app:Save remote files; additional sanity checks
@@ -196,11 +225,15 @@
  - [ ] Compute `angle_dy` for testing of grid conformality.  Theoretically,
        we can do this check for all grid and supergrid cells.
  - [ ] tripolar grids: use FRE-NCtools via cython?
- - [ ] Bring in code that converts ROMS grids to MOM6 grids
+ - [ ] Grid conversion
+   - [X] Allow conversion of ROMS grids to MOM6 grids
+     - [ ] improve just clobbering shallower points with masking_depth
    - [ ] Allow conversion of MOM6 grids to ROMS grids
- - [ ] grid reading and plot parameter defaults should be dynamic with
-       grid type declaration and potentially split out into separate
-       library modules? lib/gridTools/grids/{MOM6,ROMS,WRF}
+ - [ ] dynamic plot parameters based on grid type
+ - [ ] dynamic reading of grids
+   - [ ] grid type declaration
+   - [X] MOM6 grid module
+   - [ ] ROMS grid module
  - [ ] Place additional metadata into MOM6 grid files
    - [X] Grid parameters
    - [X] Software stack, git information
@@ -211,7 +244,7 @@
    - [X] Update conda capture code so a temporary file is not necessary
  - [ ] Work with generic non-mapping reference systems for use with
        some of the sample MOM6 problems
-   - [ ] MOM6-examples: double_gyre
+   - [ ] MOM6-examples: `double_gyre`
      - [ ] https://github.com/NOAA-GFDL/MOM6-examples/blob/dev/gfdl/ocean_only/double_gyre/Visualizing%20and%20animating%20sea-surface%20height.ipynb
      - [ ] https://gist.github.com/adcroft/2a2b91d66625fd534372
    - [ ] MOM6 dumbbell: https://github.com/NOAA-GFDL/MOM6/search?q=dumbbell
@@ -228,7 +261,7 @@
  - [ ] Dask optimizations
    - [ ] creating the native IBCAO grid is too big for mybinder.org
  - [ ] Subset any grid for running with MOM6
-   - [ ] https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files
+   - [ ] `https://github.com/ESMG/regionalMOM6_notebooks/tree/master/creating_obc_input_files`
    - [ ] May be especially useful for debugging situations; Arctic6
  - [ ] Allow gridtools to be used without xesmf and xgcm; enable module
        detection for available capabilities
@@ -258,5 +291,5 @@
 
 # QUESTIONS
 
- - [ ] ntiles,1 is written in write_MOM6_topography_file, is this
+ - [ ] ntiles,1 is written in `write_MOM6_topography_file`, is this
        required for MOM6?

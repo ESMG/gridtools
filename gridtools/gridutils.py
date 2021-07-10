@@ -1,5 +1,5 @@
 # General imports and definitions
-import os, re, sys, datetime, logging, importlib
+import os, re, sys, datetime, logging, importlib, copy
 import cartopy, warnings, hashlib
 import numpy as np
 import xarray as xr
@@ -26,7 +26,7 @@ from . import utils
 from . import sanity
 from . import sysinfo
 
-class GridUtils:
+class GridUtils(object):
 
     def __init__(self, app=dict()):
         # Constants
@@ -42,6 +42,8 @@ class GridUtils:
         self.xrOpen = False
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        # Native grid variable (ROMS, etc)
+        self.nativeGrid = None
         # Allow setting of chunk parameter for grids
         self.xrChunks = None
         # Internal parameters
@@ -357,7 +359,7 @@ class GridUtils:
                 2=raise an exception
                 3=stop at breakpoints
         '''
-        self.printMsg("New DEBUG level (%d)" % (newLevel))
+        self.printMsg("Debug level now (%d)" % (newLevel))
         self.debugLevel = newLevel
 
     def setLogLevel(self, newLevel):
@@ -450,6 +452,7 @@ class GridUtils:
         self.xrFilename = None
         self.xrDS = xr.Dataset()
         self.grid = self.xrDS
+        self.nativeGrid = None
         self.xrChunks = None
         self.gridInfo = dict()
         self.gridInfo['dimensions'] = dict()
@@ -487,33 +490,38 @@ class GridUtils:
         #self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
         #self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
 
-        try:
-            self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-        except:
-            self.grid.attrs['conda_env'] = "Conda environment not found."
+        #try:
+        #    self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+        #except:
+        #    self.grid.attrs['conda_env'] = "Conda environment not found."
 
-        try:
-            #os.system("conda list --explicit > package_versions.txt")
-            #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
-            sysObj = sysinfo.SysInfo(grd=self)
-            cmd = "conda list --explicit"
-            (out, err, rc) = sysObj.runCommand(cmd)
-            self.grid.attrs['package_versions'] = out
-            #self.grid.attrs['package_versions'] = "/n".join(out)
-        except:
-            #raise
-            try:
-                self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-            except:
-                self.grid.attrs['conda_env'] = "Conda environment not found."
+        #try:
+        #    #os.system("conda list --explicit > package_versions.txt")
+        #    #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
+        #    sysObj = sysinfo.SysInfo(grd=self)
+        #    cmd = "conda list --explicit"
+        #    (out, err, rc) = sysObj.runCommand(cmd)
+        #    self.grid.attrs['package_versions'] = out
+        #    #self.grid.attrs['package_versions'] = "/n".join(out)
+        #except:
+        #    #raise
+        #    try:
+        #        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
+        #    except:
+        #        self.grid.attrs['conda_env'] = "Conda environment not found."
+        #
+        #    self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
 
-            self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
+        #try:
+        #    response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
+        #    self.grid.attrs['software_version'] =  print(response.json()["name"])
+        #except:
+        #    self.grid.attrs['software_version'] = ""
 
-        try:
-            response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
-            self.grid.attrs['software_version'] =  print(response.json()["name"])
-        except:
-            self.grid.attrs['software_version'] = ""
+        # Collect system metadata
+        sysObj = sysinfo.SysInfo(grd=self)
+        sysObj.loadVersionData()
+        self.grid.attrs['software_version'] = sysObj.dumpVersionData()
 
         try:
             self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
@@ -691,12 +699,19 @@ class GridUtils:
         # Review gridResolution, gridResolutionX and gridResolutionY,
         #    gridResolutionUnits, gridResolutionXUnits and gridResolutionY
         # parameters
-        gridResolution = self.getGridParameter('gridResolution', default='Error')
-        gridResolutionX = self.getGridParameter('gridResolutionX', default='Error')
-        gridResolutionY = self.getGridParameter('gridResolutionY', default='Error')
-        gridResolutionUnits = self.getGridParameter('gridResolutionUnits', default='degrees')
-        gridResolutionXUnits = self.getGridParameter('gridResolutionXUnits', default='degrees')
-        gridResolutionYUnits = self.getGridParameter('gridResolutionYUnits', default='degrees')
+
+        # We suppress warning messages here and check these parameters later
+        gridResolution = self.getGridParameter('gridResolution', default='Error', inform=False)
+        gridResolutionX = self.getGridParameter('gridResolutionX', default='Error', inform=False)
+        gridResolutionY = self.getGridParameter('gridResolutionY', default='Error', inform=False)
+
+        # Emit warnings only if a parameter above is set.
+        gridResolutionUnits = self.getGridParameter('gridResolutionUnits', default='degrees',
+                inform=(gridResolution!='Error'))
+        gridResolutionXUnits = self.getGridParameter('gridResolutionXUnits', default='degrees',
+                inform=(gridResolutionX!='Error'))
+        gridResolutionYUnits = self.getGridParameter('gridResolutionYUnits', default='degrees',
+                inform=(gridResolutionY!='Error'))
 
         # Review tilt parameter
         tilt = float(self.getGridParameter('tilt', default="0.0"))
@@ -1491,8 +1506,6 @@ class GridUtils:
             self.printMsg(msg, level=logging.ERROR)
             return
 
-        # Check kwargs
-
         # Check and set any defaults to kwargs
         utils.checkArgument(kwargs, 'writeTopography', False)
         utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
@@ -1505,8 +1518,8 @@ class GridUtils:
         utils.checkArgument(kwargs, 'oceanmaskFilename', "ocean_mask.nc")
         utils.checkArgument(kwargs, 'tileName', "tile1")
         utils.checkArgument(kwargs, 'MINIMUM_DEPTH', 0.0)
-        utils.checkArgument(kwargs, 'MASKING_DEPTH', 0.0)
-        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', -99999.0)
+        utils.checkArgument(kwargs, 'MASKING_DEPTH', -9999.0)
+        utils.checkArgument(kwargs, 'MAXIMUM_DEPTH', 99999.0)
         utils.checkArgument(kwargs, 'writeExchangeGrids', False)
         utils.checkArgument(kwargs, 'writeCouplerMosaic', False)
         utils.checkArgument(kwargs, 'couplerMosaicFilename', "mosaic.nc")
@@ -1517,9 +1530,13 @@ class GridUtils:
         # ROMS specific kwargs
         utils.checkArgument(kwargs, 'topographyVariable', 'h')
 
-        # Sanity checks
+        # Sanity checks for *_DEPTH arguments
+        if kwargs['MASKING_DEPTH'] > kwargs['MINIMUM_DEPTH']:
+            msg = ('WARNING: convertGrid: MASKING_DEPTH is deeper than MINIMUM_DEPTH and therefore ignored.')
+            self.printMsg(msg, level=logging.WARNING)
+            kwargs['MASKING_DEPTH'] = -9999.0
         if not(sanity.saneDepthOptions(**kwargs)):
-            msg = ('ERROR: Invalid *_DEPTH options passed. (MAXIMUM_DEPTH(%f) <= MINIMUM_DEPTH(%f) <= MASKING_DEPTH(%f))' %\
+            msg = ('ERROR: Invalid *_DEPTH options passed. (MAXIMUM_DEPTH(%f) >= MINIMUM_DEPTH(%f) >= MASKING_DEPTH(%f))' %\
                 (kwargs['MAXIMUM_DEPTH'], kwargs['MINIMUM_DEPTH'], kwargs['MASKING_DEPTH']))
             self.printMsg(msg, level=logging.INFO)
             return
@@ -1578,24 +1595,50 @@ class GridUtils:
             self.printMsg(msg, level=logging.INFO)
             return
             
-    def openGrid(self, inputUrl, chunks=None):
-        '''Open a grid file.  The file pointer is internal to the gridtools object.
+    def openGrid(self, inputUrl, **kwargs):
+        '''Open a grid file.  This creates and open
+        file pointer which is local to the gridtools object.
 
 	Specify with file: or OpenDAP (http://, https://) or ds:.
 
-        To access it, use: obj.xrDS or obj.grid'''
+        To access the opened grid, use: `obj.xrDS`.  This grid now needs
+        to be formally read by `readGrid()` and the grid will be
+        available to `obj.grid` and `obj.nativeGrid`.
+        '''
 
         # If we have a file pointer and it is open, close it and re-open the new file
         if self.xrOpen:
             self.closeGrid()
+
+        # Process keyword arguments
+        gridType = kwargs.pop('gridType', 'MOM6')
+        chunks = kwargs.pop('chunks', None)
+
+        # Some keyword arguments need to be kept upstream
+        kwargs['chunks'] = chunks
+
+        if gridType == 'ROMS':
+            gridid = kwargs.pop('gridid', None)
+            if gridid:
+                self.gridInfo['ROMS_gridid'] = gridid
+
+            # If just the gridid is supplied, then just return
+            # the grid is read in readGrid().
+            if not(inputUrl) or inputUrl is None:
+                self.xrOpen = True
+                self.gridInfo['type'] = gridType
+                return
             
         try:
             if chunks:
-                self.xrDS = self.openDataset(inputUrl, chunks=self.xrChunks)
-            else:
-                self.xrDS = self.openDataset(inputUrl)
-            self.xrOpen = True
-            self.xrFilename = inputUrl
+                self.xrChunks = chunks
+
+            self.xrDS = self.openDataset(inputUrl, **kwargs)
+            # Update only if we are not None
+            if self.xrDS is not None:
+                self.xrOpen = True
+                self.xrFilename = inputUrl
+                self.gridInfo['type'] = gridType
         except:
             msg = "ERROR: Unable to load grid: %s" % (inputUrl)
             self.printMsg(msg, level=logging.ERROR)
@@ -1603,13 +1646,33 @@ class GridUtils:
             self.xrOpen = False
             # If in DEBUG mode, stop on error to load the inputUrl
             self.debugMsg("DEBUG: Stopping on read error of grid file.")
-            
-    def readGrid(self, opts={'type': 'MOM6'}, local=None, localFilename=None):
-        '''Read a grid.
+
+    def readGrid(self, **kwargs):
+        '''Read a grid.  This is more of a convenience function for applications
+        that need to pass grids to gridtools instead of using the openGrid function.
         
         This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc).
         This routine does not verify the read grid vs. type of grid specified.
+
+        .. note::
+            A copy of the native grid native structure can be found
+            by using `obj.nativeGrid`.  The `obj.grid` variable may
+            be modified by the gridtools library.
+
         '''
+
+        # Process keyword arguments
+        defaultModelType = 'MOM6'
+        if 'type' in self.gridInfo.keys():
+            defaultModelType = self.gridInfo['type']
+
+        gridType = kwargs.pop('gridType', defaultModelType)
+        local = kwargs.pop('local', None)
+        localFilename = kwargs.pop('localFilename', None)
+
+        if localFilename:
+            self.xrFilename = localFilename
+
         # if a dataset is being loaded via readGrid(local=), close any existing dataset
         if local:
             if self.xrOpen:
@@ -1617,14 +1680,50 @@ class GridUtils:
             self.xrOpen = True
             self.xrDS = local
             self.grid = local
-        else:
-            if self.xrOpen:
-                # Save grid metadata
-                self.gridInfo['type'] = opts['type']
-                self.grid = self.xrDS
+            # This should be an xarray with an available copy method
+            self.nativeGrid = local.copy()
+            return
+
+        if self.xrOpen:
+            # Save grid metadata
+            self.gridInfo['type'] = gridType
+            self.grid = self.xrDS
+            # This will be None until a recognized grid type is found
+            self.nativeGrid = None
+
+            # Do specific grid type reads and place into nativeGrid object
+            if gridType == 'MOM6':
+                self.nativeGrid = self.xrDS.copy()
+
+            if gridType == 'ROMS':
+
+                if 'ROMS_gridid' in self.gridInfo.keys():
+                    sourceGridModule = gridType.lower()
+                    try:
+                        mdlSource = importlib.import_module('gridtools.grids.%s' % (sourceGridModule))
+                    except:
+                        msg = ('ERROR: Failed to load grid module for %s.' % (sourceGrid))
+                        self.printMsg(msg, level=logging.ERROR)
+                        return
+
+                    romsMdl = mdlSource.ROMS()
+                    self.nativeGrid = romsMdl.get_ROMS_grid(self.gridInfo['ROMS_gridid'])
+
+                # If we loaded a ROMS grid via gridid, then we need to populate the gridutils
+                # variable with native items.
+                if len(self.grid) == 0:
+                    # Lon and Lat center grid points
+                    self.grid['lon'] = (('ny', 'nx'), self.nativeGrid.hgrid.lon_rho)
+                    self.grid['lat'] = (('ny', 'nx'), self.nativeGrid.hgrid.lat_rho)
+
+                    # Ocean mask values
+                    self.grid['mask'] = (('ny', 'nx'), self.nativeGrid.hgrid.mask)
+
+                    self.grid = self.grid.set_coords(['lon', 'lat'])
+                else:
+                    breakpoint()
+
         
-        if localFilename:
-            self.xrFilename = localFilename
 
     def removeFillValueAttributes(self, data=None, stringVars=None):
         '''Helper function to format the netCDF file to emulate the
@@ -1645,8 +1744,18 @@ class GridUtils:
         '''
 
         ncEncoding = dict()
-        if data:
-            ncVars = list(data.variables)
+        ncVars = []
+        if data is not None:
+            # The data object may be a single variable
+            if not(hasattr(data, 'variables')):
+                if hasattr(data, 'name'):
+                    ncVars = list([data.name])
+            else:
+                ncVars = list(data.variables)
+
+            # Also apply to coordinate variables
+            if hasattr(data, 'coords'):
+                ncVars = ncVars + list(data.coords)
         else:
             ncVars = list(self.grid.variables)
 
@@ -1822,6 +1931,7 @@ class GridUtils:
                         'name': 'Mercator',
                         ...other projection options...,
                     },
+                })
         >>> grd.plotGrid()
 
         **Keyword arguments**:
@@ -1867,7 +1977,7 @@ class GridUtils:
         lat_1 = self.getPlotParameter('lat_1', subKey='projection', default=0.0)
         lat_2 = self.getPlotParameter('lat_2', subKey='projection', default=0.0)
         standard_parallels = (lat_1, lat_2)
-        satellite_height = self.getPlotParameter('satellite_height', default=35785831.0)
+        satelliteHeight = self.getPlotParameter('satelliteHeight', default=35785831.0)
         true_scale_latitude = self.getPlotParameter('lat_ts', subKey='projection', default=central_latitude)
 
         # declare varying crs based on plotProjection
@@ -1880,7 +1990,7 @@ class GridUtils:
             crs = cartopy.crs.Mercator(central_longitude=central_longitude)
         if plotProjection == 'NearsidePerspective':
             crs = cartopy.crs.NearsidePerspective(central_longitude=central_longitude,
-                central_latitude=central_latitude, satellite_height=satellite_height)
+                central_latitude=central_latitude, satellite_height=satelliteHeight)
         if plotProjection == 'Stereographic':
             if central_latitude not in (-90., 90.):
                 msg = "ERROR: Stereographic projection requires lat_0 to be +90.0 or -90.0 degrees."
@@ -2041,8 +2151,11 @@ class GridUtils:
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
-    def getGridParameter(self, gkey, subKey=None, default=None):
-        '''Return the requested grid parameter or the default if none is available.'''
+    def getGridParameter(self, gkey, subKey=None, default=None, inform=True):
+        '''Return the requested grid parameter or the default if none is available.
+        The routine will emit a message by default.  Use inform=False to suppress
+        messages emitted by this function.
+        '''
         if subKey:
             if subKey in self.gridInfo['gridParameterKeys']:
                 if gkey in self.gridInfo['gridParameters'][subKey].keys():
@@ -2052,8 +2165,9 @@ class GridUtils:
         if gkey in self.gridInfo['gridParameterKeys']:
             return self.gridInfo['gridParameters'][gkey]
         
-        msg = "WARNING: Using (%s) for default parameter for (%s)." % (default, gkey)
-        self.printMsg(msg, level=logging.DEBUG)
+        if inform:
+            msg = "WARNING: Using (%s) for default parameter for (%s)." % (default, gkey)
+            self.printMsg(msg, level=logging.DEBUG)
         return default
         
     def setGridParameters(self, gridParameters, subKey=None):
@@ -2168,10 +2282,13 @@ class GridUtils:
                 
         self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
-    def getPlotParameter(self, pkey, subKey=None, default=None):
+    def getPlotParameter(self, pkey, subKey=None, default=None, inform=True):
         '''Return the requested plot parameter or the default if none is available.
         
            To access dictionary values in projection, use the subKey argument.
+
+           This function will emit an informational message when a default parameter
+           is being used.  Use inform=False to suppress the messages.
         '''
 
         # Top level subkey access
@@ -2336,12 +2453,20 @@ class GridUtils:
 
         return sourceExpression
 
-    def openDataset(self, dsName, chunks=None):
+    def openDataset(self, dsName, **kwargs):
         '''Open a dataset using the data source catalog or url that can
         point to a raw dataset using a prefix file: in the data source name.
         The url can be an OpenDAP dataset: e.g.
         https://opendap.jpl.nasa.gov/opendap/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_AMSR_OI/2011/001/20110101-NCDC-L4LRblend-GLOB-v01-fv02_0-AVHRR_AMSR_OI.nc.bz2
+
+        **Keyword arguments**
+
+            * *chunks* (``int, tuple of int or mapping of hashable to int``) -- xarray chunk description.
+            * *gridid* (``ROMS model grid ID``) -- Model grid identification using the gridid.txt file.
+              The environment variable `ROMS_GRIDID_FILE` must be set.
 	'''
+        # Process keyword arguments
+        chunks = kwargs.pop('chunks', None)
 
         dsUrl = urllib.parse.urlparse(dsName)
         # At this point, we assume the dsName is a local filename
@@ -2411,6 +2536,109 @@ class GridUtils:
 
         return dsData
 
+    def saveDataset(self, dsName, dsData, **kwargs):
+        '''This allows saving variables to a file.
+
+        :param dsName: data source name or filename
+        :type dsName: string
+        :param dsData: dataset, data array or data object
+        :type dsData: xarray object
+        :return: none
+        :rtype: none
+
+        **Keyword arguments**
+
+            * *overwrite* (``boolean``) -- set to True to allow overwriting. Default: False
+            * *hashVariables* (``list()``) -- names of variables to add a sha256sum attribute
+            * *mapVariables* (``dict()``) -- map variable names to names stored in the
+              output file.  This argument takes precidence over all arguments.
+
+        .. note::
+            (Unimplemented) If the `dsName` is a data source (`ds:`) any variable map
+            specified will be reversed before writing the final file.
+        '''
+
+        # Process keyword arguments
+        overwrite = kwargs.pop('overwrite', False)
+        hashVariables = kwargs.pop('hashVariables', list())
+        mapVariables = kwargs.pop('mapVariables', dict())
+
+        dsUrl = urllib.parse.urlparse(dsName)
+        # At this point, we assume the dsName is a local filename
+        urlToOpen = dsName
+
+        # OpenDAP
+        if dsUrl.scheme in ['http','https']:
+            urlToOpen = dsObj['url']
+            msg = ("WARNING: Saving to a remote location is unimplemented.")
+            self.printMsg(msg, level=logging.WARNING)
+            return
+
+        # Local file spec
+        if dsUrl.scheme == 'file':
+            urlToOpen = dsUrl.path
+            if not(os.path.isfile(urlToOpen)):
+                self.printMsg("ERROR: The data source (%s) is was not found." % (urlToOpen), level=logging.ERROR)
+                return None
+
+        # Gridtools catalog entry
+        dsObj = dict()
+        if dsUrl.scheme == 'ds':
+            dsPath = dsUrl.path
+            if dsPath in self.dataSourcesObj.catalog.keys():
+                dsObj = self.dataSourcesObj.catalog[dsPath]
+            else:
+                self.printMsg("ERROR: The data source (%s) is not defined." % (dsName), level=logging.ERROR)
+                return None
+
+            # Parse the catalog url, what to pass to xarray open_dataset
+            # scheme='file' => path
+            # scheme='http', scheme='https' => dsObj['url']
+            dsUrl = urllib.parse.urlparse(dsObj['url'])
+            urlToOpen = None
+            if dsUrl.scheme in ['http','https']:
+                msg = ("WARNING: Saving to a remote location is unimplemented.")
+                self.printMsg(msg, level=logging.WARNING)
+                return
+            if dsUrl.scheme == 'file':
+                urlToOpen = dsUrl.path
+
+        # Apply variable map to make sure variables are named correctly
+        for vKey in mapVariables.keys():
+            if vKey in dsData or dsData.coords:
+                dsData = dsData.rename({vKey: mapVariables[vKey]})
+            else:
+                if not(hasattr(dsData, 'variables')) and hasattr(dsData, 'name'):
+                    if dsData.name == vKey:
+                        dsData.name == mapVariables[vKey]
+
+        # Provide a new hash to selected variables
+        if len(hashVariables) > 0:
+            for hVar in hashVariables:
+                if hVar in dsData or hVar in dsData.coords:
+                    dsData[hVar].attrs['sha256'] = utils.sha256sum(dsData[hVar])
+            # Edge case where dsData is only one variable
+            if not(hasattr(dsData, 'variables')):
+                if hasattr(dsData, 'name'):
+                    if dsData.name in hashVariables:
+                        dsData.attrs['sha256'] = utils.sha256sum(dsData)
+
+        if os.path.isfile(urlToOpen) and not(overwrite):
+            msg = ("WARNING: Use overwrite=True to overwrite existing file (%s)." % (urlToOpen))
+            self.printMsg(msg, level=logging.WARNING)
+            return
+
+        try:
+            dsData.to_netcdf(urlToOpen, encoding=self.removeFillValueAttributes(data=dsData))
+            msg = ("INFO: Successfully wrote to file (%s)." % (urlToOpen))
+            self.printMsg(msg, level=logging.INFO)
+        except:
+            raise
+            msg = ("ERROR: Unable to save data to file (%s). The object passed to dsData should be a xarray." %\
+                    (urlToOpen))
+            self.printMsg(msg, level=logging.WARNING)
+            return
+
     def applyEvalMap(self, dsName, dsData):
         '''Apply constructed equations through python eval() to manipulate data source fields.
            Data source catalog entries must be prefixed with ds:.  If GEBCO is defined
@@ -2463,6 +2691,11 @@ class GridUtils:
         '''This modifies a given bathymetry using an existing land mask.'''
         from . import bathyutils
         return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
+
+    def applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
+        '''This modifies a given bathymetry using an existing ocean/Users/cermak  mask.'''
+        from . import bathyutils
+        return bathyutils.applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def computeBathymetricRoughness(self, dsName, **kwargs):
         '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''

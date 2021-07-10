@@ -1,22 +1,34 @@
-# GridUtils.App()
+'''
+Gridtools library applications.
 
+**App()**
+
+**maskEditor()**
+
+**maskEditorPylab()**
+This class is based on code from :cite:p:`ESMG_pyroms_2021`.
+
+'''
 # Modules
-
-import os, sys, io, logging
-import numpy as np
+import os, sys, io, logging, warnings
 import cartopy.crs as ccrs
 import cartopy
 import matplotlib.pyplot as plt
-import warnings
+import numpy as np
 import xarray as xr
 from io import BytesIO
 import panel as pn
 pn.extension()
 
+import hvplot.xarray
+import holoviews as hv
+import geoviews as gv
+gv.extension('bokeh')
+
 # This is called by GridTools() and can't be
 # called by itself.
 
-class App:
+class App(object):
 
     def __init__(self, grd=None):
 
@@ -969,3 +981,192 @@ class App:
                 'defaultFigureSize': self.defaultPlotFigureSize
             }
         )
+
+
+class maskEditor(object):
+    '''This class helps launch the jupyter version of the ocean mask
+    editor.
+
+    '''
+
+    def __init__(self, ds=None, grd=None, **kwargs):
+
+        # Globals
+
+        # This application has its own copy of GridTools() object
+        self.grd = grd
+
+        # Internal variables
+        self.da = ds
+        self.lastClickY = -1
+        self.lastClickX = -1
+        self.gridSubset = 50
+        self.lon = -1
+        self.lat = -1
+        self.xloc = -1
+        self.yloc = -1
+        self.clickedValues = []
+
+        # Mask editor controls
+        self.enableMaskEditing = pn.widgets.Checkbox(name='Enable Mask Editing')
+        self.MASKING_DEPTH = kwargs.pop('MASKING_DEPTH', 0.0)
+        self.MINIMUM_DEPTH = kwargs.pop('MINIMUM_DEPTH', 0.0)
+        self.MAXIMUM_DEPTH = kwargs.pop('MAXIMUM_DEPTH', -99999.0)
+        self.zEdits = dict()
+
+        # Set the default to something more meaningful
+        self.crs = kwargs.pop('crs', ccrs.Orthographic(-160, 90))
+
+        land_color = kwargs.pop('land_color', (0.6, 1.0, 0.6))
+        sea_color = kwargs.pop('sea_color', (0.6, 0.6, 1.0))
+        self.customCM = plt.matplotlib.colors.ListedColormap(
+                [land_color, sea_color], name='land/sea')
+
+    def getGridSubset(self, lClickY, lClickX, grd):
+
+        grdShape = grd.shape
+
+        firstY = lClickY - self.gridSubset
+        lastY = lClickY + self.gridSubset
+        firstX = lClickX - self.gridSubset
+        lastX = lClickX + self.gridSubset
+
+        if firstY < 0:
+            firstY = 0
+            lastY = self.gridSubset - 1
+
+        if firstX < 0:
+            firstX = 0
+            lastX = self.gridSubset - 1
+
+        if lastY > grdShape[0]-1:
+            firstY = grdShape[0] - self.gridSubset
+            lastY = grdShape[0] - 1
+
+        if lastX > grdShape[1]-1:
+            firstX = grdShape[1] - self.gridSubset
+            lastX = grdShape[1] - 1
+
+        return [firstY, lastY, firstX, lastX]
+
+    def great_circle(self, lon1, lat1, lon2, lat2):
+        # REF: https://medium.com/@petehouston/calculate-distance-of-two-locations-on-earth-using-python-1501b1944d97
+        # Convert to numpy; map requires scalars
+        # lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+        lon1 = np.radians(lon1)
+        lat1 = np.radians(lat1)
+        lon2 = np.radians(lon2)
+        lat2 = np.radians(lat2)
+
+        dist = 6371 * (
+            np.arccos(np.sin(lat1) * np.sin(lat2) + np.cos(lat1) * np.cos(lat2) * np.cos(lon1 - lon2))
+        )
+
+        return dist
+
+    def plotMap(self, x, y):
+
+        self.lon = x
+        self.lat = y
+
+        self.clickedValues.append([x,y])
+
+        # If undefined, set it to a center grid point
+        if self.lastClickY == -1:
+            self.lastClickY = int(self.da.shape[0] / 2)
+        if self.lastClickX == -1:
+            self.lastClickX = int(self.da.shape[1] / 2)
+
+        if x is not None:
+
+            # Find nearest grid point for curvilinear grid
+            d = self.great_circle(self.lon, self.lat, self.da['lon'], self.da['lat'])
+            ind = np.nonzero(np.equal(d, np.amin(d)))
+            self.yloc = int(ind[0][0])
+            self.xloc = int(ind[1][0])
+
+            self.clickedValues.append([self.lon, self.lat, self.yloc, self.xloc])
+
+            # If the mask editing is turned on, update the mask point
+            if self.enableMaskEditing.value:
+                self.da.loc[self.yloc, self.xloc] =\
+                    np.where(self.da.loc[self.yloc, self.xloc] == 0, 1, 0)
+
+            self.lastClickY = self.yloc
+            self.lastClickX = self.xloc
+
+        # Use subset method to edit grids
+        [gy1, gy2, gx1, gx2] = self.getGridSubset(self.lastClickY, self.lastClickX, self.da)
+
+        # This has a side effect of dynamically changing the colorbar and the
+        # rendered image.
+
+        # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
+        plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
+            'lon', 'lat', 'mask', projection = self.crs,
+            frame_height=540,
+            global_extent=True,
+            cmap=hv.plotting.util.process_cmap(self.customCM),
+            coastline='10m',
+            clim=(0,1)
+        )
+        opt_kwargs = dict()
+        plt.opts(title='Ocean Mask Editor', **opt_kwargs)
+
+        return plt
+
+    def createMaskEditorApp(self):
+
+        tap_stream = hv.streams.Tap()
+        dmap = gv.DynamicMap(self.plotMap, streams=[tap_stream])
+
+        app = pn.Column(pn.WidgetBox("## Controls", self.enableMaskEditing),
+                dmap).servable()
+
+        return app
+
+
+class maskEditorPylab(object):
+    '''This class helps launch the pylab version of the
+    ocean mask editor.  A jupyter cell with `%pylab` should preceed usage
+    of this class.
+
+    :Example::
+
+        [1]: import os
+             from gridtools.grids import roms
+             import cartopy.crs as crs
+             import xarray as xr
+
+             # Enable pylab
+             %pylab
+
+        [2]: # Define a map projection
+             map = ccrs.Stereographic(central_latitude=90.0, central_longitude=160.0)
+
+        [3]: # Load a ROMS grid
+
+             # Use the gridid.txt file
+             os.environ["PYROMS_GRIDID_FILE"] = "/import/AKWATERS/jrcermakiii/configs/Arctic6/roms/gridid.txt"
+
+             romsObj = roms.ROMS()
+             romsGrd = romsObj.get_ROMS_grid('ARCTIC6')
+
+        [4]: # Start the pylab editor
+             plotObj = romsObj.edit_mask_mesh(romsGrd.hgrid, proj=map)
+
+        [5]: # When ready to save the edited grid, uncomment the next line and run this cell
+             # romsObj.write_ROMS_grid(romsGrd, filename='grid_py.nc')
+
+    .. note::
+        This currently only operates on ROMS grids.  This method is extremely slow due to
+        the map refresh method.
+
+    '''
+
+    def __init__(self, grd=None):
+
+        # Globals
+
+        # This application has its own copy of GridTools() object
+        self.grd = grd

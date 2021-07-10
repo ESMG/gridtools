@@ -8,6 +8,7 @@
 #  * jupyter lab console
 
 import sys, os, logging
+import cartopy
 from gridtools.gridutils import GridUtils
 
 # Set a place to write files
@@ -40,7 +41,8 @@ grd.setGridParameters({
     'projection': {
         'name': 'LambertConformalConic',
         'lon_0': 230.0,
-        'lat_0': 40.0
+        'lat_0': 40.0,
+        'ellps': 'WGS84'
     },
     'centerX': 230.0,
     'centerY': 40.0,
@@ -51,6 +53,7 @@ grd.setGridParameters({
     'dyUnits': 'degrees',
     'tilt': gtilt,
     'gridResolution': 1.0,
+    'gridResolutionUnits': 'degrees',
     'gridMode': 2,
     'gridType': 'MOM6',
     'ensureEvenI': True,
@@ -75,7 +78,7 @@ grd.makeGrid()
 
 # Save the new grid to a netCDF file
 grd.printMsg("Attempt to save the grid to a netCDF file.")
-grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_script.nc"))
+grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example1.nc"))
 
 # This prints out all the current grid parameters
 # Note: for Lambert Conformal Conic grids, two additional projection parameters are computed.
@@ -101,13 +104,16 @@ grd.setPlotParameters(
         'projection': {
             'name': 'NearsidePerspective',
             'lat_0': 40.0,
-            'lon_0': 230.0
+            'lon_0': 230.0,
+            'ellps': 'WGS84'
         },
         'extent': [-160.0 ,-100.0, 20.0, 60.0],
         'iLinewidth': 1.0,
         'jLinewidth': 1.0,
         'showGridCells': True,
         'title': "Nearside Perspective: 20x30 with %.1f degree tilt" % (gtilt),
+        'satelliteHeight': 35785831.0,
+        'transform': cartopy.crs.PlateCarree(),
         'iColor': 'k',
         'jColor': 'k'
     }
@@ -120,7 +126,8 @@ grd.setPlotParameters(
     {
         'name': 'NearsidePerspective',
         'lat_0': 40.0,
-        'lon_0': 230.0        
+        'lon_0': 230.0,
+        'ellps': 'WGS84'
     }, subKey='projection'
 )
 
@@ -130,20 +137,18 @@ grd.setPlotParameters(
 # Axes object - you can further fine tune plot parameters,
 #   titles, axis, etc prior to the final plotting of the figure.
 #   Some items may be configured via the figure object.
-grd.printMsg('''
-Place a call to actually plot the grid using plotGrid().  This function returns
-a figure and axes object that can be further modified before displaying or saving
-the plot.
-
+grd.printMsg('''Plotting the grid requires a call to plotGrid().  This function returns
+a figure and axes object that can be further modified before displaying
+or saving the plot.
 ''')
 (figure, axes) = grd.plotGrid()
 
 # You can save the figure using the savefig() method on the
 # figure object.  Many formats are possible.
 grd.printMsg("Save the figure in two different formats: jpg and pdf.")
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_script.jpg'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Example1.jpg'), dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_script.pdf'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Example1.pdf'), dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
 

@@ -5,17 +5,21 @@ Generic sanity check routines.
 def saneDepthOptions(**kwargs):
     '''Sanity check `*_DEPTH` options for MOM6.
 
-    For MOM6, a depth equal to or shallower is masked.  The following
-    equation must be true for this routine to return **True**:
+    The following equation must be true for this routine to
+    return **True**:
 
-    ``MAXIMUM_DEPTH <= MINIMUM_DEPTH <= MASKING_DEPTH``
+    ``MAXIMUM_DEPTH >= MINIMUM_DEPTH >= MASKING_DEPTH``
+
+    A land mask is applied if a depth is equal to or shallower than
+    the ``MASKING_DEPTH``.  If ``MASKING_DEPTH`` is undefined or
+    deeper than ``MINIMUM_DEPTH``, the land mask will use the
+    ``MINIMUM_DEPTH`` to apply the land mask.
 
     :return: True of depth options are sane, False otherwise.
     :rtype: boolean
 
-    A negative `MAXIMUM_DEPTH` is ignored.  As the model is initialized, if
-    this parameter is still negative, it is set to the maximum as seen from
-    a supplied topography grid.
+    As the model is initialized, if this parameter is undefined, it is
+    set to the maximum as seen from the supplied topography grid.
 
     **References**
 
@@ -28,11 +32,11 @@ def saneDepthOptions(**kwargs):
 
     # Negative MAXIMUM_DEPTH is permitted but ignored for this test
     if kwargs['MAXIMUM_DEPTH'] < 0.0:
-        if kwargs['MINIMUM_DEPTH'] <= kwargs['MASKING_DEPTH']:
+        if kwargs['MINIMUM_DEPTH'] >= kwargs['MASKING_DEPTH']:
             return True
 
-    if kwargs['MAXIMUM_DEPTH'] <= kwargs['MINIMUM_DEPTH']:
-        if kwargs['MINIMUM_DEPTH'] <= kwargs['MASKING_DEPTH']:
+    if kwargs['MAXIMUM_DEPTH'] >= kwargs['MINIMUM_DEPTH']:
+        if kwargs['MINIMUM_DEPTH'] >= kwargs['MASKING_DEPTH']:
             return True
 
     return False
