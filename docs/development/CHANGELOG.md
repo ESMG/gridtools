@@ -1,5 +1,11 @@
 # Changelog
 
+# 2021-07-09
+
+ - For UAF/chinook with old glibc, it is best to bootstrap with python and 
+   geoviews up front and then load all the other packages.  All examples
+   and editors work.
+
 # 2021-07-08
 
  - Example 8: Update plot parameter
