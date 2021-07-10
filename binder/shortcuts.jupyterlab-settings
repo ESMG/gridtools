@@ -14,5 +14,26 @@
             ],
             "selector": ".jp-Notebook:focus"
         },
+        {
+            "command": "kernelmenu:restart-and-clear",
+            "keys": [
+                "Ctrl Shift R"
+            ],
+            "selector": "[data-jp-code-runner]:focus"
+        },
+        {
+            "command": "runmenu:restart-and-run-all",
+            "keys": [
+                "Ctrl Shift E"
+            ],
+            "selector": "[data-jp-code-runner]:focus"
+        },
+        {
+            "command": "filemenu:shutdown",
+            "keys": [
+                "Ctrl Shift K"
+            ],
+            "selector": "body"
+        },
     ]
 }

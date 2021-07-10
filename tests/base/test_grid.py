@@ -7,7 +7,7 @@ def test_import():
 
         grd = GridUtils()
 
-        gtilt = 0.0
+        gtilt = 30.0
         grd.setGridParameters({
             'projection': {
                 'name': 'LambertConformalConic',

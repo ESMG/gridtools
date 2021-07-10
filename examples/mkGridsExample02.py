@@ -24,7 +24,7 @@ grd.printMsg("---")
 from gridtools.sysinfo import SysInfo
 info = SysInfo()
 info.show(vList=['platform','python','esmf','esmpy','xgcm','xesmf',
-                 'netcdf4','numpy','xarray',
+                 'netCDF4','numpy','xarray',
                  'cartopy','matplotlib',
                  'jupyter_core','jupyterlab','notebook',
                  'dask'])

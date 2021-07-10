@@ -30,11 +30,22 @@ $ make DEVELOP=1
 $ cp scrip.cpython-38-x86_64-linux-gnu.so ${SRC}/pyroms/pyroms/pyroms/
 ```
 
+Compiling:
+```
+$ cd ${SRC}
+$ cd pyroms
+$ pip install -e .
+$ cd ../pyroms_toolbox
+$ pip install -e .
+$ cd ../bathy_smoother
+$ pip install -e .
+```
+
 Using pyroms:
 ```
 # define the location of gridid.txt
 # edit gridid.txt to point to Arctic6 nc file
-$ export PYROMS_GRIDID_FILE=/home/cermak/gridtools/gridTools/configs/Arctic6/roms/gridid.txt
+$ export PYROMS_GRIDID_FILE=/home/cermak/workdir/configs/Arctic6/roms/gridid.txt
 ```
 
 For now the only known working way to run editmask.py is via:

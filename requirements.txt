@@ -6,12 +6,15 @@ cython
 dask
 datashader
 docutils==0.16
+geoviews
+hvplot
 jupyterlab
 matplotlib
 m2r2
 netCDF4
 numba
 numpy
+owslib
 pandas
 panel
 param
@@ -19,8 +22,9 @@ pip
 pyct
 pykdtree
 pyproj
+PyQt5
+PyQt5-sip
 pytest
-pyproj
 requests
 scipy
 sphinx

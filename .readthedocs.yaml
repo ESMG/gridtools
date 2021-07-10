@@ -10,4 +10,4 @@ formats:
    - pdf
 
 conda:
-  environment: binder/environment.yml
+  environment: conda/gridTools_export-linux-64-RTD.yml

@@ -1,16 +1,29 @@
-# Releases
+<!-- DEPLOYMENT TEMPLATE -->
+
+# Release X.Y.Z
+
+## Previous Release
+
+Tag: X.Y.Z `commit_hash`
 
 This document the steps needed for a complete release.  Copy to
 release folder as X.Y.Z.md and fill out.
 
 # Checklist
 
+ - [ ] Operating system checks
+        - [ ] `x86_64`: Ubuntu 20.04.2 LTS (64 GB)
+        - [ ] `x86_64`: Ubuntu 20.04.2 LTS (12 GB VM)
+        - [ ] `aarch64`: Raspberry Pi 4 (8 GB)
+        - [ ] `x86_64`: triton node (64 GB)
+        - [ ] `x86_64`: chinook node (128 GB)
  - [ ] Verify operation of example notebooks
  - [ ] Verify operation of example scripts
  - [ ] Resync environments
    - [ ] Pip requirements.txt should closely mirror gridTools.yml
    - [ ] Update any special needs in requirements.txt
    - [ ] Resync `gridTools_export-linux-64.yml` without pip modules
+   - [ ] Resync `gridTools_export-linux-64-RTD.yml` without nodejs and pip modules
    - [ ] Ensure `binder/environment.yml` is in sync
          with `conda/gridTools_export-linux-64.yml`
  - [ ] Ensure release/version is properly updated in `gridtools/__init__.py`

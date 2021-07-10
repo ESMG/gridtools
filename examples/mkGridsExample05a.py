@@ -99,6 +99,6 @@ grd.setPlotParameters(
 grd.computeGridMetricsSpherical()
 
 (figure, axes) = grd.plotGrid()
-figure.savefig(os.path.join(wrkDir,'IBCAO_Example5a_script.jpg'))
+figure.savefig(os.path.join(wrkDir,'IBCAO_Example5a.jpg'))
 
 print(grd.grid)

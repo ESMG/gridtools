@@ -1,5 +1,183 @@
 # Changelog
 
+# 2021-07-10
+
+ - Working through deployment checklist.
+
+# 2021-07-09
+
+ - For UAF/chinook with old glibc, it is best to bootstrap with python and
+   geoviews up front and then load all the other packages.  All examples
+   and editors work.
+
+# 2021-07-08
+
+ - Example 8: Update plot parameter
+ - Example 3: fix a bug; change log file name
+ - Update docs/conda/README.md
+
+# 2021-07-07
+
+ - Begin testing on chinook@UAF.
+ - Chinook has an older glibc that requires a different
+   set of packages for gridtools.
+
+# 2021-07-06
+
+ - Try to save an artifact to github actions: conda dump
+ - All examples are functional on aarch64
+ - Clear all outputs in notebooks again
+ - Fix title bar on pylab plot
+ - conda vs pip: pyqt vs PyQt5
+ - ROMS grid writing is confirmed operational
+ - Added coastline plotting to pylab grid editor.
+ - CI failed with added pyqt requirement.
+ - Fix example 9 for projection parameter in use instead of crs.
+ - Need to debug/test further on our big node.
+ - For the aarch64 platform, the virtualenv (venv) cannot be used due
+   to missing pyqt support for pylab.  The conda package manager
+   provides sufficient pyqt support.
+
+# 2021-07-05
+
+ - Rename a few of the examples so they sort nicely in UNIX `ls`.
+ - Hashes match between github `x86_64` and `aarch64`. Good!
+ - Change pytest grid example to match Example 1 for platform
+   comparisons (LLC grid tilt 30 degrees).
+
+# 2021-07-04
+
+ - Cause an error if a ROMS gridid.txt file cannot be found.
+ - Ocean and land masks did not have a hash created.  Added to meshutils
+   functions.
+ - FRE-NCtools does not like `GEBCO_2020`.  Will try ETOPO1 and ETOPO2.
+ - Change Example3 to Mercator so we can work up an example comparing
+   gridtools with FRE-NCtools.
+ - Change an information message in the change debug level to avoid confusion.
+ - Include platform and python version in software list for saved netCDF files.
+ - The warnings for gridResolution parameters do not make sense if
+   some are properly defined. Revised.
+ - Add to favorite shortcuts to jupyter.
+ - Update jupyter MD notes.
+ - Fix CI as we changed the source of the requirements file
+   in binder which is also used by github Actions.
+ - Fix spelling of notebook in bokeh.
+ - Update the README.md in examples.
+ - RT: Bugs in mkGridIterative notebook.  Refactoring software
+   metadata discovery.
+ - Packages versions are typically seen only at the root
+   element, so optimize on that.
+
+# 2021-07-03
+
+ - Rework sysinfo and utils modules to allow more flexible software
+   and detection in different environments.
+
+# 2021-07-02
+
+ - RTD is fixed.
+ - Add roms modules to RTD docs.
+ - Create release/0.3.0.md to begin a release cycle.
+ - Update DEPLOY.md template; includes RTD fix
+ - RTD: point environment to `conda/gridTools_export-linux-64-RTD.yml`
+ - Remove pip entries and nodejs from `gridTools_export.yml` to
+   fix RTD using `gridTools_export-linux-64-RTD.yml`
+ - In conda, rename `gridTools_export.yml` to `gridTools_export-linux-64.yml`
+ - RTD(dev) is broken; unresolvable nodejs
+ - Xarray items have to have consistent dimensions and coordinates work smoothly.
+ - In bathyutils, after applying mask to correct ocean points, check the depths
+   against the `MINIMUM_DEPTH` for points that need to be capped as well.
+ - Update some MOM6 notes about bathymetry and related parameters.
+
+# 2021-07-01
+
+ - Set undefined depth of ocean to -99999.0
+ - Refactor codes to use utils.sha256sum()
+ - Apply `MASKING_DEPTH` and `MINIMUM_DEPTH` to ocean points in
+   bathyutils.applyExistingLandmask() and bathyutils.applyExistingOceanmask().
+ - Make sure we write hashes for files created by gridutils.makeSoloMosaic().
+ - Create a utility function: utils.sha256sum() for all objects
+ - Include variable coord as variables to ignore in gridutils.removeFillValueAttributes()
+ - Handle single variables passed to gridutils.removeFillValueAttributes()
+ - Change test for data in gridutils.removeFillValueAttributes()
+ - Revising mask modification for bathyutils.applyExistingLandmask() and
+   bathyutils.applyExistingOceanmask().
+
+# 2021-06-30
+
+ - MOM6 PR#1428 `MASKING_DEPTH` may be unspecified or shallower than `MINIMUM_DEPTH`.
+ - Allow modification of a MOM6 grid.
+ - Now need to work on save and application of edited grid.
+
+# 2021-06-29
+
+ - Continue configuration of jupyter mask editer.
+ - Integration of ROMS grids into openGrid/readGrid infrastructure.
+ - Rename variable `PYROMS_GRIDID_FILE` to `ROMS_GRIDID_FILE`.
+ - Move to more generic keywarg arguments to openDataset, openGrid and readGrid.
+
+# 2021-06-28
+
+ - Add controls to jupyter mask editor
+ - Jupyter mask editor is now wrapped in a class
+ - create two more classes in gridtools: maskEditor() and maskEditorPylab()
+ - Performing integration of mask editors into gridtools.
+ - Before use of pylab class in jupyter, a user must have a cell
+   that calls `%pylab` first.
+ - fix typo in example for gridutils.plotGrid()
+
+# 2021-06-27
+
+ - map() does not work well with numpy/xarray
+ - pyplot will require a rewrite to optimize speed; the full map is rendered and
+   underlying data is changed and requested to redraw on update.
+ - need to add a control to jupyter editor to enable/disable mask edits but still
+   allow moving the subgrid on each click.
+
+# 2021-06-26
+
+ - Working on trying to get jupyter and pyplot displays to be more similar to
+   each other.
+
+# 2021-06-25
+
+ - Added an adaptive method to the mask editor.  User can specify size of
+   grid subset.  Subset grid is centered over the last mouse click.
+ - Mask value is toggled between 1 and 0.
+ - With 2D lon, lat grids we have to resort to a great circle calcuation
+   of all the points to find our clicked grid point.  This computation is
+   fast.  The rendering of many points is slow.
+ - Make sure to reset the kernel and wipe out any cells on notebooks to
+   keep the repository size down.
+
+# 2021-06-24
+
+ - Experimenting with hvplot quadmesh.  With a large grid, it takes a long time.
+   May want to consider partitioning the grid for plotting?  Sliding views?
+ - Add note to README
+ - Additional package requirements: geoviews, hvplot, nodejs, pooch, owslib
+ - May be able to use jupyter for the editor
+ - Return references to the created plot object or the event
+   hooks go away.
+ - The coordinate system is a little different in cartopy.  Found
+   a reference that helped fix the issue.
+
+# 2021-06-23
+
+ - Copied needed modules from pyroms and made some modifications
+ - Added new modules to `__init__` for grids module
+ - Added (object) to all current classes
+ - Starting ipython and pasting code from mkGridsExample9 will launch a window
+ - editing only works via `ipython --pylab`
+ - a plot shows up but the transformations are off
+ - investigating replacement for Basemap() for conversion of (lon, lat) to (x, y)
+ - branch exp/maskeditorV1 opened
+ - consolidate credits and citations
+ - fix more main README.md links
+ - Updated pyroms install information for the brave
+ - bibtex authors are separated by and and not commas
+ - Add citation for pyroms
+
 # 2021-06-22
 
  - PR#8 submitted to main.  Making final checks of CI, RTD and mybinder.

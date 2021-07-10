@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 # This is the same as Example4 but in a python script instead of
-# a notebook
+# a notebook.
 
+import os
 import numpy as np
 import xarray as xr
+
+wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 
 # IBCAO
 # Working in cartesian coordinates, all values are in meters
@@ -31,7 +34,8 @@ lon, lat = proj.transform(yy, xx, direction='INVERSE')
 
 # Confirm we have the correct grid points and lat lon values
 print(yy[0,0], xx[0,0], lat[0,0], lon[0,0])
-print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1], lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])
+print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1],\
+        lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])
 
 import os, sys
 from gridtools.gridutils import GridUtils
@@ -86,9 +90,9 @@ grd.setPlotParameters(
     }
 )
 
-grd.computeGridMetrics()
+grd.computeGridMetricsSpherical()
 
 (figure, axes) = grd.plotGrid()
-figure.savefig('configs/test/IBCAO_Example5_script.jpg')
+figure.savefig(os.path.join(wrkDir,'IBCAO_Example5.jpg'))
 
 print(grd.grid)
