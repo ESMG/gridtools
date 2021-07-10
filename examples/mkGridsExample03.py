@@ -21,7 +21,7 @@ grd.printMsg("")
 
 # We can turn on extra output from the module
 grd.printMsg("Set print and logging messages to the DEBUG level.")
-logFilename = os.path.join(wrkDir, 'gridTest.log')
+logFilename = os.path.join(wrkDir, 'MERC_20x30_Example3.log')
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -104,7 +104,7 @@ grd.setPlotParameters(
         'iLinewidth': 1.0,
         'jLinewidth': 1.0,
         'showGridCells': True,
-        'title': "Mercator: 0.5 deg x 0.5 deg" % (gtilt),
+        'title': "Mercator: 0.5 deg x 0.5 deg",
         'satelliteHeight': 35785831.0,
         'transform': cartopy.crs.PlateCarree(),
         'iColor': 'k',

@@ -126,7 +126,7 @@ grd.setPlotParameters(
         'iColor': 'k',
         'jColor': 'k',
         'transform': cartopy.crs.PlateCarree(),
-        'satellite_height': 35785831.0,
+        'satelliteHeight': 35785831.0,
     }
 )
 

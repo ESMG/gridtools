@@ -12,6 +12,7 @@
  * https://discourse.holoviz.org/t/how-to-create-a-conditional-custom-hover-tool-for-a-holoviews-plot/311
  * https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
  * https://docs.github.com/en/actions/guides/about-continuous-integration#skipping-workflow-runs
+ * https://docs.github.com/en/actions/creating-actions/creating-a-composite-run-steps-action
  * https://docs.github.com/en/actions/quickstart
  * https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
  * https://docs.github.com/en/github/writing-on-github/autolinked-references-and-urls
@@ -26,7 +27,9 @@
  * https://www.geeksforgeeks.org/matplotlib-figure-figure-add_axes-in-python/amp/
  * https://geohackweek.github.io/nDarrays/09-masking/
  * https://gist.github.com/TomTom101/25e0e76f11a5da57523a60fb280005c1 (Multiple conditions on xarray Data Array)
+ * https://github.com/actions/starter-workflows/blob/main/automation/manual.yml
  * https://github.com/binder-examples/conda
+ * https://github.com/fastai/workflows
  * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
  * https://github.com/pydata/xarray/issues/2899
@@ -71,6 +74,7 @@
  * https://stackoverflow.com/questions/2654113/how-to-get-the-callers-method-name-in-the-called-method
  * https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
  * https://stackoverflow.com/questions/4076239/finding-out-the-name-of-the-original-repository-you-cloned-from-in-git
+ * https://stackoverflow.com/questions/5812960/change-figure-window-title-in-pylab
  * https://stackoverflow.com/questions/6999621/how-to-use-extent-in-matplotlib-pyplot-imshow
  * https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
@@ -148,3 +152,6 @@
 
  * pygridtools
    * https://github.com/Geosyntec/pygridtools
+
+ * ParaView
+   * https://www.paraview.org/gallery/

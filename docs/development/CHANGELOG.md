@@ -1,5 +1,17 @@
 # Changelog
 
+# 2021-07-08
+
+ - Example 8: Update plot parameter
+ - Example 3: fix a bug; change log file name
+ - Update docs/conda/README.md
+
+# 2021-07-07
+
+ - Begin testing on chinook@UAF.
+ - Chinook has an older glibc that requires a different
+   set of packages for gridtools.
+
 # 2021-07-06
 
  - Try to save an artifact to github actions: conda dump

@@ -1063,6 +1063,7 @@ class maskEditor(object):
         )
 
         return dist
+
     def plotMap(self, x, y):
     
         self.lon = x
@@ -1103,9 +1104,11 @@ class maskEditor(object):
         # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
         plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
             'lon', 'lat', 'mask', projection = self.crs,
-            global_extent=True, frame_height=540,
+            frame_height=540,
+            global_extent=True,
             cmap=hv.plotting.util.process_cmap(self.customCM),
-            coastline='10m', clim=(0,1)
+            coastline='10m',
+            clim=(0,1)
         )
         opt_kwargs = dict()
         plt.opts(title='Ocean Mask Editor', **opt_kwargs)
