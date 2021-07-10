@@ -67,6 +67,7 @@
      - [ ] Unify code that adjusts lon (PR#1)
    - [ ] Verify unification of radius (R) throughout code
  - [ ] grid mask editor (ocean, etc)
+     - [X] create a working example for binder.org
      - [X] needs upgrade from basemap()
      - [X] create an editor that works in jupyter
      - [ ] add routines for mask checking

@@ -3,6 +3,7 @@
 # 2021-07-10
 
  - Working through deployment checklist.
+ - Fix a spelling mistake in release notes.
 
 # 2021-07-09
 
