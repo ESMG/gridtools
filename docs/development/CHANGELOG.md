@@ -1,5 +1,14 @@
 # Changelog
 
+# 2021-07-14
+
+ - Adding RTD documentation about the grid generation application.
+ - Learned how to add page breaks in rst for latex/PDF.
+ - Change the bgColor for WARNINGS in latex/PDF.
+ - Use the gridtools generated version number for RTD.
+ - Fix message for detached logging from application.
+ - Add missing last section to RTD tutorial.
+
 # 2021-07-13
 
  - Add references from GridUtils to bathyutils functions.

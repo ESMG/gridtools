@@ -12,6 +12,7 @@ elements:
   * :ref:`use-the-editor-to-make-some-mask-updates`
   * :ref:`apply-mask-changes-to-the-model-grid`
   * :ref:`write-updated-FMS-coupler-and-mosaic-files`
+  * :ref:`check-final-ocean-mask`
 
 Prerequisites
 =============
@@ -291,6 +292,10 @@ by using a display() function.
         })
     display(figureMaskZoom)
 
+.. raw:: latex
+
+    \newpage
+
 When this cell is run, three plots should appear.
 
 **Ocean Topography**
@@ -437,3 +442,28 @@ are written.
             encoding=grd.removeFillValueAttributes(data=topoGrids))
 
     grd.saveGrid(filename=os.path.join(input2Dir, "ocean_hgrid.nc"))
+
+.. _check-final-ocean-mask:
+
+Check final ocean mask
+======================
+
+Plot the final ocean mask to be sure the points are
+correctly represented.
+
+[12]::
+
+    (figureMaskZoom2, axesMaskZoom2) = grd.plotGrid(showModelGrid = True,
+            plotVariables={
+            'mask': {
+                'values': oceanMask['mask'],
+                'title': 'Ocean mask (1 = ocean): Zoom',
+                'cmap': maskCM,
+                'cbar_kwargs': {
+                    'orientation': 'horizontal',
+                }
+            }
+        })
+    display(figureMaskZoom2)
+
+.. image:: OceanMaskFinal.png

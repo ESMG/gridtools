@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import gridtools
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
@@ -21,7 +22,7 @@ copyright = '2021, MOM6 Community'
 author = 'MOM6 Community'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = gridtools.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -62,3 +63,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # -- Options for LATEX output -------------------------------------------------
+
+latex_elements = {
+    'sphinxsetup': 'warningBgColor={RGB}{255,204,204}'
+}

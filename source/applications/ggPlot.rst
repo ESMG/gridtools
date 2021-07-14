@@ -6,7 +6,7 @@ This section describes "`Plot`" controls.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Controls:
 
    ggPlotProjection
    ggPlotExtent

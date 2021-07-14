@@ -1,8 +1,8 @@
 .. _jupyter-grid-generation-application:
 
-***************************
-Grid Generation Application
-***************************
+***************
+Grid Generation
+***************
 
 This section provides detail on the controls
 of the grid generation application written

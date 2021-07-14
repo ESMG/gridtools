@@ -215,7 +215,7 @@ class GridUtils(object):
         '''Detach logging from application so messages are shown in
         the script and/or jupyter.'''
         self.msgBox = None
-        msg = "GridUtils detached from application information window."
+        msg = "GridUtils detached logging from application information window."
         self.printMsg(msg, level=logging.INFO)
 
     def disableLogging(self):
@@ -2351,27 +2351,36 @@ class GridUtils(object):
             
             **Primary keys**
 
-            * *figsize* (``(float inches, float inches)`` -- matplotlib figure size [width, height (**5.0, 3.75**)]
-            * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see extentCRS) [**[]**]
-              If no extent is given, **[]**, then the global extent ``set_global()`` is used.
+            * *figsize* (``(float inches, float inches)``) -- matplotlib figure size (width, height)
+              Default: **(5.0, 3.75)**
+            * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see *extentCRS*)
+              If no extent is given, **[]**, then the global extent, ``set_global()``, is used.
               See `matplotlib geoaxes <https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html>`_.
-            * *extentCRS* (``cartopy.crs method``) -- cartopy crs [**cartopy.crs.PlateCarree()**]
+              Default: **[]**
+            * *extentCRS* (``cartopy.crs method``) -- cartopy crs
               You must have the cartopy.crs module loaded to change this setting.
               See `Cartopy projection list <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html>`_.
-            * *showGrid* (``boolean``) -- show the grid outline [**True**]
-            * *showGridCells* (``boolean``) -- show the grid cells [**False**]
-            * *showSupergrid* (``boolean``) -- show the MOM6 supergrid cells [**False**]
-            * *title* (``string``) -- add a title to the plot [**None**]
-            * *iColor* (``string``) -- matplotlib color for i vertices [**'k'** (black)]
-            * *jColor* (``string``) -- matplotlib color for j vertices [**'k'** (black)]
-            * *iLinewidth* (``float points``) -- matplotlib linewidth for i vertices [**1.0**]
-            * *jLinewidth* (``float points``) -- matplotlib linewidth for j vertices [**1.0**]
+              Default: **cartopy.crs.PlateCarree()**
+            * *showGrid* (``boolean``) -- show the grid outline. Default: **True**
+            * *showGridCells* (``boolean``) -- show the grid cells. Default: **False**
+            * *showSupergrid* (``boolean``) -- show the MOM6 supergrid cells.
+              Default: **False**
+            * *title* (``string``) -- set plot title.
+              Default: **None**
+            * *iColor* (``string``) -- matplotlib color for i vertices.
+              Default: **'k'** (black)
+            * *jColor* (``string``) -- matplotlib color for j vertices.
+              Default: **'k'** (black)
+            * *iLinewidth* (``float points``) -- matplotlib linewidth for i vertices.
+              Default: **1.0**
+            * *jLinewidth* (``float points``) -- matplotlib linewidth for j vertices.
+              Default: **1.0**
 
             Line width in matplotlib is generally defined by a numerical value over the default
             dots per inch (dpi).  The nominal dpi value is 72 dots per inch.  A line width of
-            one (1.0) is 1/72nd of an inch at 72 dpi. A good discussion between
+            one (1.0) is 1/72nd of an inch at 72 dpi. A Stack Overflow post discusses 
             `dpi and figure size <https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size>`_
-            can be found on a stackoverflow post.
+            in good detail.
 
             **subKey 'projection'**
 
