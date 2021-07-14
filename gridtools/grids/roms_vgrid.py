@@ -5,7 +5,7 @@ Various vertical coordinates
 Presently, only ocean s-coordinates are supported. Future plans will be to
 include all of the vertical coordinate systems defined by the CF conventions.
 
-This module is a modified copy from :cite:p:`IESMG_pyroms_2021`.
+This module is a modified copy from :cite:p:`ESMG_pyroms_2021`.
 '''
 
 __docformat__ = "restructuredtext en"

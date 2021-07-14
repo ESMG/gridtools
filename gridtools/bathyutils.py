@@ -655,6 +655,10 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         refinements against the bathymetry data source.
     '''
     # Provide defaults if a kwarg is not set
+    if not('depthName' in kwargs.keys()):
+        kwargs['depthName'] = 'depth'
+    depthName = kwargs['depthName']
+
     if not('superGrid' in kwargs.keys()):
         kwargs['superGrid'] = False
     useSupergrid = kwargs['superGrid']
@@ -683,17 +687,23 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     # Attempt to open the selected dataset
     bathyData = grd.openDataset(dsName)
     if not(bathyData):
-        grd.printMsg("ERROR: The datasource (%s) did not return a usable variable." % (dsName), level=logging.ERROR)
+        grd.printMsg("ERROR: The datasource (%s) did not return a usable variable." %\
+                (dsName), level=logging.ERROR)
         return None
 
-    if not(grd.checkAvailableVariables(bathyData, ['lat','lon','depth'])):
+    # Variables to use
+    variablesToUse = ['lat', 'lon', depthName]
+
+    if not(grd.checkAvailableVariables(bathyData, variablesToUse)):
+        grd.printMsg("ERROR: The datasource (%s) did not have required variables: %s" %\
+                (dsName, variablesToUse), level=logging.ERROR)
         return None
 
     # Collect data source data
     # topo_ name is unfortunate, input data source could be bathymetric with depths
     topo_lons = bathyData['lon']
     topo_lats = bathyData['lat']
-    topo_elvs = bathyData['depth']
+    topo_elvs = bathyData[depthName]
 
     # Fix the topography to open some channels
     # Not fully integrated

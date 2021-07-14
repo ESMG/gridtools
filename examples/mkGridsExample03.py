@@ -2,10 +2,10 @@
 
 # conda: gridTools
 
-# Gridtools library demonstration in
-#  * Command line
-#  * ipython
-#  * jupyter lab console
+# This demonstrates creation of a grid using
+# gridtools in a Mercator projection.  This
+# grid should be comparable to a similar
+# grid created by FRE-NCtools.
 
 import sys, os, logging, cartopy
 from gridtools.gridutils import GridUtils
@@ -139,9 +139,13 @@ the plot.
 # You can save the figure using the savefig() method on the
 # figure object.  Many formats are possible.
 grd.printMsg("Save the figure in two different formats: jpg and pdf.")
-figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.jpg'), dpi=None, facecolor='w', edgecolor='w',
-        orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.jpg'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', transparent=False, bbox_inches=None,
+        pad_inches=0.1)
 
-figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.pdf'), dpi=None, facecolor='w', edgecolor='w',
-        orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.pdf'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', transparent=False, bbox_inches=None,
+        pad_inches=0.1)
 

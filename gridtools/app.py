@@ -42,7 +42,8 @@ class App(object):
         self.defaultLogFilename = 'logFile.log'
 
         # How we grow the grid from the specified latitude (lat0) or longitude (lon0)
-        # TODO: If 'Center' is not chosen then the controls for Central Latitude and Central Longitude no longer make sense.
+        # TODO: If 'Center' is not chosen then the controls for
+        # Central Latitude and Central Longitude no longer make sense.
         # For now: we assume Center/Center for making grids.
         self.xGridModes = ['Left', 'Center', 'Right']
         self.yGridModes = ['Lower', 'Center', 'Upper']

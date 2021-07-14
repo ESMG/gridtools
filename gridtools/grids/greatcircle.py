@@ -1,5 +1,5 @@
 '''
-Module `pyroms/pyroms/extern/greatcircle.py` copied from :cite:p:`IESMG_pyroms_2021`.
+Module `pyroms/pyroms/extern/greatcircle.py` copied from :cite:p:`ESMG_pyroms_2021`.
 '''
 
 import numpy as NX

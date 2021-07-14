@@ -1,5 +1,32 @@
 # Changelog
 
+# 2021-07-13
+
+ - Add references from GridUtils to bathyutils functions.
+ - Fix citation tags for pyroms references.
+ - Update bathyutils.computeBathymetricRoughness to allow specification
+   of the depth variable via `depthName`.
+ - Fix two documentation references to functions.
+ - Add function to detach logging from embedded Jupyter notebook.
+ - Greatly expanded ReadtheDocs documentation.
+ - Nearly completed a tutorial showing how to create
+   and edit a MOM6 model grid.
+
+# 2021-07-12
+
+ - Discovered we can manually force showing a figure using display(figure).
+ - Started a broad tutorial for creating and modifying a grid in Jupyter.
+
+# 2021-07-11
+
+ - Started some work on syncing MD files into source directory for sphinx.
+   Might have to rethink this a bit.
+ - Updates to html documentation; working towards an operational tutorial using
+   examples 7 and 9a.
+ - FRE-NCtools requires a vertical ocean grid before using `make_topog` see
+   FRE-NCtools test 13.  Still need to increase MAXXGRID to 1e8 in
+   `create_xgrid.h` to succeed with using GEBCO 2020.
+
 # 2021-07-10
 
  - Working through deployment checklist.

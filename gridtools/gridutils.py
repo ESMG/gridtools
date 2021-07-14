@@ -211,6 +211,13 @@ class GridUtils(object):
         os.unlink(logFilename)
         self.printMsg("Logfile (%s) removed." % (logFilename), level=logging.INFO)
 
+    def detachLoggingFromApplication(self):
+        '''Detach logging from application so messages are shown in
+        the script and/or jupyter.'''
+        self.msgBox = None
+        msg = "GridUtils detached from application information window."
+        self.printMsg(msg, level=logging.INFO)
+
     def disableLogging(self):
         '''Disable logging of messages to a file'''
         self.logHandle.disable = True
@@ -2688,12 +2695,16 @@ class GridUtils(object):
     # bathyutils routines
 
     def applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
-        '''This modifies a given bathymetry using an existing land mask.'''
+        '''This modifies a given bathymetry using an existing land mask.
+        See :py:func:`~gridtools.bathyutils.applyExistingLandmask`.
+        '''
         from . import bathyutils
         return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
-        '''This modifies a given bathymetry using an existing ocean/Users/cermak  mask.'''
+        '''This modifies a given bathymetry using an existing ocean mask.
+        See :py:func:`~gridtools.bathyutils.applyExistingOceanmask`.
+        '''
         from . import bathyutils
         return bathyutils.applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
