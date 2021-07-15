@@ -12,8 +12,8 @@
 #
 import os
 import sys
-import gridtools
 sys.path.insert(0, os.path.abspath('..'))
+import gridtools
 
 # -- Project information -----------------------------------------------------
 
