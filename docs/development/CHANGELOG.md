@@ -1,5 +1,18 @@
 # Changelog
 
+# 2021-07-15
+
+ - Large files take a long time to save.  Makes the application appear hung
+   or unresponsive.
+ - Fixed "Remote Files" grid loading in application.
+ - Move loaded message to end of try block to make sure the
+   grid loading is successful in grid generation app.
+ - BUG: Unable to plot loaded MOM6 grids using "Remote Files".
+ - Allow plotting of the supergrid for MOM6 model grids.
+ - Fix grid gen app Plot Style: make control titles consistent.
+ - Continue with documentation updates to RTD.
+ - Fixed RTD by moving import gridtools after adding ".." to path.
+
 # 2021-07-14
 
  - Adding RTD documentation about the grid generation application.

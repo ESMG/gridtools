@@ -159,12 +159,12 @@ class App(object):
         # Test to see if xarray can load the selected file
         try:
             ncTest = xr.load_dataset(localFileSelection.value)
-            msg = "The grid file %s was loaded." % (self.localFileSelection.filename)
-            self.grd.printMsg(msg, logging.INFO)
             self.grd.clearGrid()
             self.grd.readGrid(local=ncTest, localFilename=self.localFileSelection.filename)
             self.updateDataView()
             self.updateFilename(self.localFileSelection.filename)
+            msg = "The grid file %s was loaded." % (self.localFileSelection.filename)
+            self.grd.printMsg(msg, logging.INFO)
         except:
             msg = "The grid file %s was not loadable." % (self.localFileSelection.filename)
             self.grd.printMsg(msg, logging.ERROR)
@@ -181,12 +181,12 @@ class App(object):
 
         try:
             fileToOpen = self.remoteFileSelection.value[0]
-            self.grd.openDataset(self.remoteFileSelection.value[0])
-            self.grd.readGrid()
-            msg = "The grid file %s was loaded." % (fileToOpen)
-            self.grd.printMsg(msg, logging.INFO)
+            ncTest = self.grd.openDataset(fileToOpen)
+            self.grd.readGrid(local=ncTest, localFilename=fileToOpen)
             self.updateDataView()
             self.updateFilename(fileToOpen)
+            msg = "The grid file %s was loaded." % (fileToOpen)
+            self.grd.printMsg(msg, logging.INFO)
         except:
             msg = "Failed to load grid file: %s" % (fileToOpen)
             self.grd.printMsg(msg, logging.ERROR)
@@ -290,7 +290,7 @@ class App(object):
         # Check plotGridMode.value to set plot parameter showGridCells
         showGridCellsState = False
         pGridMode = self.plotGridModeDict[self.plotGridMode.value]
-        if pGridMode == 'gridCells':
+        if pGridMode in ['gridCells', 'superGrid']:
             showGridCellsState = True
 
         # Determine plot extent (this may vary depending on selected projection)
@@ -316,11 +316,18 @@ class App(object):
                 'iLinewidth': self.plotYLineWidth.value,
                 'jLinewidth': self.plotXLineWidth.value,
                 'showGridCells': showGridCellsState,
+                'showSupergrid': False,
                 'title': mp_title,
                 'iColor': self.plotColorDict[self.plotYColor.value],
                 'jColor': self.plotColorDict[self.plotXColor.value]
             }
         )
+
+        # If the super grid is requested, add that parameter here
+        if pGridMode == 'superGrid':
+            self.grd.setPlotParameters({
+                'showSupergrid': True
+            })
         
         # LambertConformalConic
         if projectionName == 'LambertConformalConic':
@@ -695,7 +702,7 @@ class App(object):
         self.plotUseGlobal = pn.widgets.Checkbox(name="Use global extent (disables custom extent)")
 
         # Style
-        self.plotTitle = pn.widgets.TextInput(name='Plot title', value="", width=250)
+        self.plotTitle = pn.widgets.TextInput(name='Plot Title', value="", width=250)
         self.plotGridMode = pn.widgets.Select(name='Grid Style', options=self.plotGridModesDescriptions, value=self.plotGridModesDescriptions[1])
         self.plotXColor = pn.widgets.Select(name='x Color', options=self.plotColorsDescriptions, value=self.plotColorsDescriptions[3])
         self.plotYColor = pn.widgets.Select(name='y Color', options=self.plotColorsDescriptions, value=self.plotColorsDescriptions[3])

@@ -1,3 +1,5 @@
+.. _grid-generation-information:
+
 ***********
 Information
 ***********
