@@ -1,5 +1,10 @@
 # Changelog
 
+# 2021-07-16
+
+ - Add some borders to the grid editor.  Have to work on the 4th side.
+ - Continue with documentation
+
 # 2021-07-15
 
  - Large files take a long time to save.  Makes the application appear hung

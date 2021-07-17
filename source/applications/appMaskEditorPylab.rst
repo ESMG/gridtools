@@ -1,6 +1,6 @@
-*****************************
-Pylab Mask Editor Application
-*****************************
+*****************
+Pylab Mask Editor
+*****************
 
 This section goes into greater detail on the controls
 of the pylab mask editor application.

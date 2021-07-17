@@ -171,7 +171,7 @@
  - [ ] For now, the gridParameters are always in reference to a center
        point in a grid in the future, one may fix a side or point of
        the grid and grow out from that point instead of the center.
- - [ ] application
+ - [ ] Grid generation application
    - [ ] enable user configurable plot and widget sizes (hardcoded in __init__)
    - [ ] enable user to change ellipsoid, R, `x_0` and `y_0` grid and
          plot parameters
@@ -179,14 +179,17 @@
    - [ ] title is misleading; it should show the projections in use if different
    - [ ] title is misleading after loading a MOM6 grid of different size, etc
    - [ ] large files take significant time to save
- - [ ] Develop a GridUtils() function
+   - [ ] `x_0` and `y_0` are hard coded to be zero offsets.  The user can
+         modify these values.
+ - [ ] Grid editor application
+   - [ ] Grid outline uses center of outer grid points, use supergrid to
+         show actual edge
+ - [ ] Develop additional GridUtils() functions
    - [ ] Run `proj -le` and return the names or display the details
    - [ ] Populates the ellps field for the application
    - [ ] Detect grid types and auto extend grids to deal with data artifacts
    - [ ] Create routine to handle periodic conditions; automatically extend
          needed points to cover zero degree and dateline issues.
- - [ ] `x_0` and `y_0` are hard coded to be zero offsets.  The user can
-        modify these values.
  - [ ] Deploy use of self.gridMade (robTest:PR#1)
    - [ ] After success in makeGrid()
    - [ ] Successful load of grid from a file
