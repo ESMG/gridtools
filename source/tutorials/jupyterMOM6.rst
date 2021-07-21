@@ -3,7 +3,8 @@ Build and Edit a MOM6 Grid in Jupyter
 *************************************
 
 This tutorial works through the following operational
-elements:
+elements using the grid generation application and
+library functions:
 
   * :ref:`build-an-initial-grid`
   * :ref:`obtain-roughness-and-topography-grids`
