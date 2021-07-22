@@ -1035,26 +1035,35 @@ class maskEditor(object):
 
         grdShape = grd.shape
 
+        # First check the bounds of the click
+        # If out of bounds, bring back to nearest
+        # grid edge.
+        if lClickY < 0:
+            lClickY = 0
+        if lClickX < 0:
+            lClickX = 0
+        if lClickY > grdShape[0]:
+            lClickY = grdShape[0]
+        if lClickX > grdShape[1]:
+            lClickX = grdShape[1]
+
         firstY = lClickY - self.gridSubset
         lastY = lClickY + self.gridSubset
         firstX = lClickX - self.gridSubset
         lastX = lClickX + self.gridSubset
 
+        # Now check grid extent
         if firstY < 0:
             firstY = 0
-            lastY = self.gridSubset - 1
 
         if firstX < 0:
             firstX = 0
-            lastX = self.gridSubset - 1
 
-        if lastY > grdShape[0]-1:
-            firstY = grdShape[0] - self.gridSubset
-            lastY = grdShape[0] - 1
+        if lastY > grdShape[0]:
+            lastY = grdShape[0]
 
-        if lastX > grdShape[1]-1:
-            firstX = grdShape[1] - self.gridSubset
-            lastX = grdShape[1] - 1
+        if lastX > grdShape[1]:
+            lastX = grdShape[1]
 
         return [firstY, lastY, firstX, lastX]
 
@@ -1115,28 +1124,29 @@ class maskEditor(object):
             # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
             fullGrid = [(x-1) for x in self.da.shape]
             # When drawing a path, it has to follow around the edge of the grid
+            # Drawing is fine on Example 9b
             plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
                 'lon', 'lat', 'mask', projection = self.crs, global_extent=True,
                 frame_height=540,
                 cmap=hv.plotting.util.process_cmap(self.customCM),
                 coastline='10m',
                 clim=(0,1))\
-            * self.da.sel(ny = slice(0, fullGrid[0]), nx = 0).hvplot.paths(
+            * self.da.sel(ny = slice(0, fullGrid[0]+1), nx = 0).hvplot.paths(
                 'lon', 'lat', projection = self.crs, global_extent=True,
                 color='red', size=1, hover=False, line_dash='dashed',
                 frame_height=540)\
-            * self.da.sel(ny = fullGrid[0], nx = slice(0, fullGrid[1])).hvplot.paths(
+            * self.da.sel(ny = fullGrid[0], nx = slice(0, fullGrid[1]+1)).hvplot.paths(
                 'lon', 'lat', projection = self.crs, global_extent=True,
                 color='red', size=1, hover=False, line_dash='dashed',
                 frame_height=540)\
-            * self.da.sel(ny = slice(fullGrid[0], 0, -1), nx = fullGrid[1]).hvplot.paths(
+            * self.da.sel(ny = slice(0, fullGrid[0]+1), nx = fullGrid[1]).hvplot.paths(
+                'lon', 'lat', projection = self.crs, global_extent=True,
+                color='red', size=1, hover=False, line_dash='dashed',
+                frame_height=540)\
+            * self.da.sel(ny = 0, nx = slice(0, fullGrid[1]+1)).hvplot.paths(
                 'lon', 'lat', projection = self.crs, global_extent=True,
                 color='red', size=1, hover=False, line_dash='dashed',
                 frame_height=540)
-            #* self.da.sel(ny = 0, nx = slice(0, fullGrid[1])).hvplot.paths(
-            #    'lon', 'lat', projection = self.crs, global_extent=True,
-            #    color='red', size=1, hover=False, line_dash='dashed',
-            #    frame_height=540)
             opt_kwargs = dict()
             plt.opts(title='Ocean Mask Editor', **opt_kwargs)
         else:

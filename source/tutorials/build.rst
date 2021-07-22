@@ -116,9 +116,3 @@ make the grid::
 For systems with smaller amounts of memory,
 `example #6 <https://github.com/ESMG/gridtools/blob/exp/rel031/examples/mkGridsExample06.py>`_
 constructs a mini IBCAO grid with fewer grid points.
-
-.. toctree::
-   :maxdepth: 1
-
-   buildJupyter
-   buildScript

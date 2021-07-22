@@ -1,5 +1,19 @@
 # Changelog
 
+# 2021-07-22
+
+ - Remove unneeded import from example 09b
+ - Documentation updates
+ - Mask editor sometimes does not show up when the jupyter
+   notebook is run.  Restart jupyter session worked in this case.
+ - BUG: Fixed drawing of grid edges; grid was clipped on high side
+   of x and y grid
+ - BUG: Fixed recentering of grid subset area.  Have to check the
+   clicked point and bring that back to model grid area first before
+   doing additional bounds checks.
+ - In xarray dataset .sel statements, slice requires the shape location
+   and the dimension wants the array location.
+
 # 2021-07-20
 
  - Documentation updates
