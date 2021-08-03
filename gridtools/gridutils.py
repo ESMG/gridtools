@@ -154,6 +154,21 @@ class GridUtils(object):
 
         return
 
+    def isAvailable(self, utilName):
+        '''Check the availablilty of a runnable executable in the
+        system PATH.  Returns True if an executable appears to be
+        available in the system PATH.  Otherwise, return False.
+        '''
+        sysObj = sysinfo.SysInfo(grd=self)
+        cmd = 'which %s' % (utilName)
+        (stdout, stderr, rc) = sysObj.runCommand(cmd)
+
+        if rc == 0:
+            return True
+
+        return False
+
+
     def clearMessage(self):
         '''This clears the message buffer of messages.'''
         self.msgBuffer = []
@@ -2383,7 +2398,7 @@ class GridUtils(object):
 
             Line width in matplotlib is generally defined by a numerical value over the default
             dots per inch (dpi).  The nominal dpi value is 72 dots per inch.  A line width of
-            one (1.0) is 1/72nd of an inch at 72 dpi. A Stack Overflow post discusses 
+            one (1.0) is 1/72nd of an inch at 72 dpi. A Stack Overflow post discusses
             `dpi and figure size <https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size>`_
             in good detail.
 

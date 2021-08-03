@@ -1,5 +1,16 @@
 # Changelog
 
+# 2021-08-03
+
+ - Looking at how to apply PR#11
+ - Example 07a; note that the selection of the 1000 meter depth is
+   arbitrary for demonstration purposes.  Remove gdb import.
+ - Firm up the development of example 03 for comparison between
+   gridtools and FRE-NCtools.
+ - Add isAvailable function to gridutils for checking for executables
+   in the PATH.
+ - Create dataset subset/preparer for `make_topog` executables.
+
 # 2021-07-22
 
  - Remove unneeded import from example 09b

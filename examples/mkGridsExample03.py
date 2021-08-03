@@ -10,7 +10,7 @@
 import sys, os, logging, cartopy
 from gridtools.gridutils import GridUtils
 
-# Set a place to write files
+# Set a place to read/write files
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 inputDir = os.path.join(wrkDir, 'INPUT')
 
