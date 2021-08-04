@@ -1,5 +1,12 @@
 # Changelog
 
+# 2021-08-04
+
+ - PR#11 can be applied via merge of remote branch,
+   proceeding with 0.3.1 update
+ - PyCNAL: Grabbing a copy of SODA 3.3.1/1980 for OBC/IC work
+ - PyCNAL: Grabbing a copy of WOA13 for OBC/IC work
+
 # 2021-08-03
 
  - Looking at how to apply PR#11
