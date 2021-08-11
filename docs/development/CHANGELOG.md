@@ -1,5 +1,18 @@
 # Changelog
 
+# 2021-08-11
+
+ - Update conda configs: xarray=0.19.0
+   - binder: `cp ../conda/gridTools_export-linux-64.yml environment.yml`
+ - Confirmed: upgrading to xarray from 0.18.2 to 0.19.0 breaks gridtools
+ - Thanks to bug reports from Angus Gibson and Olga Sergienko a root
+   cause may have been identified.  See PR#11.
+   A recent upgrade to xarray to version 0.19.0 breaks some examples
+   in gridtools.  Now is a good time for 0.3.1.
+ - Expand example 3 for gridtools and FRE-NCtools comparison.
+ - Add a guide to the API manual for the gridtools and FRE-NCtools
+   comparison which is partially complete.
+
 # 2021-08-04
 
  - PR#11 can be applied via merge of remote branch,

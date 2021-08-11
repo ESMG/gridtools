@@ -8,6 +8,7 @@ Welcome to Gridtools library's documentation!
    about
    tutorials/index
    applications/applications
+   guides/index
    api/api
    bibliography
 

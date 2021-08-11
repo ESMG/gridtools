@@ -10,6 +10,7 @@
          current set of tools and FRE-NCtools.
    - [ ] PR#11 fix to docs/manual/gridtoolAppTutorial.ipynb (merge with 0.3.1)
  - [ ] Release 0.x
+   - [ ] Fix GridUtils.regridTopo() halo effect on outer grid edge
    - [ ] Improvements to roughness calculation.
    - [ ] Auto extending known grid types to allow flexible calculations.
    - [ ] Finish port ROMS mask editor as-is to gridtools for MOM6/ROMS grids (pylab)
