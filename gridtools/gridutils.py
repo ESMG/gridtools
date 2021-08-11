@@ -563,8 +563,8 @@ class GridUtils(object):
         R = self.getRadius(self.gridInfo['gridParameters'])
 
         # Make a copy of the lon grid as values are changed for computation
-        lon = self.grid.x.copy()
-        lat = self.grid.y
+        lon = self.grid.x.copy().data
+        lat = self.grid.y.data
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
