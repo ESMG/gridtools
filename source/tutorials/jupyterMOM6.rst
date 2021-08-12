@@ -42,6 +42,10 @@ Be sure the ``GEBCO_2020.nc`` is available for use.  The source
 of this dataset is
 `available here. <https://www.gebco.net/data_and_products/gridded_bathymetry_data/>`_
 
+This example will run on the binder website.  Please follow these
+":ref:`instructions <binderGEBCO>`" to
+download the ``GEBCO_2020.nc`` dataset for use with `binder <https://mybinder.org>`_.
+
 Getting Started
 ===============
 

@@ -7,7 +7,8 @@
  - Fix links in CONTRIBUTING.md
  - Update tutorial to point to README.md in example directory
    for maintained list of example descriptions.
- - General code update to resolve GH-1
+ - General code update to resolve issue #1
+ - Binder tests are ok
 
 # 2021-08-11
 
