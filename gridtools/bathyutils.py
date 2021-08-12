@@ -867,12 +867,14 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         bathymetricRoughness['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C %s-points' % (kwargs['gridPoint'])
         bathymetricRoughness['depth'].attrs['sha256'] = hashlib.sha256( np.array( height_refsamp ) ).hexdigest()
 
-    bathymetricRoughness['x'] = (('ny','nx'), target_lon)
+    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+    bathymetricRoughness['x'] = (('ny','nx'), target_lon.data)
     bathymetricRoughness['x'].attrs['units'] = 'degrees_east'
     bathymetricRoughness['x'].attrs['standard_name'] = 'longitude'
     bathymetricRoughness['x'].attrs['sha256'] = hashlib.sha256( np.array( target_lon ) ).hexdigest()
 
-    bathymetricRoughness['y'] = (('ny','nx'), target_lat)
+    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+    bathymetricRoughness['y'] = (('ny','nx'), target_lat.data)
     bathymetricRoughness['y'].attrs['units'] = 'degrees_north'
     bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
     bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( target_lat ) ).hexdigest()

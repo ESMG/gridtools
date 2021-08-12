@@ -1,7 +1,20 @@
 # Changelog
 
+# 2021-08-12
+
+ - Begin release cycle for 0.3.1
+ - Add github templates
+ - Fix links in CONTRIBUTING.md
+ - Update tutorial to point to README.md in example directory
+   for maintained list of example descriptions.
+ - General code update to resolve GH-1
+
 # 2021-08-11
 
+ - Example 3 is broken
+ - xarray=0.19.0
+   - seems to require unpacking of variable via .data prior to establishing a
+     a new variable in a Dataset.  See: Issue #1
  - Update conda configs: xarray=0.19.0
    - binder: `cp ../conda/gridTools_export-linux-64.yml environment.yml`
  - Confirmed: upgrading to xarray from 0.18.2 to 0.19.0 breaks gridtools

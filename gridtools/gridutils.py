@@ -563,6 +563,7 @@ class GridUtils(object):
         R = self.getRadius(self.gridInfo['gridParameters'])
 
         # Make a copy of the lon grid as values are changed for computation
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
         lon = self.grid.x.copy().data
         lat = self.grid.y.data
 
@@ -2087,17 +2088,20 @@ class GridUtils(object):
         if kwargs['plotVariables']:
             for pVar in kwargs['plotVariables'].keys():
                 ds = xr.Dataset()
-                ds[pVar] = (('ny','nx'), kwargs['plotVariables'][pVar]['values'])
+                # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+                ds[pVar] = (('ny','nx'), kwargs['plotVariables'][pVar]['values'].data)
                 s1 = ds[pVar].shape
                 s2 = self.grid['x'].shape
                 # See if we are on the same grid, if not assume the variable to plot was
                 # on the regular grid and subset our supergrid to a regular grid for plotting
                 if s1 == s2:
-                    ds['x'] = (('ny','nx'), self.grid['x'])
-                    ds['y'] = (('ny','nx'), self.grid['y'])
+                    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+                    ds['x'] = (('ny','nx'), self.grid['x'].data)
+                    ds['y'] = (('ny','nx'), self.grid['y'].data)
                 else:
-                    ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2])
-                    ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2])
+                    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+                    ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2].data)
+                    ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2].data)
 
                 # xarray plot needs coordinate variables for lon and lat
                 ds = ds.set_coords(['y', 'x'])

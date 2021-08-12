@@ -6,8 +6,11 @@
 
 Tag: X.Y.Z `commit_hash`
 
-This document the steps needed for a complete release.  Copy to
-release folder as X.Y.Z.md and fill out.
+<!--
+This documents the steps needed for a complete release.  Copy to
+release folder as X.Y.Z.md and fill out.  Delete these instructions
+and the DEPLOYMENT TEMPLATE header above.
+-->
 
 # Checklist
 
@@ -29,13 +32,14 @@ release folder as X.Y.Z.md and fill out.
  - [ ] Ensure release/version is properly updated in `gridtools/__init__.py`
  - [ ] Modify any test CI Github Actions
  - [ ] Update any tests performed by pytest
- - [ ] Update TODOs.md
- - [ ] After submission of PR
+ - [ ] Update TODOs.md, archiving completed TODOs and milestones
+ - [ ] After submission of PR to main
    - [ ] Review commit as necessary
    - [ ] Verify CI/Actions pass
    - [ ] Verify Read the Docs render correctly
    - [ ] Verify mybinder.org is functional
  - [ ] Merge "Release x.y.z" to main
+   - [ ] Add [Co-authored-by](https://docs.github.com/en/github/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) for contributions via the pull request or related issues
    - [ ] Reverify mybinder.org operation
    - [ ] Ensure CI/Actions continue to pass
    - [ ] Ensure ReadtheDocs renders correctly
