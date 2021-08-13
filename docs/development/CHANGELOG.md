@@ -9,6 +9,7 @@
    for maintained list of example descriptions.
  - General code update to resolve issue #1
  - Binder tests are ok
+ - Script tests on triton ok
 
 # 2021-08-11
 
