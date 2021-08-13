@@ -10,6 +10,7 @@
  - General code update to resolve issue #1
  - Binder tests are ok
  - Script tests on triton ok
+ - Add contributors to release notes
 
 # 2021-08-11
 

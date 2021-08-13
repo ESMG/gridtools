@@ -33,13 +33,13 @@ and the DEPLOYMENT TEMPLATE header above.
  - [ ] Modify any test CI Github Actions
  - [ ] Update any tests performed by pytest
  - [ ] Update TODOs.md, archiving completed TODOs and milestones
+ - [ ] Add contributors in their own section below for contributions via the pull request or related issues
  - [ ] After submission of PR to main
    - [ ] Review commit as necessary
    - [ ] Verify CI/Actions pass
    - [ ] Verify Read the Docs render correctly
    - [ ] Verify mybinder.org is functional
  - [ ] Merge "Release x.y.z" to main
-   - [ ] Add [Co-authored-by](https://docs.github.com/en/github/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) for contributions via the pull request or related issues
    - [ ] Reverify mybinder.org operation
    - [ ] Ensure CI/Actions continue to pass
    - [ ] Ensure ReadtheDocs renders correctly

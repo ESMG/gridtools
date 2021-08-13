@@ -33,6 +33,7 @@
  * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
  * https://github.com/pydata/xarray/issues/2899
+ * https://github.com/rabernat/intro_to_physical_oceanography
  * https://github.com/SciTools/cartopy/issues/787
  * https://guides.github.com/features/mastering-markdown/
  * http://holoviews.org/user_guide/Dashboards.html
