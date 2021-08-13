@@ -33,6 +33,7 @@
  * https://github.com/marketplace/actions/setup-miniconda
  * https://github.com/NOAA-GFDL/FRE-NCtools/issues/35
  * https://github.com/pydata/xarray/issues/2899
+ * https://github.com/rabernat/intro_to_physical_oceanography
  * https://github.com/SciTools/cartopy/issues/787
  * https://guides.github.com/features/mastering-markdown/
  * http://holoviews.org/user_guide/Dashboards.html
@@ -67,6 +68,7 @@
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
  * https://scitools.org.uk/cartopy/docs/latest/gallery/effects_of_the_ellipse.html
  * https://softwareengineering.stackexchange.com/questions/329348/classes-vs-modules-in-python
+ * https://www.sphinx-doc.org/en/master/latex.html#latexsphinxsetup
  * https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
  * https://sphinxcontrib-bibtex.readthedocs.io/en/latest/quickstart.html
  * https://stackoverflow.com/questions/1137161/what-is-the-correct-way-to-document-a-kwargs-parameter
@@ -78,11 +80,13 @@
  * https://stackoverflow.com/questions/6999621/how-to-use-extent-in-matplotlib-pyplot-imshow
  * https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
+ * https://stackoverflow.com/questions/13530489/adding-background-color-of-notes-to-sphinx-generated-pdf-files
  * https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
  * https://stackoverflow.com/questions/20180543/how-to-check-version-of-python-modules
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/20961287/what-is-pylab
  * https://stackoverflow.com/questions/21778118/counting-the-number-of-non-nan-elements-in-a-numpy-ndarray-in-python
+ * https://stackoverflow.com/questions/26120570/sphinx-add-a-page-break-in-my-pdf-with-latexpdf
  * https://stackoverflow.com/questions/27175400/how-to-find-the-index-of-a-value-in-2d-array-in-python
  * https://stackoverflow.com/questions/29870629/pip-install-test-dependencies-for-tox-from-setup-py
  * https://stackoverflow.com/questions/32234156/how-to-unimport-a-python-module-which-is-already-imported
@@ -120,6 +124,7 @@
  * https://towardsdatascience.com/10-examples-to-master-args-and-kwargs-in-python-6f1e8cc30749
  * https://towardsdatascience.com/plt-subplot-or-plt-subplots-understanding-state-based-vs-object-oriented-programming-in-pyplot-4ba0c7283f5d
  * https://towardsdatascience.com/stop-using-print-to-debug-in-python-use-icecream-instead-79e17b963fcc
+ * https://towardsdatascience.com/using-class-decorators-in-python-2807ef52d273
  * https://towardsdatascience.com/why-decorators-in-python-are-pure-genius-1e812949a81e
 
 ## Python Packaging

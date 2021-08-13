@@ -9,33 +9,35 @@ on different systems that only have one or the other. Second, it will pass throu
 netCDF[3/4] objects unchanged, so that netCDF objects, filenames, lists of files, or
 strings with wildcards can be passed to the function indescriminately.
 
-Examples of usage
------------------
+**Examples of usage**:
 
-with an input of a string:
-    # returns netCDF4.Dataset object based on file
-    nc = pyroms.io.Dataset(file)
+    with an input of a string::
 
-    # returns MFnetCDF4.Dataset object based on file (with wildcard chars)
-    nc = pyroms.io.MFDataset(file)
+        # returns netCDF4.Dataset object based on file
+        nc = pyroms.io.Dataset(file)
 
-with an input of a list of files:
-    # returns MFDataset object based on list of files
-    nc = pyroms.io.Dataset(files)
+        # returns MFnetCDF4.Dataset object based on file (with wildcard chars)
+        nc = pyroms.io.MFDataset(file)
 
-    # returns MFDataset object based on list of files
-    nc = pyroms.io.MFDataset(files)
+    with an input of a list of files::
 
-with an input of a netCDF4.Dataset or MFnetCDF4.Dataset object:
-    # passes through netCDF4.Dataset or MFnetCDF4.Dataset object
-    nc = pyroms.io.Dataset(nc)
+        # returns MFDataset object based on list of files
+        nc = pyroms.io.Dataset(files)
 
-    # passes through MFDataset object based on file (with wildcard chars)
-    nc = pyroms.io.MFDataset(nc)
+        # returns MFDataset object based on list of files
+        nc = pyroms.io.MFDataset(files)
 
-This module is a modified copy from :cite:p:`IESMG_pyroms_2021`.
+    with an input of a netCDF4.Dataset or MFnetCDF4.Dataset object::
+
+        # passes through netCDF4.Dataset or MFnetCDF4.Dataset object
+        nc = pyroms.io.Dataset(nc)
+
+        # passes through MFDataset object based on file (with wildcard chars)
+        nc = pyroms.io.MFDataset(nc)
+
+This module is a modified copy from :cite:p:`ESMG_pyroms_2021`.
 '''
-__docformat__ = "restructuredtext en"
+#__docformat__ = "restructuredtext en"
 
 from glob import glob
 
@@ -62,7 +64,7 @@ try:
         else:
             raise TypeError('type %s not supported' % type(ncfile))
 
-    Dataset.__doc__ = __doc__
+    #Dataset.__doc__ = __doc__
 
     def MFDataset(ncfile):
         """Return an MFnetCDF4 object given a string or list.  A string is expanded
@@ -80,7 +82,7 @@ try:
             raise TypeError('type %s not supported' % type(ncfile))
             return MFnetCDF4.Dataset(files)
 
-    MFDataset.__doc__ = __doc__
+    #MFDataset.__doc__ = __doc__
 
 except:
     import pyroms.extern.pupynere
@@ -96,7 +98,7 @@ except:
         else:
             raise TypeError('type %s not supported' % type(ncfile))
 
-    Dataset.__doc__ = __doc__
+    #Dataset.__doc__ = __doc__
 
 
 if __name__ == '__main__':

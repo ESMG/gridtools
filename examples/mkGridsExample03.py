@@ -2,15 +2,17 @@
 
 # conda: gridTools
 
-# Gridtools library demonstration in
-#  * Command line
-#  * ipython
-#  * jupyter lab console
+# This demonstrates creation of a grid using
+# gridtools in a Mercator projection.  This
+# grid should be comparable to a similar
+# grid created by FRE-NCtools.
 
 import sys, os, logging, cartopy
+import xarray as xr
 from gridtools.gridutils import GridUtils
+from gridtools.datasource import DataSource
 
-# Set a place to write files
+# Set a place to read/write files
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 inputDir = os.path.join(wrkDir, 'INPUT')
 
@@ -18,6 +20,31 @@ inputDir = os.path.join(wrkDir, 'INPUT')
 grd = GridUtils()
 grd.printMsg("At this point, we have initialized a GridUtils() object.")
 grd.printMsg("")
+
+# External data sources are required
+# This creates an empty data source catalog
+ds = DataSource()
+
+# Connect the catalog to the grid object
+grd.useDataSource(ds)
+
+# For variableMap, matching variable values will be renamed to the
+# variable key.  For evalMap, variables in the expression need
+# to be in brackets.  If the key is new, a new field will be
+# created with the given expression.
+ds.addDataSource({
+    'GEBCO_2020': {
+            'url' : 'file:///import/AKWATERS/jrcermakiii/bathy/gebco/GEBCO_2020.nc',
+            'variableMap' : {
+                'lat': 'lat',
+                'lon': 'lon',
+                'depth' : 'elevation'
+            },
+            'evalMap': {
+                'depth' : '-[depth]'
+            }
+        }
+   })
 
 # We can turn on extra output from the module
 grd.printMsg("Set print and logging messages to the DEBUG level.")
@@ -104,7 +131,7 @@ grd.setPlotParameters(
         'iLinewidth': 1.0,
         'jLinewidth': 1.0,
         'showGridCells': True,
-        'title': "Mercator: 0.5 deg x 0.5 deg",
+        'title': "Mercator: 1.0 deg x 1.0 deg",
         'satelliteHeight': 35785831.0,
         'transform': cartopy.crs.PlateCarree(),
         'iColor': 'k',
@@ -139,9 +166,94 @@ the plot.
 # You can save the figure using the savefig() method on the
 # figure object.  Many formats are possible.
 grd.printMsg("Save the figure in two different formats: jpg and pdf.")
-figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.jpg'), dpi=None, facecolor='w', edgecolor='w',
-        orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.jpg'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', transparent=False, bbox_inches=None,
+        pad_inches=0.1)
 
-figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.pdf'), dpi=None, facecolor='w', edgecolor='w',
-        orientation='portrait', transparent=False, bbox_inches=None, pad_inches=0.1)
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Example3.pdf'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', transparent=False, bbox_inches=None,
+        pad_inches=0.1)
 
+# Create ocean_topog method 1: computeBathymetricRoughness()
+
+# Bathymetry grid variables filename
+bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example3_computeBathymetricRoughness.nc')
+
+# The bathymetric roughness can take a while to run.
+# If the file exists, we use that one instead of regenerating
+# it.  If you want to test the routine again, erase the output
+# file.
+if os.path.isfile(bathyGridFilename):
+    bathyGrids = xr.open_dataset(bathyGridFilename)
+else:
+    # Data sources cannot be in chunked mode for use in this routine
+    bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
+            maxMb=99, superGrid=False, useClipping=False,
+            FixByOverlapQHGridShift=True,
+            auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
+    )
+
+    # This is needed to really convert the elevation field to depth
+    # The 'depth' field has to be requested as an auxVariables
+    grd.applyEvalMap('ds:GEBCO_2020', bathyGrids)
+
+    # Write ocean_mask.nc and land_mask.nc based on existing field
+    grd.writeOceanmask(bathyGrids, 'depth', 'mask',
+            os.path.join(wrkDir, 'ocean_mask_Example3.nc'),
+            MASKING_DEPTH=0.0)
+    grd.writeLandmask(bathyGrids, 'depth', 'mask',
+            os.path.join(wrkDir, 'land_mask_Example3.nc'),
+            MASKING_DEPTH=0.0)
+
+    # Write fields out to a file
+    # TODO: provide a data source service hook?
+    bathyGrids.to_netcdf(bathyGridFilename,
+            encoding=grd.removeFillValueAttributes(data=bathyGrids))
+
+# Clip any negative depths to zero
+bathyGrids['depth'] = xr.where(bathyGrids['depth'] < 0.0, 0.0, bathyGrids['depth'])
+
+# Plot original depth grid after running computeBathyRoughness()
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'depth': {
+            'values': bathyGrids['depth'],
+            'title': 'GEBCO 2020 applied with computeBathyRoughness()',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
+        }
+    },
+)
+
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Bathy_Example3_computeBathyRoughness.png'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+
+# Create ocean_topog method 2: regridTopo()
+
+resultGrids = grd.regridTopo('ds:GEBCO_2020', topoVarName='depth', periodic=False)
+
+resultGrids.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example3_regridTopo.nc'),
+        encoding=grd.removeFillValueAttributes(data=resultGrids))
+
+# Plot the new bathy grid
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'depth': {
+            'values': resultGrids['depth'],
+            'title': 'GEBCO 2020 applied with GridUtils.regridTopo()',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
+        }
+    },
+)
+
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Bathy_Example3_regridTopo.png'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)

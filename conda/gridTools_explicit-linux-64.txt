@@ -258,7 +258,7 @@ https://conda.anaconda.org/conda-forge/linux-64/pybtex-0.24.0-py37h89c1867_0.tar
 https://conda.anaconda.org/conda-forge/noarch/pygments-2.9.0-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/pyopenssl-20.0.1-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/pyqt-impl-5.12.3-py37he336c9b_7.tar.bz2
-https://conda.anaconda.org/conda-forge/noarch/xarray-0.18.2-pyhd8ed1ab_0.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/xarray-0.19.0-pyhd8ed1ab_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/cartopy-0.19.0.post1-py37h0c48da3_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/cf_xarray-0.5.2-pyh6c4a22f_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/dask-2021.6.2-pyhd8ed1ab_0.tar.bz2

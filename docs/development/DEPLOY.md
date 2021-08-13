@@ -6,8 +6,11 @@
 
 Tag: X.Y.Z `commit_hash`
 
-This document the steps needed for a complete release.  Copy to
-release folder as X.Y.Z.md and fill out.
+<!--
+This documents the steps needed for a complete release.  Copy to
+release folder as X.Y.Z.md and fill out.  Delete these instructions
+and the DEPLOYMENT TEMPLATE header above.
+-->
 
 # Checklist
 
@@ -29,8 +32,9 @@ release folder as X.Y.Z.md and fill out.
  - [ ] Ensure release/version is properly updated in `gridtools/__init__.py`
  - [ ] Modify any test CI Github Actions
  - [ ] Update any tests performed by pytest
- - [ ] Update TODOs.md
- - [ ] After submission of PR
+ - [ ] Update TODOs.md, archiving completed TODOs and milestones
+ - [ ] Add contributors in their own section below for contributions via the pull request or related issues
+ - [ ] After submission of PR to main
    - [ ] Review commit as necessary
    - [ ] Verify CI/Actions pass
    - [ ] Verify Read the Docs render correctly
