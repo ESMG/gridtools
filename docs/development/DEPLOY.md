@@ -15,11 +15,11 @@ and the DEPLOYMENT TEMPLATE header above.
 # Checklist
 
  - [ ] Operating system checks
-        - [ ] `x86_64`: Ubuntu 20.04.2 LTS (64 GB)
-        - [ ] `x86_64`: Ubuntu 20.04.2 LTS (12 GB VM)
-        - [ ] `aarch64`: Raspberry Pi 4 (8 GB)
-        - [ ] `x86_64`: triton node (64 GB)
-        - [ ] `x86_64`: chinook node (128 GB)
+   - [ ] `x86_64`: Ubuntu 20.04.2 LTS (64 GB)
+   - [ ] `x86_64`: Ubuntu 20.04.2 LTS (12 GB VM)
+   - [ ] `aarch64`: Raspberry Pi 4 (8 GB)
+   - [ ] `x86_64`: triton node (64 GB)
+   - [ ] `x86_64`: chinook node (128 GB)
  - [ ] Verify operation of example notebooks
  - [ ] Verify operation of example scripts
  - [ ] Resync environments
@@ -39,10 +39,11 @@ and the DEPLOYMENT TEMPLATE header above.
    - [ ] Verify CI/Actions pass
    - [ ] Verify Read the Docs render correctly
    - [ ] Verify mybinder.org is functional
+   - [ ] Review, update and/or close any issues
  - [ ] Merge "Release x.y.z" to main
    - [ ] Reverify mybinder.org operation
-   - [ ] Ensure CI/Actions continue to pass
-   - [ ] Ensure ReadtheDocs renders correctly
+   - [ ] Ensure CI/Actions continue to pass (requires manual request)
+   - [ ] Ensure Read the Docs renders correctly
    - [ ] Ensure MDs on github renders correctly
  - [ ] Add and commit a tag with x.y.z
  - [ ] Run through a Release on the github site

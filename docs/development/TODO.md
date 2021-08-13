@@ -135,6 +135,8 @@
 
 # TODO
 
+ - [ ] Update operational paths graphic
+   - [ ] Interoperability with FRE-NCtools
  - [ ] Generic plotting of figures
    - [ ] Scour MOM6-examples/tools for useful code; analysis/m6plot.py
      - [ ] May hold solution to plotting grid vertices and center values
