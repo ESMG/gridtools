@@ -43,12 +43,14 @@ and the DEPLOYMENT TEMPLATE header above.
  - [ ] Merge "Release x.y.z" to main
    - [ ] Reverify mybinder.org operation
    - [ ] Ensure CI/Actions continue to pass (requires manual request)
-   - [ ] Ensure Read the Docs renders correctly
    - [ ] Ensure MDs on github renders correctly
  - [ ] Add and commit a tag with x.y.z
+ - [ ] Ensure Read the Docs renders correctly for `stable` (triggered after new tag is pushed)
  - [ ] Run through a Release on the github site
  - [ ] Place a release notice on the MOM6 forum
 
 # General Release Notes
 
 # Bug Fixes
+
+# Contributors
