@@ -154,6 +154,21 @@ class GridUtils(object):
 
         return
 
+    def isAvailable(self, utilName):
+        '''Check the availablilty of a runnable executable in the
+        system PATH.  Returns True if an executable appears to be
+        available in the system PATH.  Otherwise, return False.
+        '''
+        sysObj = sysinfo.SysInfo(grd=self)
+        cmd = 'which %s' % (utilName)
+        (stdout, stderr, rc) = sysObj.runCommand(cmd)
+
+        if rc == 0:
+            return True
+
+        return False
+
+
     def clearMessage(self):
         '''This clears the message buffer of messages.'''
         self.msgBuffer = []
@@ -210,6 +225,13 @@ class GridUtils(object):
 
         os.unlink(logFilename)
         self.printMsg("Logfile (%s) removed." % (logFilename), level=logging.INFO)
+
+    def detachLoggingFromApplication(self):
+        '''Detach logging from application so messages are shown in
+        the script and/or jupyter.'''
+        self.msgBox = None
+        msg = "GridUtils detached logging from application information window."
+        self.printMsg(msg, level=logging.INFO)
 
     def disableLogging(self):
         '''Disable logging of messages to a file'''
@@ -541,8 +563,9 @@ class GridUtils(object):
         R = self.getRadius(self.gridInfo['gridParameters'])
 
         # Make a copy of the lon grid as values are changed for computation
-        lon = self.grid.x.copy()
-        lat = self.grid.y
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        lon = self.grid.x.copy().data
+        lat = self.grid.y.data
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
@@ -2042,16 +2065,21 @@ class GridUtils(object):
         # Plot the model grid only if specified
         if kwargs['showModelGrid']:
             plotAllVertices = self.getPlotParameter('showGridCells', default=False)
+            plotSupergrid = self.getPlotParameter('showSupergrid', default=False)
+            plotStep = 2
+            if plotSupergrid:
+                plotStep = 1
             #self.printMsg("Current grid parameters:", level=logging.INFO)
 
             # plotting vertices
             # For a non conforming projection, we have to plot every line between
             # the points of each grid box
-            for i in range(0,ni+1,2):
+
+            for i in range(0, ni+1, plotStep):
                 if (i == 0 or i == (ni-1)) or plotAllVertices:
                     if i <= ni-1:
                         ax.plot(self.grid['x'][:,i], self.grid['y'][:,i], iColor, linewidth=iLinewidth, transform=transform)
-            for j in range(0,nj+1,2):
+            for j in range(0, nj+1, plotStep):
                 if (j == 0 or j == (nj-1)) or plotAllVertices:
                     if j <= nj-1:
                         ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
@@ -2060,17 +2088,20 @@ class GridUtils(object):
         if kwargs['plotVariables']:
             for pVar in kwargs['plotVariables'].keys():
                 ds = xr.Dataset()
-                ds[pVar] = (('ny','nx'), kwargs['plotVariables'][pVar]['values'])
+                # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+                ds[pVar] = (('ny','nx'), kwargs['plotVariables'][pVar]['values'].data)
                 s1 = ds[pVar].shape
                 s2 = self.grid['x'].shape
                 # See if we are on the same grid, if not assume the variable to plot was
                 # on the regular grid and subset our supergrid to a regular grid for plotting
                 if s1 == s2:
-                    ds['x'] = (('ny','nx'), self.grid['x'])
-                    ds['y'] = (('ny','nx'), self.grid['y'])
+                    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+                    ds['x'] = (('ny','nx'), self.grid['x'].data)
+                    ds['y'] = (('ny','nx'), self.grid['y'].data)
                 else:
-                    ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2])
-                    ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2])
+                    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+                    ds['x'] = (('ny','nx'), self.grid['x'][1::2,1::2].data)
+                    ds['y'] = (('ny','nx'), self.grid['y'][1::2,1::2].data)
 
                 # xarray plot needs coordinate variables for lon and lat
                 ds = ds.set_coords(['y', 'x'])
@@ -2344,27 +2375,36 @@ class GridUtils(object):
             
             **Primary keys**
 
-            * *figsize* (``(float inches, float inches)`` -- matplotlib figure size [width, height (**5.0, 3.75**)]
-            * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see extentCRS) [**[]**]
-              If no extent is given, **[]**, then the global extent ``set_global()`` is used.
+            * *figsize* (``(float inches, float inches)``) -- matplotlib figure size (width, height)
+              Default: **(5.0, 3.75)**
+            * *extent* (``[x0, x1, y0, y1]``) -- map extent of given coordinate system (see *extentCRS*)
+              If no extent is given, **[]**, then the global extent, ``set_global()``, is used.
               See `matplotlib geoaxes <https://scitools.org.uk/cartopy/docs/latest/matplotlib/geoaxes.html>`_.
-            * *extentCRS* (``cartopy.crs method``) -- cartopy crs [**cartopy.crs.PlateCarree()**]
+              Default: **[]**
+            * *extentCRS* (``cartopy.crs method``) -- cartopy crs
               You must have the cartopy.crs module loaded to change this setting.
               See `Cartopy projection list <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html>`_.
-            * *showGrid* (``boolean``) -- show the grid outline [**True**]
-            * *showGridCells* (``boolean``) -- show the grid cells [**False**]
-            * *showSupergrid* (``boolean``) -- show the MOM6 supergrid cells [**False**]
-            * *title* (``string``) -- add a title to the plot [**None**]
-            * *iColor* (``string``) -- matplotlib color for i vertices [**'k'** (black)]
-            * *jColor* (``string``) -- matplotlib color for j vertices [**'k'** (black)]
-            * *iLinewidth* (``float points``) -- matplotlib linewidth for i vertices [**1.0**]
-            * *jLinewidth* (``float points``) -- matplotlib linewidth for j vertices [**1.0**]
+              Default: **cartopy.crs.PlateCarree()**
+            * *showGrid* (``boolean``) -- show the grid outline. Default: **True**
+            * *showGridCells* (``boolean``) -- show the grid cells. Default: **False**
+            * *showSupergrid* (``boolean``) -- show the MOM6 supergrid cells.
+              Default: **False**
+            * *title* (``string``) -- set plot title.
+              Default: **None**
+            * *iColor* (``string``) -- matplotlib color for i vertices.
+              Default: **'k'** (black)
+            * *jColor* (``string``) -- matplotlib color for j vertices.
+              Default: **'k'** (black)
+            * *iLinewidth* (``float points``) -- matplotlib linewidth for i vertices.
+              Default: **1.0**
+            * *jLinewidth* (``float points``) -- matplotlib linewidth for j vertices.
+              Default: **1.0**
 
             Line width in matplotlib is generally defined by a numerical value over the default
             dots per inch (dpi).  The nominal dpi value is 72 dots per inch.  A line width of
-            one (1.0) is 1/72nd of an inch at 72 dpi. A good discussion between
+            one (1.0) is 1/72nd of an inch at 72 dpi. A Stack Overflow post discusses
             `dpi and figure size <https://stackoverflow.com/questions/47633546/relationship-between-dpi-and-figure-size>`_
-            can be found on a stackoverflow post.
+            in good detail.
 
             **subKey 'projection'**
 
@@ -2688,12 +2728,16 @@ class GridUtils(object):
     # bathyutils routines
 
     def applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
-        '''This modifies a given bathymetry using an existing land mask.'''
+        '''This modifies a given bathymetry using an existing land mask.
+        See :py:func:`~gridtools.bathyutils.applyExistingLandmask`.
+        '''
         from . import bathyutils
         return bathyutils.applyExistingLandmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs):
-        '''This modifies a given bathymetry using an existing ocean/Users/cermak  mask.'''
+        '''This modifies a given bathymetry using an existing ocean mask.
+        See :py:func:`~gridtools.bathyutils.applyExistingOceanmask`.
+        '''
         from . import bathyutils
         return bathyutils.applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 

@@ -150,7 +150,7 @@ class SysInfo(object):
               package manager to use to show versions of installed software.
               Default: auto
 
-        .. notes::
+        .. note::
 
             This function by default only obtains version information for
             modules already loaded into the python environment.  Switching

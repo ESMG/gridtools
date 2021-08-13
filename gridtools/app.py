@@ -42,7 +42,8 @@ class App(object):
         self.defaultLogFilename = 'logFile.log'
 
         # How we grow the grid from the specified latitude (lat0) or longitude (lon0)
-        # TODO: If 'Center' is not chosen then the controls for Central Latitude and Central Longitude no longer make sense.
+        # TODO: If 'Center' is not chosen then the controls for
+        # Central Latitude and Central Longitude no longer make sense.
         # For now: we assume Center/Center for making grids.
         self.xGridModes = ['Left', 'Center', 'Right']
         self.yGridModes = ['Lower', 'Center', 'Upper']
@@ -158,12 +159,12 @@ class App(object):
         # Test to see if xarray can load the selected file
         try:
             ncTest = xr.load_dataset(localFileSelection.value)
-            msg = "The grid file %s was loaded." % (self.localFileSelection.filename)
-            self.grd.printMsg(msg, logging.INFO)
             self.grd.clearGrid()
             self.grd.readGrid(local=ncTest, localFilename=self.localFileSelection.filename)
             self.updateDataView()
             self.updateFilename(self.localFileSelection.filename)
+            msg = "The grid file %s was loaded." % (self.localFileSelection.filename)
+            self.grd.printMsg(msg, logging.INFO)
         except:
             msg = "The grid file %s was not loadable." % (self.localFileSelection.filename)
             self.grd.printMsg(msg, logging.ERROR)
@@ -180,12 +181,12 @@ class App(object):
 
         try:
             fileToOpen = self.remoteFileSelection.value[0]
-            self.grd.openDataset(self.remoteFileSelection.value[0])
-            self.grd.readGrid()
-            msg = "The grid file %s was loaded." % (fileToOpen)
-            self.grd.printMsg(msg, logging.INFO)
+            ncTest = self.grd.openDataset(fileToOpen)
+            self.grd.readGrid(local=ncTest, localFilename=fileToOpen)
             self.updateDataView()
             self.updateFilename(fileToOpen)
+            msg = "The grid file %s was loaded." % (fileToOpen)
+            self.grd.printMsg(msg, logging.INFO)
         except:
             msg = "Failed to load grid file: %s" % (fileToOpen)
             self.grd.printMsg(msg, logging.ERROR)
@@ -289,7 +290,7 @@ class App(object):
         # Check plotGridMode.value to set plot parameter showGridCells
         showGridCellsState = False
         pGridMode = self.plotGridModeDict[self.plotGridMode.value]
-        if pGridMode == 'gridCells':
+        if pGridMode in ['gridCells', 'superGrid']:
             showGridCellsState = True
 
         # Determine plot extent (this may vary depending on selected projection)
@@ -315,11 +316,18 @@ class App(object):
                 'iLinewidth': self.plotYLineWidth.value,
                 'jLinewidth': self.plotXLineWidth.value,
                 'showGridCells': showGridCellsState,
+                'showSupergrid': False,
                 'title': mp_title,
                 'iColor': self.plotColorDict[self.plotYColor.value],
                 'jColor': self.plotColorDict[self.plotXColor.value]
             }
         )
+
+        # If the super grid is requested, add that parameter here
+        if pGridMode == 'superGrid':
+            self.grd.setPlotParameters({
+                'showSupergrid': True
+            })
         
         # LambertConformalConic
         if projectionName == 'LambertConformalConic':
@@ -694,7 +702,7 @@ class App(object):
         self.plotUseGlobal = pn.widgets.Checkbox(name="Use global extent (disables custom extent)")
 
         # Style
-        self.plotTitle = pn.widgets.TextInput(name='Plot title', value="", width=250)
+        self.plotTitle = pn.widgets.TextInput(name='Plot Title', value="", width=250)
         self.plotGridMode = pn.widgets.Select(name='Grid Style', options=self.plotGridModesDescriptions, value=self.plotGridModesDescriptions[1])
         self.plotXColor = pn.widgets.Select(name='x Color', options=self.plotColorsDescriptions, value=self.plotColorsDescriptions[3])
         self.plotYColor = pn.widgets.Select(name='y Color', options=self.plotColorsDescriptions, value=self.plotColorsDescriptions[3])
@@ -982,7 +990,6 @@ class App(object):
             }
         )
 
-
 class maskEditor(object):
     '''This class helps launch the jupyter version of the ocean mask
     editor.
@@ -1009,6 +1016,8 @@ class maskEditor(object):
 
         # Mask editor controls
         self.enableMaskEditing = pn.widgets.Checkbox(name='Enable Mask Editing')
+        self.showModelGridOutline = pn.widgets.Checkbox(name='Show Model Grid Outline')
+        self.showModelGridOutline.value = True
         self.MASKING_DEPTH = kwargs.pop('MASKING_DEPTH', 0.0)
         self.MINIMUM_DEPTH = kwargs.pop('MINIMUM_DEPTH', 0.0)
         self.MAXIMUM_DEPTH = kwargs.pop('MAXIMUM_DEPTH', -99999.0)
@@ -1026,26 +1035,35 @@ class maskEditor(object):
 
         grdShape = grd.shape
 
+        # First check the bounds of the click
+        # If out of bounds, bring back to nearest
+        # grid edge.
+        if lClickY < 0:
+            lClickY = 0
+        if lClickX < 0:
+            lClickX = 0
+        if lClickY > grdShape[0]:
+            lClickY = grdShape[0]
+        if lClickX > grdShape[1]:
+            lClickX = grdShape[1]
+
         firstY = lClickY - self.gridSubset
         lastY = lClickY + self.gridSubset
         firstX = lClickX - self.gridSubset
         lastX = lClickX + self.gridSubset
 
+        # Now check grid extent
         if firstY < 0:
             firstY = 0
-            lastY = self.gridSubset - 1
 
         if firstX < 0:
             firstX = 0
-            lastX = self.gridSubset - 1
 
-        if lastY > grdShape[0]-1:
-            firstY = grdShape[0] - self.gridSubset
-            lastY = grdShape[0] - 1
+        if lastY > grdShape[0]:
+            lastY = grdShape[0]
 
-        if lastX > grdShape[1]-1:
-            firstX = grdShape[1] - self.gridSubset
-            lastX = grdShape[1] - 1
+        if lastX > grdShape[1]:
+            lastX = grdShape[1]
 
         return [firstY, lastY, firstX, lastX]
 
@@ -1101,17 +1119,48 @@ class maskEditor(object):
         # This has a side effect of dynamically changing the colorbar and the
         # rendered image.
 
-        # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
-        plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
-            'lon', 'lat', 'mask', projection = self.crs,
-            frame_height=540,
-            global_extent=True,
-            cmap=hv.plotting.util.process_cmap(self.customCM),
-            coastline='10m',
-            clim=(0,1)
-        )
-        opt_kwargs = dict()
-        plt.opts(title='Ocean Mask Editor', **opt_kwargs)
+        # Do we overlay the model grid outline?
+        if self.showModelGridOutline.value:
+            # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
+            fullGrid = [(x-1) for x in self.da.shape]
+            # When drawing a path, it has to follow around the edge of the grid
+            # Drawing is fine on Example 9b
+            plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
+                'lon', 'lat', 'mask', projection = self.crs, global_extent=True,
+                frame_height=540,
+                cmap=hv.plotting.util.process_cmap(self.customCM),
+                coastline='10m',
+                clim=(0,1))\
+            * self.da.sel(ny = slice(0, fullGrid[0]+1), nx = 0).hvplot.paths(
+                'lon', 'lat', projection = self.crs, global_extent=True,
+                color='red', size=1, hover=False, line_dash='dashed',
+                frame_height=540)\
+            * self.da.sel(ny = fullGrid[0], nx = slice(0, fullGrid[1]+1)).hvplot.paths(
+                'lon', 'lat', projection = self.crs, global_extent=True,
+                color='red', size=1, hover=False, line_dash='dashed',
+                frame_height=540)\
+            * self.da.sel(ny = slice(0, fullGrid[0]+1), nx = fullGrid[1]).hvplot.paths(
+                'lon', 'lat', projection = self.crs, global_extent=True,
+                color='red', size=1, hover=False, line_dash='dashed',
+                frame_height=540)\
+            * self.da.sel(ny = 0, nx = slice(0, fullGrid[1]+1)).hvplot.paths(
+                'lon', 'lat', projection = self.crs, global_extent=True,
+                color='red', size=1, hover=False, line_dash='dashed',
+                frame_height=540)
+            opt_kwargs = dict()
+            plt.opts(title='Ocean Mask Editor', **opt_kwargs)
+        else:
+            # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
+            plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
+                'lon', 'lat', 'mask', projection = self.crs,
+                frame_height=540,
+                global_extent=True,
+                cmap=hv.plotting.util.process_cmap(self.customCM),
+                coastline='10m',
+                clim=(0,1)
+            )
+            opt_kwargs = dict()
+            plt.opts(title='Ocean Mask Editor', **opt_kwargs)
 
         return plt
 
@@ -1120,8 +1169,11 @@ class maskEditor(object):
         tap_stream = hv.streams.Tap()
         dmap = gv.DynamicMap(self.plotMap, streams=[tap_stream])
 
-        app = pn.Column(pn.WidgetBox("## Controls", self.enableMaskEditing),
-                dmap).servable()
+        app = pn.Column(pn.WidgetBox(
+                "## Controls",
+                self.showModelGridOutline,
+                self.enableMaskEditing),
+            dmap).servable()
 
         return app
 

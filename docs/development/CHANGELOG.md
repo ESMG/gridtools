@@ -1,5 +1,123 @@
 # Changelog
 
+# 2021-08-12
+
+ - Begin release cycle for 0.3.1
+ - Add github templates
+ - Fix links in CONTRIBUTING.md
+ - Update tutorial to point to README.md in example directory
+   for maintained list of example descriptions.
+ - General code update to resolve issue #1
+ - Binder tests are ok
+ - Script tests on triton ok
+
+# 2021-08-11
+
+ - Example 3 is broken
+ - xarray=0.19.0
+   - seems to require unpacking of variable via .data prior to establishing a
+     a new variable in a Dataset.  See: Issue #1
+ - Update conda configs: xarray=0.19.0
+   - binder: `cp ../conda/gridTools_export-linux-64.yml environment.yml`
+ - Confirmed: upgrading to xarray from 0.18.2 to 0.19.0 breaks gridtools
+ - Thanks to bug reports from Angus Gibson and Olga Sergienko a root
+   cause may have been identified.  See PR#11.
+   A recent upgrade to xarray to version 0.19.0 breaks some examples
+   in gridtools.  Now is a good time for 0.3.1.
+ - Expand example 3 for gridtools and FRE-NCtools comparison.
+ - Add a guide to the API manual for the gridtools and FRE-NCtools
+   comparison which is partially complete.
+
+# 2021-08-04
+
+ - PR#11 can be applied via merge of remote branch,
+   proceeding with 0.3.1 update
+ - PyCNAL: Grabbing a copy of SODA 3.3.1/1980 for OBC/IC work
+ - PyCNAL: Grabbing a copy of WOA13 for OBC/IC work
+
+# 2021-08-03
+
+ - Looking at how to apply PR#11
+ - Example 07a; note that the selection of the 1000 meter depth is
+   arbitrary for demonstration purposes.  Remove gdb import.
+ - Firm up the development of example 03 for comparison between
+   gridtools and FRE-NCtools.
+ - Add isAvailable function to gridutils for checking for executables
+   in the PATH.
+ - Create dataset subset/preparer for `make_topog` executables.
+
+# 2021-07-22
+
+ - Remove unneeded import from example 09b
+ - Documentation updates
+ - Mask editor sometimes does not show up when the jupyter
+   notebook is run.  Restart jupyter session worked in this case.
+ - BUG: Fixed drawing of grid edges; grid was clipped on high side
+   of x and y grid
+ - BUG: Fixed recentering of grid subset area.  Have to check the
+   clicked point and bring that back to model grid area first before
+   doing additional bounds checks.
+ - In xarray dataset .sel statements, slice requires the shape location
+   and the dimension wants the array location.
+
+# 2021-07-20
+
+ - Documentation updates
+
+# 2021-07-16
+
+ - Add some borders to the grid editor.  Have to work on the 4th side.
+ - Continue with documentation
+
+# 2021-07-15
+
+ - Large files take a long time to save.  Makes the application appear hung
+   or unresponsive.
+ - Fixed "Remote Files" grid loading in application.
+ - Move loaded message to end of try block to make sure the
+   grid loading is successful in grid generation app.
+ - BUG: Unable to plot loaded MOM6 grids using "Remote Files".
+ - Allow plotting of the supergrid for MOM6 model grids.
+ - Fix grid gen app Plot Style: make control titles consistent.
+ - Continue with documentation updates to RTD.
+ - Fixed RTD by moving import gridtools after adding ".." to path.
+
+# 2021-07-14
+
+ - Adding RTD documentation about the grid generation application.
+ - Learned how to add page breaks in rst for latex/PDF.
+ - Change the bgColor for WARNINGS in latex/PDF.
+ - Use the gridtools generated version number for RTD.
+ - Fix message for detached logging from application.
+ - Add missing last section to RTD tutorial.
+
+# 2021-07-13
+
+ - Add references from GridUtils to bathyutils functions.
+ - Fix citation tags for pyroms references.
+ - Update bathyutils.computeBathymetricRoughness to allow specification
+   of the depth variable via `depthName`.
+ - Fix two documentation references to functions.
+ - Add function to detach logging from embedded Jupyter notebook.
+ - Greatly expanded ReadtheDocs documentation.
+ - Nearly completed a tutorial showing how to create
+   and edit a MOM6 model grid.
+
+# 2021-07-12
+
+ - Discovered we can manually force showing a figure using display(figure).
+ - Started a broad tutorial for creating and modifying a grid in Jupyter.
+
+# 2021-07-11
+
+ - Started some work on syncing MD files into source directory for sphinx.
+   Might have to rethink this a bit.
+ - Updates to html documentation; working towards an operational tutorial using
+   examples 7 and 9a.
+ - FRE-NCtools requires a vertical ocean grid before using `make_topog` see
+   FRE-NCtools test 13.  Still need to increase MAXXGRID to 1e8 in
+   `create_xgrid.h` to succeed with using GEBCO 2020.
+
 # 2021-07-10
 
  - Working through deployment checklist.

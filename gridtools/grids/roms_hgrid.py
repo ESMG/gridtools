@@ -44,8 +44,10 @@ from .greatcircle import GreatCircle
 def dist_point_to_segment(p, s0, s1):
     """
     Get the distance of a point to a segment.
-      *p*, *s0*, *s1* are *xy* sequences
-    This algorithm from
+
+    `*p*, *s0*, *s1* are *xy* sequences`
+
+    This algorithm is from
     http://geomalgorithms.com/a02-_lines.html
     """
     v = s1 - s0
@@ -64,7 +66,7 @@ class BoundaryInteractor(object):
     """
     Interactive grid creation
 
-    bry = BoundaryClick(x=[], y=[], beta=None, ax=gca(), **gridgen_options)
+    `bry = BoundaryClick(x=[], y=[], beta=None, ax=gca(), **gridgen_options)`
 
     The initial boundary polygon points (x and y) are
     counterclockwise, starting in the upper left corner of the
@@ -603,7 +605,7 @@ class CGrid(object):
     masked arrays are used, the mask will be a combination of the specified
     mask (if given) and the masked locations.
 
-    EXAMPLES:
+    EXAMPLES
     --------
 
     >>> x, y = mgrid[0.0:7.0, 0.0:8.0]

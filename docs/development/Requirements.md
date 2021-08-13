@@ -21,6 +21,9 @@ For the grid generation application:
  * jupyterlab
  * panel
 
+For the jupyter grid editor application:
+ * geoviews >= 1.9
+
 For regridding operations:
  * xesmf
  * xgcm
@@ -34,7 +37,7 @@ Development tools:
  * pip
  * pytest
  * sphinx
- * sphinx-rtd-theme (called sphinx_rtd_theme for conda)
+ * sphinx-rtd-theme (called `sphinx_rtd_theme` for conda)
 
 To generate PDF version of the documentation, a good
 portion of the latex software will need to be installed.

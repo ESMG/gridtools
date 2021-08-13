@@ -10,6 +10,12 @@ Within that directory, you will need an `INPUT`
 directory to simulate a MOM6 model runs input file
 directory.
 
+Some examples utilize the **GEBCO 2020** bathymetry.
+The bathymetry will needed to be downloaded and scripts
+edited for the storage location before they can be used.
+See the [Bathymetry](../docs/resources/Bathymetry.md)
+in the resources portion of the gridtools manual.
+
 ## mkGridInteractive.ipynb
 
 This is the interactive grid generator.  It was
@@ -54,13 +60,36 @@ necessary for debugging problems.
 ## mkGridsExample03.py
 
 This example generates a Mercator grid off
-the west coast.  This will become an example
-that can be compared to FRE-NCtools.
+the west coast of California.  A similar
+grid is constructed in FRE-NCtools, in
+example [03FRE](mkGridsExample03FRE.py),
+for comparison.
 
-We are unable to prepare a valid topography
-using `make_topog` at the moment.  We have
-only been successful in creating a similar
-grid.  See our TODO list.
+Please see the
+[API](https://mom6gridtools.readthedocs.io/en/latest/guides/index.html)
+manual for a guide
+that compares gridtools and FRE-NCtools
+grid generation methods.
+
+## mkGridsExample03FRE.py
+
+This script generates a Mercator grid using
+FRE-NCtools.
+
+To successfully create a topography file, these
+things are needed for `make_topog`:
+ * Input topography/bathymetry with variable of
+   type `NC_DOUBLE`, `NC_FLOAT` or `NC_INT`.
+ * Input topography/bathymetry with an attribute
+   named `missing_value` with type `NC_DOUBLE`,
+   `NC_FLOAT`, `NC_INT`, `NC_SHORT` or `NC_CHAR`.
+ * Ocean vertical grid
+
+Please see the
+[API](https://mom6gridtools.readthedocs.io/en/latest/guides/index.html)
+manual for a guide
+that compares gridtools and FRE-NCtools
+grid generation methods.
 
 ## mkGridsExample04.ipynb
 
@@ -186,6 +215,13 @@ script copy and pasted to start the editor.
 
 Once editing is complete, there are more commands
 required to save the edited grid.
+
+## NewGridMOM6.ipynb
+
+This is all the code from a fully written tutorial about
+constructing a MOM6 model grid.
+
+See: [Build and Edit a MOM6 Grid in Jupyter](https://mom6gridtools.readthedocs.io/en/latest/tutorials/jupyterMOM6.html)
 
 # DIR: ./bokeh
 

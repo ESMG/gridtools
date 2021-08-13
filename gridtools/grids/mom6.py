@@ -62,16 +62,20 @@ class MOM6(object):
 
             ds.tile.attrs['geometry'] = "cartesian"
 
-        ds['dx'] = (('nyp', 'nx'), self.mom6_grid['supergrid']['dx'])
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['dx'] = (('nyp', 'nx'), self.mom6_grid['supergrid']['dx'].data)
         ds['dx'].attrs['units'] = 'meters'
         ds['dx'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['dx'] )
-        ds['dy'] = (('ny', 'nxp'), self.mom6_grid['supergrid']['dy'])
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['dy'] = (('ny', 'nxp'), self.mom6_grid['supergrid']['dy'].data)
         ds['dy'].attrs['units'] = 'meters'
         ds['dy'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['dy'] )
-        ds['area'] = (('ny','nx'), self.mom6_grid['supergrid']['area'])
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['area'] = (('ny','nx'), self.mom6_grid['supergrid']['area'].data)
         ds['area'].attrs['units'] = 'meters^2'
         ds['area'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['area'] )
-        ds['angle_dx'] = (('nyp','nxp'), self.mom6_grid['supergrid']['angle'])
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['angle_dx'] = (('nyp','nxp'), self.mom6_grid['supergrid']['angle'].data)
         ds['angle_dx'].attrs['units'] = 'radians'
         ds['angle_dx'].attrs['sha256'] = utils.sha256sum( self.mom6_grid['supergrid']['angle'] )
 
@@ -263,7 +267,8 @@ class MOM6(object):
         #    topog_ds.createDimension('ny', ny)
         #    topog_ds.createDimension('ntiles', 1)
 
-        ds['depth'] = (('ny', 'nx'), kwargs['topographyGrid'])
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['depth'] = (('ny', 'nx'), kwargs['topographyGrid'].data)
         ds['depth'].attrs['units'] = 'meters'
         ds['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
         ds['depth'].attrs['sha256'] = utils.sha256sum( kwargs['topographyGrid'] )
@@ -379,22 +384,27 @@ class MOM6(object):
         # Find land mask points using settings from kwargs
         landMask = self._generate_mask('land', grd, **kwargs)
 
-        ds['mask'] = (('ny', 'nx'), landMask)
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['mask'] = (('ny', 'nx'), landMask.data)
         ds['mask'].attrs['standard_name'] = 'land fraction at T-cell centers'
         ds['mask'].attrs['units'] = 'none'
         ds['mask'].attrs['sha256'] = utils.sha256sum( ds['mask'] )
 
         if 'supergrid' in self.mom6_grid:
-            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2].data)
         else:
-            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2].data)
         ds['x'].attrs['sha256'] = utils.sha256sum( ds['x'] )
         ds['x'].attrs['standard_name'] = 'longitude'
         ds['x'].attrs['units'] = 'degrees_east'
         if 'supergrid' in self.mom6_grid:
-            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2].data)
         else:
-            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2].data)
         ds['y'].attrs['sha256'] = utils.sha256sum( ds['y'] )
         ds['y'].attrs['standard_name'] = 'latitude'
         ds['y'].attrs['units'] = 'degrees_north'
@@ -438,22 +448,27 @@ class MOM6(object):
         # Find land mask points using settings from kwargs
         oceanMask = self._generate_mask('ocean', grd, **kwargs)
 
-        ds['mask'] = (('ny', 'nx'), oceanMask)
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        ds['mask'] = (('ny', 'nx'), oceanMask.data)
         ds['mask'].attrs['standard_name'] = 'ocean fraction at T-cell centers'
         ds['mask'].attrs['units'] = 'none'
         ds['mask'].attrs['sha256'] = utils.sha256sum( ds['mask'] )
 
         if 'supergrid' in self.mom6_grid:
-            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2].data)
         else:
-            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2].data)
         ds['x'].attrs['sha256'] = utils.sha256sum( ds['x'] )
         ds['x'].attrs['standard_name'] = 'longitude'
         ds['x'].attrs['units'] = 'degrees_east'
         if 'supergrid' in self.mom6_grid:
-            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2].data)
         else:
-            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2].data)
         ds['y'].attrs['sha256'] = utils.sha256sum( ds['y'] )
         ds['y'].attrs['standard_name'] = 'latitude'
         ds['y'].attrs['units'] = 'degrees_north'
@@ -504,7 +519,8 @@ class MOM6(object):
             # In xarray, to pull cell values out for matching mask, the variable and mask have to appear in the same
             # dataset.
             dsCombined = xr.Dataset()
-            dsCombined['area'] = (('ny','nx'), self.mom6_grid['cell_grid']['area'])
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            dsCombined['area'] = (('ny','nx'), self.mom6_grid['cell_grid']['area'].data)
             dsCombined['mask'] = mask
             dsCombined['sha256'] = utils.sha256sum( self.mom6_grid['cell_grid']['area'] )
             idx = numpy.nonzero(mask==1)
@@ -566,7 +582,8 @@ class MOM6(object):
             #   hxgrid_area.standard_name = 'exchange_grid_area'
             #   hxgrid_area.units = 'm2'
             #   hxgrid_area[:] = xgrid_area
-            ds['xgrid_area'] = (('ncells'), xgrid_area)
+            # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+            ds['xgrid_area'] = (('ncells'), xgrid_area.data)
             ds['xgrid_area'].attrs['standard_name'] = 'exchange_grid_area'
             ds['xgrid_area'].attrs['units'] = 'm2'
 
