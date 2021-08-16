@@ -1,5 +1,17 @@
 # Changelog
 
+# 2021-08-16
+
+ - Add a southern hemispheric example to `mkGridIterative.ipynb`.
+ - BUG in `gridtools.generate_regional_spherical_meters`, the
+   INVERSE should use (xx,yy) NOT (yy,xx).  Thanks to the bug
+   report from Olga Sergienko.
+
+# 2021-08-13
+
+ - Begin exp/rel032 branch
+ - Fix gridtools pydoc/ref for computeBathymetricRoughness()
+
 # 2021-08-12
 
  - Begin release cycle for 0.3.1

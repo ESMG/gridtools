@@ -67,6 +67,7 @@
  * https://scitools.org.uk/cartopy/docs/latest/index.html
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
  * https://scitools.org.uk/cartopy/docs/latest/gallery/effects_of_the_ellipse.html
+ * https://scitools.org.uk/cartopy/docs/latest/matplotlib/gridliner.html
  * https://softwareengineering.stackexchange.com/questions/329348/classes-vs-modules-in-python
  * https://www.sphinx-doc.org/en/master/latex.html#latexsphinxsetup
  * https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
@@ -82,6 +83,7 @@
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
  * https://stackoverflow.com/questions/13530489/adding-background-color-of-notes-to-sphinx-generated-pdf-files
  * https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+ * https://stackoverflow.com/questions/18717877/prevent-plot-from-showing-in-jupyter-notebook
  * https://stackoverflow.com/questions/20180543/how-to-check-version-of-python-modules
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/20961287/what-is-pylab

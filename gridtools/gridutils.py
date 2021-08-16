@@ -1386,7 +1386,7 @@ class GridUtils(object):
             yy, xx = np.meshgrid(y, x)
 
             # compute (y, x) from (lon, lat)
-            lon, lat = proj.transform(yy, xx, direction='INVERSE')
+            lon, lat = proj.transform(xx, yy, direction='INVERSE')
 
             lam_ = lon
             phi_ = lat
@@ -2182,6 +2182,25 @@ class GridUtils(object):
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
+    def findLineFromPoints(self, ptsY, ptsX):
+        '''Find the slope (dy, dx) of a given set of points.  This routine
+        assumes a linear regularly spaced array is provided.
+        '''
+
+        dy = 0.0
+        dx = 0.0
+
+        diffY = np.diff(ptsY)
+        diffY2 = np.diff(ptsY, n=2)
+        print(diffY)
+        print(diffY2)
+        diffX = np.diff(ptsX)
+        diffX2 = np.diff(ptsX, n=2)
+        print(diffX)
+        print(diffX2)
+
+        return (dy, dx)
+
     def getGridParameter(self, gkey, subKey=None, default=None, inform=True):
         '''Return the requested grid parameter or the default if none is available.
         The routine will emit a message by default.  Use inform=False to suppress
@@ -2453,7 +2472,7 @@ class GridUtils(object):
             self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
     # data source operations data source routines
-    # Data source operations Data source routines
+    # Data Source Operations Data Source Routines
 
     def addDataSource(self, dataSource, delete=False):
         '''Add a data source to the catalog.  See: datasource.addDataSource()'''
@@ -2742,7 +2761,8 @@ class GridUtils(object):
         return bathyutils.applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def computeBathymetricRoughness(self, dsName, **kwargs):
-        '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
+        '''This generates h2 and other fields.
+        See: :func:`gridtools.bathyutils.computeBathymetricRoughness()`'''
         from . import bathyutils
         return bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
 
