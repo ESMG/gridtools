@@ -1359,7 +1359,7 @@ class GridUtils(object):
             # create the projection from lon/lat to x/y
             proj = Transformer.from_crs(crs.geodetic_crs, crs)
 
-            # compute (y, x) from (lon, lat)
+            # compute (x, y) from (lon, lat)
             gX, gY = proj.transform(cX, cY)
             msg = 'Computing center point in meters: (%f, %f) to (%f, %f)' % (cY, cX, gX, gY)
             self.printMsg(msg, level=logging.INFO)                
@@ -1385,7 +1385,7 @@ class GridUtils(object):
 
             yy, xx = np.meshgrid(y, x)
 
-            # compute (y, x) from (lon, lat)
+            # compute (lon, lat) from (x, y)
             lon, lat = proj.transform(xx, yy, direction='INVERSE')
 
             lam_ = lon
@@ -2182,24 +2182,34 @@ class GridUtils(object):
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
-    def findLineFromPoints(self, ptsY, ptsX):
-        '''Find the slope (dy, dx) of a given set of points.  This routine
-        assumes a linear regularly spaced array is provided.
+    def findLineFromPoints(self, ptsY, ptsX, nY, nX):
+        '''Find the extension points at the end of given set of points.
+        This routine assumes a linear regularly spaced array of points
+        is provided.
+
+        Returned are the new points on the given line.
+
+        ([y1, y2], [x1, x2]) where (y1, x1) is the head of
+        the line and (y2, x2) is the tail of the line.
+
+        NOTE: Number of points to extend should be the same nY = nX.
         '''
 
-        dy = 0.0
-        dx = 0.0
+        newy = []
+        newx = []
 
         diffY = np.diff(ptsY)
-        diffY2 = np.diff(ptsY, n=2)
-        print(diffY)
-        print(diffY2)
         diffX = np.diff(ptsX)
-        diffX2 = np.diff(ptsX, n=2)
-        print(diffX)
-        print(diffX2)
 
-        return (dy, dx)
+        for ind in range(0, nY):
+            newy.append(ptsY[0] - (diffY[0]*ind))
+            newy.append(ptsY[-1] + (diffY[-1]*ind))
+
+        for ind in range(0, nX):
+            newx.append(ptsX[0] - (diffX[0]*ind))
+            newx.append(ptsX[-1] + (diffX[-1]*ind))
+
+        return (newy, newx)
 
     def getGridParameter(self, gkey, subKey=None, default=None, inform=True):
         '''Return the requested grid parameter or the default if none is available.

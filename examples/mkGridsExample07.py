@@ -187,8 +187,9 @@ grd.setPlotParameters(
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None, facecolor='w', edgecolor='w',
-        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None,
+        facecolor='w', edgecolor='w', orientation='landscape',
+        transparent=False, bbox_inches=None, pad_inches=0.1)
 
 # Plot depth grid after we apply an existing landmask with minimum
 # depth set to 1000 meters

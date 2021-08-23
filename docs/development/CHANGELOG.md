@@ -1,5 +1,24 @@
 # Changelog
 
+# 2021-08-23
+
+ - Finish task of creating a roughness field from an extended
+   MOM6 grid so we have useful data for the entire grid.
+ - Example 07 formatting.
+ - `undo_break_array_to_blocks` change argument from
+   useSupergrid to useOverlap to better reflect technique
+   being used.
+ - `undo_break_array_to_blocks` the grid returned is the
+   untrimmed grid for useOverlap.
+ - `computeBathymetricRoughness` add extendedGrid option
+   to tell the routine that an extended grid is being used.
+   When this is true, the grid shift is skipped if used
+   with useFixByOverlapQHGridShift.
+ - `computeBathymetricRoughness` add more user messages
+   indicating what it is doing based on specified options.
+ - add `findLineFromPoints()` needs to be improved to
+   allow specification of additional points on the grid.
+
 # 2021-08-16
 
  - Add a southern hemispheric example to `mkGridIterative.ipynb`.

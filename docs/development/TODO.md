@@ -136,6 +136,10 @@
 
 # TODO
 
+ - [ ] incorporate grid extension code
+   - [ ] spherical coords
+   - [ ] lat/lon coord
+   - [ ] cylendrical coords
  - [ ] Update operational paths graphic
    - [ ] Interoperability with FRE-NCtools
  - [ ] Generic plotting of figures

@@ -347,15 +347,15 @@ def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
         raise Exception('This routine can only make 2x2 blocks!')
         ##Niki: Implement a better algo and lift this restriction
 
-def undo_break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
+def undo_break_array_to_blocks(a, xb=4, yb=1, useOverlap=False):
     if (xb == 4 and yb == 1):
-        if not(useSupergrid):
+        if useOverlap:
             ao = np.append(a[0][:,:-1], a[1], axis=1)
             ao = np.append(ao[:,:-1]  , a[2], axis=1)
             ao = np.append(ao[:,:-1]  , a[3], axis=1)
             # Trim y+1,x and y,x+1
-            ao = ao[:-1,:-1]
-            #pdb.set_trace()
+            # Return the untrimmed version to deal with later
+            # ao = ao[:-1,:-1]
         else:
             ao = np.append(a[0], a[1], axis=1)
             ao = np.append(ao  , a[2], axis=1)
@@ -603,20 +603,32 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         * *auxVariables* (``list``) --
           Specify additional variables to include with bathymetric roughness. See below. Default: []
         * *superGrid* (``boolean``) --
-          If ``True``, the bathymetric roughness grid returned is a super grid.  Otherwise, the ocean roughness is the same size as the current grid. Default: False
+          If ``True``, the bathymetric roughness grid returned is a supergrid.
+          Otherwise, the ocean roughness is the same size as the current grid. Default: False
         * *useClipping* (``boolean``) --
-          Use ``True`` if the current grid is periodic and should be clipped prior to computing the bathymetric roughness. Defualt: False
+          Use ``True`` if the current grid is periodic and should be
+          clipped prior to computing the bathymetric roughness. Defualt: False
         * *useFixByOverlapQHGridShift* (``boolean``) --
           When using a regular grid, use overlapping grid technique to fill in partition boundaries.
           See IMPLEMENTATION NOTES below. Default: True
+        * *extendedGrid* (``boolean``) --
+          If True, the grid provided by this routine has been extended and should use the overlap
+          technique on h-points only and not q-points which are then shifted back to h-points.
+          See IMPLEMENTATION NOTES below. Default: False
 
     This routine is based on a paper by Adcroft :cite:p:`Adcroft_2013` and python code from
     `OMtopogen/create_topog_refinedSampling.py` :cite:p:`Zadeh_2020_ocean_model_topog_generator`.
 
     .. note::
 
+      :maxMB:
+          The memory limit for successive grid refinements.  This should be maximized for the
+          memory footprint of the compute node.  If the program crashes, use lower amounts of
+          memory.
+
       :auxVariables:
-          h_std, h_min, h_max, and height variables. Ask for one or more additional variables by python list [] to auxVariables.
+          h_std, h_min, h_max, and height variables. Ask for one or more
+          additional variables by python list [] to auxVariables.
           Default is an empty list: []
 
       :gridPoint:
@@ -645,9 +657,14 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
       * For the supergrid, four zero bands along longitude are returned
         representing the four grid partitions.  This needs to be fixed
         in the future.
-      * For h-points, h2 is created on the q-points and shifted by 1/2
-        a grid cell back to the h-points.  Accuracy of the roughness
-        and other resultant variables are off by a 1/2 grid cell.
+      * **useFixByOverlapQHGridShift** by default is True.  Roughness (h2) is
+        diagnosed on the q-points and shifted by 1/2 a grid cell back to the
+        h-points.  Accuracy of the roughness and other resultant variables are
+        off by a 1/2 grid cell.  This only works for the regular grid, not the
+        supergrid.  If the grid is extended, setting **extendedGrid** to True,
+        tells this routine to attempt to diagnose h2 on the h-points without
+        shifting the grid.  The extended grid should be extended by two grid
+        points on the supergrid.
       * Support for 'q' and 'uv' grid points are not supported.
       * If the program is running out of memory, reduce the maxMb value.
         This reduces the available memory footprint available to
@@ -673,9 +690,24 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         kwargs['maxMb'] = 8000
     max_mb = kwargs['maxMb']
 
-    #TODO: Not using the supergrid implies useFixByOverlapQHGridShift
-    #if not('useFixByOverlapQHGridShift' in kwargs.keys()):
-    #    kwargs['useFixByOverlapQHGridShift'] = True
+    # useFixByOverlapQHGridShift = True implies superGrid = False
+    # this method uses q-points and shifts back to h-points.
+    useOverlap = False
+    if not('useFixByOverlapQHGridShift' in kwargs.keys()):
+        kwargs['useFixByOverlapQHGridShift'] = True
+        if useSupergrid:
+            grd.printMsg("ERROR: Use of the superGrid is not permitted when useFixByOverlapQHGridShift is True.",\
+                level=logging.ERROR)
+    if kwargs['useFixByOverlapQHGridShift']:
+        useOverlap = True
+
+    # extendedGrid
+    # This tells the FixByOverlap routine to use the h-points instead
+    # of q-points but still use the overlap method to produce a full
+    # set of h-points for roughness.  The grid passed should have been
+    # extended to overcome the problem of this routine at the edges.
+    if not('extendedGrid' in kwargs.keys()):
+        kwargs['extendedGrid'] = False
 
     # Unimplemented or not fully implemented kwargs
     if not('open_channels' in kwargs.keys()):
@@ -734,11 +766,20 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         grd.printMsg(msg, level=logging.INFO)
         grid_lon = target_grid['x'][1::2,1::2]
         grid_lat = target_grid['y'][1::2,1::2]
-        # We use the q-points of the supergrid to provide an extra column
-        # to create an overlap in the partitions to cover over the gap the
-        # routine creates.
-        target_lon = target_grid['x'][::2,::2]
-        target_lat = target_grid['y'][::2,::2]
+        if kwargs['useFixByOverlapQHGridShift']:
+            if not(kwargs['extendedGrid']):
+                # We use the q-points of the supergrid to provide an extra column
+                # to create an overlap in the partitions to cover over the gap the
+                # routine creates.
+                target_lon = target_grid['x'][::2,::2]
+                target_lat = target_grid['y'][::2,::2]
+                msg = ("Using grid overlap technique with q-points shifted to h-points.")
+                grd.printMsg(msg, level=logging.INFO)
+            else:
+                target_lon = target_grid['x'][1::2,1::2]
+                target_lat = target_grid['y'][1::2,1::2]
+                msg = ("Using grid overlap technique with extended h-points.")
+                grd.printMsg(msg, level=logging.INFO)
 
     # x and y have shape (nyp,nxp). Topog does not need the last col for global grids (period in x).
     # Useful for GLOBAL GRIDS!
@@ -808,27 +849,29 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
 
     msg = ("Merging the blocks ...")
     grd.printMsg(msg, level=logging.INFO)
-    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useSupergrid=useSupergrid)
-    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useSupergrid=useSupergrid)
-    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useSupergrid=useSupergrid)
-    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useSupergrid=useSupergrid)
+    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useOverlap=useOverlap)
+    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useOverlap=useOverlap)
+    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useOverlap=useOverlap)
+    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useOverlap=useOverlap)
 
     #Niki: Why isn't h periodic in x?  I.e., height_refsamp[:,0] != height_refsamp[:,-1]
-    #ANS? For global grids, the column was potentially clipped.
-    # TODO: rework for periodic grids?
+    # ANS?: The overlapping grid row was clipped?
+    # TODO: check periodic grids without clipping
+    # TODO: no need to display these messages if the grid is not periodic
     msg = ("Periodicity test  : %f %f" % (height_refsamp[0,0], height_refsamp[0,-1]))
     grd.printMsg(msg, level=logging.INFO)
     msg = ("Periodicity break : %f" % ((np.abs(height_refsamp[:,0] - height_refsamp[:,-1])).max()))
     grd.printMsg(msg, level=logging.INFO)
 
-    # Non-supergrid hack
+    # For non-supergrids, we use the h-point lon lats for
+    # both for the shifted and the unshifted versions of
+    # the grid.
     if not(kwargs['superGrid']):
         # Subset to MOM6 regular grid
-        msg = ("Shifting q-points onto h-points of regular grid.")
-        grd.printMsg(msg, level=logging.INFO)
         target_lon = target_grid['x'][1::2,1::2]
         target_lat = target_grid['y'][1::2,1::2]
 
+    #breakpoint()
     # Assemble grids
     bathymetricRoughness = xr.Dataset()
 
