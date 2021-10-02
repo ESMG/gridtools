@@ -1,5 +1,15 @@
 # Changelog
 
+# 2021-10-01
+
+ - BUG: app: fix latitude range for grid center.  Range should be
+   -90 to +90 instead of 0 to 90.  The 0 to 90 range would be
+   important if we chose to stick with two separate hemispheric
+   projections.  Dealing with a separate southern hemisphere would
+   introduce additional complications.  Resolves #12.
+ - Begin work on grid extension for cartesian and lat/lon based
+   grids.  Create example 12 to exercise new features.
+
 # 2021-08-23
 
  - Finish task of creating a roughness field from an extended

@@ -35,6 +35,7 @@
  * https://github.com/pydata/xarray/issues/2899
  * https://github.com/rabernat/intro_to_physical_oceanography
  * https://github.com/SciTools/cartopy/issues/787
+ * https://gitlab.com/remikz/nccmp
  * https://guides.github.com/features/mastering-markdown/
  * http://holoviews.org/user_guide/Dashboards.html
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).

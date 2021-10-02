@@ -647,6 +647,13 @@ class GridUtils(object):
 
         return projString
 
+    def getCartDist(x1, y1, x2, y2):
+        '''Compute distance in Cartesian space.'''
+    
+        dst = math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))
+
+    return dst
+
     def makeGrid(self, setFilename=None):
         '''Using supplied grid parameters, populate a grid in memory.'''
 
@@ -2181,6 +2188,42 @@ class GridUtils(object):
                 self.self.gridInfo['gridParameters'].pop(k, None)
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
+
+    def extendGrid(self, iStart, iEnd, jStart, jEnd, method='auto', proj='auto'):
+        '''Extend the current grid by iStart, iEnd, jStart, jEnd points using
+        the specified method.  The grid can be extended using 'cartesian' space
+        or 'latlon' space.  If the method is 'auto', the routine tries to 
+        determine which to use.  The grid is extended in all directions
+        using the maximum of provided parameters and then clipped to
+        the proper dimensions.  Grids extended using 'cartesian' space
+        require the projection used when the grid was created.
+
+        This function assumes an existing grid is present and that
+        the variables x and y are longitude and latitude.
+
+        This function returns the extended grid.
+
+        .. note::
+
+            Since MOM6 grids are defined with a supergrid, to extend
+            the regular grid one point in all directions, this routine
+            should specify to extend the grid two points in all
+            directions.
+        '''
+
+        maxIncrease = max(iStart, iEnd, jStart, jEnd)
+
+        try:
+            x = self.grid['x'].data.copy()
+            y = self.grid['y'].data.copy()
+        except:
+            msg = "ERROR: Existing grid not found.  Returning an empty grid."
+            self.printMsg(msg, level=logging.ERROR)
+            self.debugMsg(msg)
+            return (None, None)
+
+        return (x,y)
+
 
     def findLineFromPoints(self, ptsY, ptsX, nY, nX):
         '''Find the extension points at the end of given set of points.
