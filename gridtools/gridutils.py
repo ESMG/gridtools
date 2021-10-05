@@ -652,7 +652,7 @@ class GridUtils(object):
     
         dst = math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))
 
-    return dst
+        return dst
 
     def makeGrid(self, setFilename=None):
         '''Using supplied grid parameters, populate a grid in memory.'''
@@ -2211,8 +2211,12 @@ class GridUtils(object):
             directions.
         '''
 
+        # Local variables
         maxIncrease = max(iStart, iEnd, jStart, jEnd)
+        x = None
+        y = None
 
+        # An existing grid should be present
         try:
             x = self.grid['x'].data.copy()
             y = self.grid['y'].data.copy()
@@ -2221,6 +2225,8 @@ class GridUtils(object):
             self.printMsg(msg, level=logging.ERROR)
             self.debugMsg(msg)
             return (None, None)
+
+
 
         return (x,y)
 

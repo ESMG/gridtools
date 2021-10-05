@@ -1,5 +1,9 @@
 # Changelog
 
+# 2021-10-05
+
+ - Fix return in function (CI:113)
+
 # 2021-10-01
 
  - BUG: app: fix latitude range for grid center.  Range should be
