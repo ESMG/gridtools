@@ -1,5 +1,11 @@
 # Changelog
 
+# 2021-10-06
+
+ - Add a reference for Niki Zadah's grid generation tools.
+ - Continue grid extension development.
+ - Auto detect method and projection for grid to extend.
+
 # 2021-10-05
 
  - Fix return in function (CI:113)
@@ -11,7 +17,7 @@
    important if we chose to stick with two separate hemispheric
    projections.  Dealing with a separate southern hemisphere would
    introduce additional complications.  Resolves #12.
- - Begin work on grid extension for cartesian and lat/lon based
+ - Begin work on grid extension for spherical and lat/lon based
    grids.  Create example 12 to exercise new features.
 
 # 2021-08-23

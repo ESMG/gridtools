@@ -2189,14 +2189,15 @@ class GridUtils(object):
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
-    def extendGrid(self, iStart, iEnd, jStart, jEnd, method='auto', proj='auto'):
+    def extendGrid(self, iStart, iEnd, jStart, jEnd, gridMethod='auto', gridProj='auto'):
         '''Extend the current grid by iStart, iEnd, jStart, jEnd points using
-        the specified method.  The grid can be extended using 'cartesian' space
+        the specified method.  The grid can be extended using 'spherical' space
         or 'latlon' space.  If the method is 'auto', the routine tries to 
         determine which to use.  The grid is extended in all directions
         using the maximum of provided parameters and then clipped to
-        the proper dimensions.  Grids extended using 'cartesian' space
-        require the projection used when the grid was created.
+        the proper dimensions.  Grids extended using 'spherical' space
+        require the projection used when the grid was created to perform
+        forward and reverse transformation of coordinates.
 
         This function assumes an existing grid is present and that
         the variables x and y are longitude and latitude.
@@ -2216,6 +2217,31 @@ class GridUtils(object):
         x = None
         y = None
 
+        # If gridMethod='auto' try to determine if we should extend
+        # the grid via 'spherical' or 'latlon'.
+
+        if gridMethod == 'auto':
+            gridMethod = self.extendGridDetectMethod()
+            if not(gridMethod in ('spherical','latlon')):
+                msg = "ERROR: Unable to automatically detect grid type. Returning an empty grid."
+                self.printMsg(msg, level=logging.ERROR)
+                self.debugMsg(msg)
+                return (None, None)
+
+            # INFO
+            msg = ("INFO: Auto detected gridding method (%s)." % (gridMethod))
+            self.printMsg(msg, level=logging.INFO)
+
+        if gridProj == 'auto':
+            if hasattr(self.grid, 'attrs'):
+                gridAttr = self.grid.attrs.keys()
+                if 'proj' in gridAttr:
+                    gridProj = self.grid.attrs['proj']
+
+            # INFO
+            msg = ("INFO: Auto detected projection details (%s)." % (gridProj))
+            self.printMsg(msg, level=logging.INFO)
+
         # An existing grid should be present
         try:
             x = self.grid['x'].data.copy()
@@ -2229,6 +2255,41 @@ class GridUtils(object):
 
 
         return (x,y)
+
+
+    def extendGridDetectMethod(self):
+        '''
+        This function looks at the grid metadata and searches for hints
+        to see how the grid should be extended.
+
+        **Sources probed for information**:
+        
+            * Global attribute: projection
+            * Variable 'tile' attribute: geometry
+        '''
+
+        # Simple cases
+        if hasattr(self.grid, 'attrs'):
+            gridAttr = self.grid.attrs.keys()
+            if 'projection' in gridAttr:
+                gridProjection = self.grid.attrs['projection']
+                if gridProjection == 'Mercator':
+                    return 'latlon'
+                if gridProjection == 'LambertConformalConic':
+                    return 'spherical'
+
+        if hasattr(self.grid, 'variables'):
+            gridVars = self.grid.variables.keys()
+            if 'tile' in gridVars:
+                tileAttr = self.grid.variables['tile'].attrs.keys()
+                if 'geometry' in tileAttr:
+                    gridGeometry = self.grid.variables['tile'].attrs['geometry']
+                    if gridGeometry == 'spherical':
+                        return 'spherical'
+                    # This may not be right
+                    return 'latlon'
+
+        return None
 
 
     def findLineFromPoints(self, ptsY, ptsX, nY, nX):
