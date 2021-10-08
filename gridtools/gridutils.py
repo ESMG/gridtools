@@ -1,5 +1,5 @@
 # General imports and definitions
-import os, re, sys, datetime, logging, importlib, copy
+import os, re, sys, datetime, logging, importlib, copy, math
 import cartopy, warnings, hashlib
 import numpy as np
 import xarray as xr
@@ -647,8 +647,8 @@ class GridUtils(object):
 
         return projString
 
-    def getCartDist(x1, y1, x2, y2):
-        '''Compute distance in Cartesian space.'''
+    def getXYDist(self, x1, y1, x2, y2):
+        '''Compute distance between two points in x/y space.'''
     
         dst = math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))
 
@@ -1751,7 +1751,8 @@ class GridUtils(object):
 
                     self.grid = self.grid.set_coords(['lon', 'lat'])
                 else:
-                    breakpoint()
+                    #breakpoint()
+                    pass
 
         
 
@@ -2210,12 +2211,64 @@ class GridUtils(object):
             the regular grid one point in all directions, this routine
             should specify to extend the grid two points in all
             directions.
+
+        **Grid Extension Technique**:
+
+            This description shows the extension of a grid by one point.  This
+            also applies to any requested grid size.
+
+            Process
+
+            # Original grid (o); Points to fill (.)
+            #  . . . . .
+            #  . o o o .
+            #  . o o o .
+            #  . o o o .
+            #  . . . . .
+
+            # Step 1: Extend grid along j-direction
+            # New points shown by (A)
+            #  . . . . .
+            #  A o o o A
+            #  A o o o A
+            #  A o o o A
+            #  . . . . .
+            #
+
+            # Step 2: Extend grid along the i-direction
+            # New points shown by (B)
+            #  B B B B B
+            #  A o o o A
+            #  A o o o A
+            #  A o o o A
+            #  B B B B B
+
+            # Step 3: Clip grid back to requested size
+            # given by iStart, iEnd, jStart, jEnd.
+
+            # To prepend one column of points,
+            # please specify extendGrid(0,0,1,0).
+            # The grid returned should look like:
+            #  A o o o
+            #  A o o o
+            #  A o o o
+
+            # To prepend one column of points and
+            # append a row of points to the end,
+            # please specify extendGrid(0,1,1,0).
+            # The grid returned should look like:
+            #  B B B B
+            #  A o o o
+            #  A o o o
+            #  A o o o
+
         '''
 
         # Local variables
         maxIncrease = max(iStart, iEnd, jStart, jEnd)
         x = None
         y = None
+        extGrid = xr.Dataset()
 
         # If gridMethod='auto' try to determine if we should extend
         # the grid via 'spherical' or 'latlon'.
@@ -2226,7 +2279,7 @@ class GridUtils(object):
                 msg = "ERROR: Unable to automatically detect grid type. Returning an empty grid."
                 self.printMsg(msg, level=logging.ERROR)
                 self.debugMsg(msg)
-                return (None, None)
+                return extGrid
 
             # INFO
             msg = ("INFO: Auto detected gridding method (%s)." % (gridMethod))
@@ -2244,18 +2297,163 @@ class GridUtils(object):
 
         # An existing grid should be present
         try:
-            x = self.grid['x'].data.copy()
-            y = self.grid['y'].data.copy()
+            extGrid['x'] = self.grid['x'].copy()
+            extGrid['y'] = self.grid['y'].copy()
         except:
             msg = "ERROR: Existing grid not found.  Returning an empty grid."
             self.printMsg(msg, level=logging.ERROR)
             self.debugMsg(msg)
-            return (None, None)
+            return extGrid
 
+        extGrid.attrs['extendedGrid'] = False
+        if gridMethod == 'spherical':
+            extGrid = self.extendGridSpherical(extGrid, maxIncrease, gridProj)
+        if gridMethod == 'latlon':
+            extGrid = self.extendGridLatLon(extGrid, maxIncrease)
 
+        if extGrid.attrs['extendedGrid']:
+            # No need to do anything if requested size equals maxIncrease
+            if maxIncrease == iStart and maxIncrease == iEnd and maxIncrease == jStart and maxIncrease == jEnd:
+                return extGrid
+            # Clip extended grid to requested size
 
-        return (x,y)
+        else:
+            msg = "ERROR: Extending grid failed.  Returning incomplete grid."
+            self.printMsg(msg, level=logging.ERROR)
+            self.debugMsg(msg)
 
+        return extGrid
+
+    def extendGridSpherical(self, inputGrid, maxIncrease, gridProj):
+        '''
+        This uniformly extends the input grid by maxIncrease points using spherical coordinates
+        in meters.  This function requires a grid projection to accurately perform the forward
+        and reverse transformation of grid points.
+
+        To increase the grid size we need maxIncrease points on either size (twice as big).
+        '''
+
+        # create the coordinate reference system
+        crs = CRS.from_proj4(gridProj)
+
+        # create the projection from lon/lat to x/y
+        projObj = Transformer.from_crs(crs.geodetic_crs, crs)
+
+        # Transform lat/lon to spherical coordinates
+        gX, gY = projObj.transform(inputGrid['x'], inputGrid['y'])
+
+        # Start with an empty grid
+        extGrd = xr.Dataset()
+        extGrd.attrs['extendedGrid'] = True
+
+        # Get current size of input grid
+        (nyp, nxp) = inputGrid['x'].shape
+
+        # Create extended grid with new size
+        x = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+        y = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+
+        # Place array and dimensions into the new grid
+        # Copy input grid into the center of the new grid
+        extGrd['x'] = (('nyp', 'nxp'), x)
+        extGrd['y'] = (('nyp', 'nxp'), y)
+        extGrd['x'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['x'][:,:]
+        extGrd['y'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['y'][:,:]
+        # Get the shape of the new grid
+        (extyp, extxp) = x.shape
+
+        # Extend grid along j-direction using meters and transform back to
+        # latitude and longitude.
+        for j in range(0, nyp):
+            (newY, newX) = self.findLineFromPoints(gY[j,:], gX[j,:], maxIncrease, maxIncrease)
+            newLon, newLat = projObj.transform(newX, newY, direction='INVERSE')
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                extGrd['x'][j+maxIncrease,ind-1] = newLon[(newPt*2)]
+                extGrd['y'][j+maxIncrease,ind-1] = newLat[(newPt*2)]
+                extGrd['x'][j+maxIncrease,extxp-ind] = newLon[(newPt*2)+1]
+                extGrd['y'][j+maxIncrease,extxp-ind] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        # Extend grid along i-direction using meters and transform back to
+        # latitude and longitude coordinates.  Need to include
+        # the extended points in the j-direction to find
+        # the corners.
+        for i in range(0, extxp):
+            lon = extGrd['x'][maxIncrease:extyp-maxIncrease,i].data
+            lat = extGrd['y'][maxIncrease:extyp-maxIncrease,i].data
+            gXX, gYY = projObj.transform(lon, lat)
+            (newY, newX) = self.findLineFromPoints(gYY, gXX, maxIncrease, maxIncrease)
+            newLon, newLat = projObj.transform(newX, newY, direction='INVERSE')
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                extGrd['x'][ind-1,i] = newLon[(newPt*2)]
+                extGrd['y'][ind-1,i] = newLat[(newPt*2)]
+                extGrd['x'][extyp-ind,i] = newLon[(newPt*2)+1]
+                extGrd['y'][extyp-ind,i] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        return extGrd
+
+    def extendGridLatLon(self, inputGrid, maxIncrease):
+        '''
+        This uniformly extends the input grid by maxIncrease points using latitude and longitude
+        coordinates in degrees.
+
+        To increase the grid size we need maxIncrease points on either size (twice as big).
+        '''
+
+        # Start with an empty grid
+        extGrd = xr.Dataset()
+        extGrd.attrs['extendedGrid'] = True
+
+        # Get shape of the input grid
+        (nyp, nxp) = inputGrid['x'].shape
+
+        # Create extended grid with new size
+        x = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+        y = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+
+        # Place array and dimensions into the new grid
+        # Copy input grid into the center of the new grid
+        extGrd['x'] = (('nyp', 'nxp'), x)
+        extGrd['y'] = (('nyp', 'nxp'), y)
+        extGrd['x'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['x'][:,:]
+        extGrd['y'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['y'][:,:]
+        # Get the shape of the new grid
+        (extyp, extxp) = x.shape
+
+        # Extend grid along j-direction using latitude
+        # and longitude coordinates.
+        for j in range(0, nyp):
+            (newLat, newLon) = self.findLineFromPoints(inputGrid['y'][j,:], inputGrid['x'][j,:], maxIncrease, maxIncrease)
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                # jStart (head)
+                extGrd['x'][j+maxIncrease,ind-1] = newLon[(newPt*2)]
+                extGrd['y'][j+maxIncrease,ind-1] = newLat[(newPt*2)]
+                # jEnd (tail)
+                extGrd['x'][j+maxIncrease,extxp-ind] = newLon[(newPt*2)+1]
+                extGrd['y'][j+maxIncrease,extxp-ind] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        # Extend grid along i-direction using latitude
+        # and longitude coordinates.  Need to include
+        # the extended points in the j-direction to find
+        # the corners.
+        for i in range(0, extxp):
+            xpts = extGrd['x'][maxIncrease:extyp-maxIncrease,i].data
+            ypts = extGrd['y'][maxIncrease:extyp-maxIncrease,i].data
+            (newLat, newLon) = self.findLineFromPoints(ypts, xpts, maxIncrease, maxIncrease)
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                extGrd['x'][ind-1,i] = newLon[(newPt*2)]
+                extGrd['y'][ind-1,i] = newLat[(newPt*2)]
+                extGrd['x'][extyp-ind,i] = newLon[(newPt*2)+1]
+                extGrd['y'][extyp-ind,i] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        return extGrd
 
     def extendGridDetectMethod(self):
         '''
@@ -2275,7 +2473,7 @@ class GridUtils(object):
                 gridProjection = self.grid.attrs['projection']
                 if gridProjection == 'Mercator':
                     return 'latlon'
-                if gridProjection == 'LambertConformalConic':
+                if gridProjection in ('LambertConformalConic','Stereographic'):
                     return 'spherical'
 
         if hasattr(self.grid, 'variables'):
@@ -2294,7 +2492,7 @@ class GridUtils(object):
 
     def findLineFromPoints(self, ptsY, ptsX, nY, nX):
         '''Find the extension points at the end of given set of points.
-        This routine assumes a linear regularly spaced array of points
+        This routine assumes a nearly linear regularly spaced array of points
         is provided.
 
         Returned are the new points on the given line.
@@ -2302,7 +2500,9 @@ class GridUtils(object):
         ([y1, y2], [x1, x2]) where (y1, x1) is the head of
         the line and (y2, x2) is the tail of the line.
 
-        NOTE: Number of points to extend should be the same nY = nX.
+        NOTE: Number of points to extend should be the same nY = nX.  If
+        the points are not regularly spaced, extension of a line with
+        a large number of points is not going to work very well.
         '''
 
         newy = []
@@ -2311,11 +2511,13 @@ class GridUtils(object):
         diffY = np.diff(ptsY)
         diffX = np.diff(ptsX)
 
-        for ind in range(0, nY):
+        # lat
+        for ind in range(1, nY+1):
             newy.append(ptsY[0] - (diffY[0]*ind))
             newy.append(ptsY[-1] + (diffY[-1]*ind))
 
-        for ind in range(0, nX):
+        # lon
+        for ind in range(1, nX+1):
             newx.append(ptsX[0] - (diffX[0]*ind))
             newx.append(ptsX[-1] + (diffX[-1]*ind))
 

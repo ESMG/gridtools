@@ -1,5 +1,22 @@
 # Changelog
 
+# 2021-10-07
+
+ - Example 12 shows mercator, lambert conformal conic and
+   stereographic grid extensions.
+ - Finished generation of extended grid.  Need to
+   finish clipping of grid back to requested size.
+ - Added support for extending sterographic grids.
+ - Grid extension development.  Keeping routine
+   very simple.  Initial implementation was somewhat
+   more complex.
+ - Extending lat/lon grids works.
+ - Found a bug in gridutils.findLineFromPoints(), off
+   by one error for computing new points.
+ - Spurious breakpoint() in gridutils.readGrid() with
+   no documentation.  Seems to be a condition with
+   reading ROMS grids.
+
 # 2021-10-06
 
  - Add a reference for Niki Zadah's grid generation tools.
