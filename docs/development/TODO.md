@@ -4,7 +4,9 @@
 
  - [ ] Release 0.3.2
    - [X] BUG: `gridtools.generate_regional_spherical_meters` fix INVERSE call
+     - [ ] Southern hemisphere vertices are swapped
    - [X] BUG: app: adjust grid center latitude bounds to -90 to +90. Resolves #16.
+   - [X] GridUtils.plotGrid() allow plotting of one or more grid points.
    - [ ] Additional metadata for tile variable: `standard_name`, `tile_spec_version`,
          `geometry`, `discretization` and `conformal`.
    - [ ] Add dataset subset/preparer function that will satisfy
@@ -45,6 +47,9 @@
 
 # TASKS
 
+ - [ ] Generic tool to subset a MOM6 grid for a given area for debugging
+ - [ ] Show example of original roughness calculation
+ - [ ] grid extension and other operations for `GNOMONIC_ED` grid (FRE)
  - [ ] gridutils.readGrid() ROMS grid; spurious breakpoint() removed; missing
        condition in if statement
  - [ ] Add tile metadata `geometry`; move global `grid_version` into tile
@@ -151,8 +156,11 @@
  - [ ] Incorporate grid extension (extending) code
    - [X] initial automatic grid detection code 
    - [X] spherical coords
+     - [ ] test northern hemispheric grids
+     - [ ] test southern hemispheric grids
+     - [ ] test grids that overlap the equator
    - [X] lat/lon coord
-   - [ ] clip grid to specified size
+   - [X] clip grid to specified size
  - [ ] Update operational paths graphic
    - [ ] Interoperability with FRE-NCtools
  - [ ] Generic plotting of figures
@@ -222,6 +230,7 @@
 
 # WISH
 
+ - [ ] Plotting model grid: include option to highlight points on the grid.
  - [ ] Update gridTools.yml with some pinned versions to help package resolution
  - [ ] Write example program(s)
    - [ ] Example 04 : DASK: mkGridsEample4a.ipynb is incomplete

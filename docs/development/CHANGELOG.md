@@ -1,5 +1,18 @@
 # Changelog
 
+# 2021-10-11
+
+ - Fix a few spellings of vertices and note the singular of
+   "vertices" is "vertex".
+ - Spherical grid fix (rel 0.3.1) for southern hemisphere broke
+   the northern hemispheric grids.  Need to further investigate
+   creation and extension of various spherical grids.
+ - Start marking i vertex lines as yellow in examples to ensure
+   proper grid generation.
+ - Add option to plotGrid to allow plotting of one or more
+   specified grid points.
+ - Initial clipping code added to extendGrid function.
+
 # 2021-10-07
 
  - Example 12 shows mercator, lambert conformal conic and

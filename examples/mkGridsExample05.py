@@ -85,7 +85,7 @@ grd.setPlotParameters(
         'jLinewidth': 1.0,
         'showGrid': True,
         'title': 'Stereographic: IBCAO',
-        'iColor': 'k',
+        'iColor': 'y',
         'jColor': 'k'
     }
 )

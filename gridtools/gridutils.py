@@ -1129,7 +1129,7 @@ class GridUtils(object):
         ax.coastlines()
         ax.gridlines()
         (nj,ni) = lon.shape 
-        # plotting verticies
+        # plotting vertices
         for i in range(0,ni+1,2):
             ax.plot(lon[:,i], lat[:,i], 'k', transform=cartopy.crs.Geodetic())
         for j in range(0,nj+1,2):
@@ -1393,7 +1393,12 @@ class GridUtils(object):
             yy, xx = np.meshgrid(y, x)
 
             # compute (lon, lat) from (x, y)
-            lon, lat = proj.transform(xx, yy, direction='INVERSE')
+            # Works for northern hemisphere
+            if pD['lat_0'] == 90.0:
+                lon, lat = proj.transform(yy, xx, direction='INVERSE')
+            # Works for southern hemisphere
+            if pD['lat_0'] == -90.0:
+                lon, lat = proj.transform(yy, xx, direction='INVERSE')
 
             lam_ = lon
             phi_ = lat
@@ -2092,6 +2097,9 @@ class GridUtils(object):
                     if j <= nj-1:
                         ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
 
+            # DEBUG PLOT (0,0)
+            ax.scatter(self.grid['x'][0,0], self.grid['y'][0,0], color="red", s=5, transform=transform)
+
         # Loop through provided variables
         if kwargs['plotVariables']:
             for pVar in kwargs['plotVariables'].keys():
@@ -2190,8 +2198,8 @@ class GridUtils(object):
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
-    def extendGrid(self, iStart, iEnd, jStart, jEnd, gridMethod='auto', gridProj='auto'):
-        '''Extend the current grid by iStart, iEnd, jStart, jEnd points using
+    def extendGrid(self, jStart, jEnd, iStart, iEnd, gridMethod='auto', gridProj='auto'):
+        '''Extend the current grid by jStart, jEnd, iStart, iEnd points using
         the specified method.  The grid can be extended using 'spherical' space
         or 'latlon' space.  If the method is 'auto', the routine tries to 
         determine which to use.  The grid is extended in all directions
@@ -2265,7 +2273,7 @@ class GridUtils(object):
         '''
 
         # Local variables
-        maxIncrease = max(iStart, iEnd, jStart, jEnd)
+        maxIncrease = max(jStart, jEnd, iStart, iEnd)
         x = None
         y = None
         extGrid = xr.Dataset()
@@ -2316,7 +2324,22 @@ class GridUtils(object):
             if maxIncrease == iStart and maxIncrease == iEnd and maxIncrease == jStart and maxIncrease == jEnd:
                 return extGrid
             # Clip extended grid to requested size
-
+            (ny, nx) = extGrid['x'].shape
+            clipGrid = xr.Dataset()
+            # Y/lat
+            jjStart = maxIncrease - jStart
+            jjEnd   = ny - (maxIncrease - jEnd)
+            # X/lon
+            iiStart = maxIncrease - iStart
+            iiEnd   = nx - (maxIncrease - iEnd)
+            print("Request:",jStart,jEnd,iStart,iEnd)
+            print("MaxIncrease:",maxIncrease)
+            print("Grid shape:",ny,nx)
+            print("Grid clip:",jjStart,jjEnd,iiStart,iiEnd)
+            clipGrid['x'] = extGrid['x'][jjStart:jjEnd,iiStart:iiEnd]
+            clipGrid['y'] = extGrid['y'][jjStart:jjEnd,iiStart:iiEnd]
+            extGrid = clipGrid
+            print("Grid shape:", extGrid['x'].shape)
         else:
             msg = "ERROR: Extending grid failed.  Returning incomplete grid."
             self.printMsg(msg, level=logging.ERROR)
