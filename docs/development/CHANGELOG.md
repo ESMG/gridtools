@@ -1,5 +1,28 @@
 # Changelog
 
+# 2021-10-20
+
+ - Software development around subsetting existing grids.
+ - Upgrades to computeBathymetricRoughness() to allow it to
+   diagnose roughness using serveral grid options.
+   Reworking options to useSupergrid, useOverlap and
+   useQHGridShift replacing prior options.
+ - Add more important documentation links from matplotlib.
+ - Noted that original ROMS to MOM6 conversion script uses
+   a different default earth radius.
+ - Save the global projection attribute only if available.
+ - If the global projection attribute is not set, try to
+   set it from the projection grid parameters.  Use the
+   global projection attribute, if it is available.
+ - When computing grid metrics, clamp `angle_dx` to zero
+   as is done in the original convertion from ROMS to MOM6
+   code.
+
+# 2021-10-13
+
+ - Develop gridutils.subsetGrid() to allow subsetting of
+   grids evenly divisble by the specified scale factor.
+
 # 2021-10-11
 
  - Fix a few spellings of vertices and note the singular of

@@ -43,8 +43,10 @@
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/image_masked.html
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_levels.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-levels-py
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py
- * https://matplotlib.org/stable/tutorials/colors/colormaps.html
  * https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py
+ * https://matplotlib.org/stable/tutorials/colors/colormaps.html
+ * https://matplotlib.org/stable/tutorials/colors/colormap-manipulation.html
+ * https://matplotlib.org/stable/tutorials/colors/colors.html
  * https://matplotlib.org/stable/users/event_handling.html
  * https://matplotlib.org/stable/users/interactive.html
  * https://matthewrocklin.com/blog/work/2017/07/03/scaling

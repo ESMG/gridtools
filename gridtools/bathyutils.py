@@ -318,7 +318,7 @@ def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kw
 
 # Original functions from create_topog_refinedSampling.py
 
-def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
+def break_array_to_blocks(a, xb=4, yb=1, useOverlap=False, useSupergrid=False):
     a_win = []
     # TODO: xb==8 or other values are not completely supported
     if ((xb == 4 or xb == 8) and yb == 1):
@@ -329,9 +329,10 @@ def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
 
         j1 = a.shape[0]//yb
 
-        # If we are not using the super grid, we want to overlap
-        # the blocks to get rid of a zero band between the blocks
-        if not(useSupergrid):
+        # If we are using the overlap, add points in the
+        # j-direction which we dispose of to get rid of the
+        # zero bands.
+        if useOverlap:
             a_win.append(a[0:j1,0:i1+1])
             a_win.append(a[0:j1,i1:i2+1])
             a_win.append(a[0:j1,i2:i3+1])
@@ -347,15 +348,18 @@ def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
         raise Exception('This routine can only make 2x2 blocks!')
         ##Niki: Implement a better algo and lift this restriction
 
-def undo_break_array_to_blocks(a, xb=4, yb=1, useOverlap=False):
+def undo_break_array_to_blocks(a, xb=4, yb=1, useOverlap=False, extendedGrid=False,
+        useSupergrid=False, useQHGridShift=False):
     if (xb == 4 and yb == 1):
         if useOverlap:
             ao = np.append(a[0][:,:-1], a[1], axis=1)
             ao = np.append(ao[:,:-1]  , a[2], axis=1)
             ao = np.append(ao[:,:-1]  , a[3], axis=1)
-            # Trim y+1,x and y,x+1
-            # Return the untrimmed version to deal with later
-            # ao = ao[:-1,:-1]
+            # If we are using the QHGridShift,
+            # trim y+1,x and y,x+1, otherwise send
+            # the grid back untrimmed.
+            if useQHGridShift:
+                ao = ao[:-1,:-1]
         else:
             ao = np.append(a[0], a[1], axis=1)
             ao = np.append(ao  , a[2], axis=1)
@@ -611,6 +615,11 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         * *useFixByOverlapQHGridShift* (``boolean``) --
           When using a regular grid, use overlapping grid technique to fill in partition boundaries.
           See IMPLEMENTATION NOTES below. Default: True
+        * *useQHGridShift* (``boolean``) --
+          For a regular grid, use the Q point values as the H values to fill missing points.
+        * *useOverlap* (``boolean``) --
+          Use overlapping grid technique to fill in partition boundaries.  The outer column and
+          row will still be missing.
         * *extendedGrid* (``boolean``) --
           If True, the grid provided by this routine has been extended and should use the overlap
           technique on h-points only and not q-points which are then shifted back to h-points.
@@ -690,24 +699,44 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         kwargs['maxMb'] = 8000
     max_mb = kwargs['maxMb']
 
+    if not('useOverlap' in kwargs.keys()):
+        kwargs['useOverlap'] = False
+    useOverlap = kwargs['useOverlap']
+
+    if not('useQHGridShift' in kwargs.keys()):
+        kwargs['useQHGridShift'] = False
+    useQHGridShift = kwargs['useQHGridShift']
+
+    if not('extendedGrid' in kwargs.keys()):
+        kwargs['extendedGrid'] = False
+    extendedGrid = kwargs['extendedGrid']
+
     # useFixByOverlapQHGridShift = True implies superGrid = False
     # this method uses q-points and shifts back to h-points.
-    useOverlap = False
-    if not('useFixByOverlapQHGridShift' in kwargs.keys()):
-        kwargs['useFixByOverlapQHGridShift'] = True
-        if useSupergrid:
-            grd.printMsg("ERROR: Use of the superGrid is not permitted when useFixByOverlapQHGridShift is True.",\
-                level=logging.ERROR)
-    if kwargs['useFixByOverlapQHGridShift']:
-        useOverlap = True
+    #useOverlap = False
+    #if not('useFixByOverlapQHGridShift' in kwargs.keys()):
+    #    kwargs['useFixByOverlapQHGridShift'] = True
+    #    if useSupergrid:
+    #        grd.printMsg("ERROR: Use of the superGrid is not permitted when useFixByOverlapQHGridShift is True.",\
+    #            level=logging.ERROR)
+    #if kwargs['useFixByOverlapQHGridShift']:
+    #    useOverlap = True
 
     # extendedGrid
     # This tells the FixByOverlap routine to use the h-points instead
     # of q-points but still use the overlap method to produce a full
     # set of h-points for roughness.  The grid passed should have been
     # extended to overcome the problem of this routine at the edges.
-    if not('extendedGrid' in kwargs.keys()):
-        kwargs['extendedGrid'] = False
+    #extendedGrid = False
+    #if not('extendedGrid' in kwargs.keys()):
+    #    kwargs['extendedGrid'] = False
+    #else:
+    #    if kwargs['extendedGrid']:
+    #        extendedGrid = kwargs['extendedGrid']
+    #        useOverlap = True
+
+    #if not(useSupergrid):
+    #    useOverlap = True
 
     # Unimplemented or not fully implemented kwargs
     if not('open_channels' in kwargs.keys()):
@@ -758,6 +787,8 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     target_grid = grd.grid
     target_lon = grd.grid['x']
     target_lat = grd.grid['y']
+    grid_lon = target_grid['x']
+    grid_lat = target_grid['y']
 
     # Optionally, subset to just the grid instead of the supergrid
     if not(kwargs['superGrid']):
@@ -766,20 +797,21 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         grd.printMsg(msg, level=logging.INFO)
         grid_lon = target_grid['x'][1::2,1::2]
         grid_lat = target_grid['y'][1::2,1::2]
-        if kwargs['useFixByOverlapQHGridShift']:
-            if not(kwargs['extendedGrid']):
-                # We use the q-points of the supergrid to provide an extra column
-                # to create an overlap in the partitions to cover over the gap the
-                # routine creates.
-                target_lon = target_grid['x'][::2,::2]
-                target_lat = target_grid['y'][::2,::2]
-                msg = ("Using grid overlap technique with q-points shifted to h-points.")
-                grd.printMsg(msg, level=logging.INFO)
-            else:
-                target_lon = target_grid['x'][1::2,1::2]
-                target_lat = target_grid['y'][1::2,1::2]
-                msg = ("Using grid overlap technique with extended h-points.")
-                grd.printMsg(msg, level=logging.INFO)
+        target_lon = target_grid['x'][1::2,1::2]
+        target_lat = target_grid['y'][1::2,1::2]
+        if kwargs['useQHGridShift']:
+            # We use the q-points of the supergrid to provide an extra column
+            # to fill the grid without extending the grid.  This introduces an
+            # error of 1/2 grid point in the data.
+            target_lon = target_grid['x'][::2,::2]
+            target_lat = target_grid['y'][::2,::2]
+            msg = ("Using diagnosed q-points for h-points on regular grid.")
+            grd.printMsg(msg, level=logging.INFO)
+
+    if kwargs['useOverlap']:
+        # This uses the grid overlap technique.
+        msg = ("Using grid overlap technique.")
+        grd.printMsg(msg, level=logging.INFO)
 
     # x and y have shape (nyp,nxp). Topog does not need the last col for global grids (period in x).
     # Useful for GLOBAL GRIDS!
@@ -822,13 +854,21 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     # if( .NOT. is_mesh_regular() ) throw
     msg = ('RAM allocation to refinements (Mb): %f' % (max_mb))
     grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag useSuperGrid   : %s" % (useSupergrid))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag useOverlap     : %s" % (useOverlap))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag useQHGridShift : %s" % (useQHGridShift))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag extendedGrid   : %s" % (extendedGrid))
+    grd.printMsg(msg, level=logging.INFO)
 
     # Rework partitioning (dask opportunity)
     # Niki: Why 4,1 partition?
     xb = 4
     yb = 1
-    lons = break_array_to_blocks(target_lon, xb, yb, useSupergrid=useSupergrid)
-    lats = break_array_to_blocks(target_lat, xb, yb, useSupergrid=useSupergrid)
+    lons = break_array_to_blocks(target_lon, xb, yb, useOverlap=useOverlap, useSupergrid=useSupergrid)
+    lats = break_array_to_blocks(target_lat, xb, yb, useOverlap=useOverlap, useSupergrid=useSupergrid)
 
     # We must loop over the 4 partitions
     # TODO: The number of points being collected and the number of hits algorithm does not
@@ -849,10 +889,14 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
 
     msg = ("Merging the blocks ...")
     grd.printMsg(msg, level=logging.INFO)
-    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useOverlap=useOverlap)
-    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useOverlap=useOverlap)
-    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useOverlap=useOverlap)
-    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useOverlap=useOverlap)
+    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
+    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
+    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
+    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
 
     #Niki: Why isn't h periodic in x?  I.e., height_refsamp[:,0] != height_refsamp[:,-1]
     # ANS?: The overlapping grid row was clipped?
@@ -910,17 +954,23 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         bathymetricRoughness['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C %s-points' % (kwargs['gridPoint'])
         bathymetricRoughness['depth'].attrs['sha256'] = hashlib.sha256( np.array( height_refsamp ) ).hexdigest()
 
-    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-    bathymetricRoughness['x'] = (('ny','nx'), target_lon.data)
-    bathymetricRoughness['x'].attrs['units'] = 'degrees_east'
-    bathymetricRoughness['x'].attrs['standard_name'] = 'longitude'
-    bathymetricRoughness['x'].attrs['sha256'] = hashlib.sha256( np.array( target_lon ) ).hexdigest()
+    try:
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        bathymetricRoughness['x'] = (('ny','nx'), grid_lon.data)
+        bathymetricRoughness['x'].attrs['units'] = 'degrees_east'
+        bathymetricRoughness['x'].attrs['standard_name'] = 'longitude'
+        bathymetricRoughness['x'].attrs['sha256'] = hashlib.sha256( np.array( grid_lon ) ).hexdigest()
 
-    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-    bathymetricRoughness['y'] = (('ny','nx'), target_lat.data)
-    bathymetricRoughness['y'].attrs['units'] = 'degrees_north'
-    bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
-    bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( target_lat ) ).hexdigest()
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        bathymetricRoughness['y'] = (('ny','nx'), grid_lat.data)
+        bathymetricRoughness['y'].attrs['units'] = 'degrees_north'
+        bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
+        bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( grid_lat ) ).hexdigest()
+    except:
+        print('hstd:',hstd_refsamp.shape)
+        print('grid_lon:',grid_lon.shape)
+        breakpoint()
+        #raise
 
     # Return finished dataset
     return bathymetricRoughness

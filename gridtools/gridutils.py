@@ -496,7 +496,10 @@ class GridUtils(object):
         self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
         self.grid.attrs['history'] = "%s: created grid with GridTools library" %\
             (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
-        self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        try:
+            self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        except:
+            pass
 
         # Add additional metadata if available
         addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
@@ -545,8 +548,13 @@ class GridUtils(object):
         sysObj.loadVersionData()
         self.grid.attrs['software_version'] = sysObj.dumpVersionData()
 
+        # If the global attribute 'proj' is not set, try to set it using
+        # provided gridParameters.  Use the global 'proj' attribute if
+        # already set.
+
         try:
-            self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
+            if not('proj' in self.grid.attrs.keys()):
+                self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
         except:
             projString = self.formProjString(self.gridInfo['gridParameters'])
             if projString:
@@ -557,15 +565,15 @@ class GridUtils(object):
                 self.printMsg(msg, level=logging.WARNING)
                 self.debugMsg('')
 
-        #R = 6370.e3 # Radius of sphere
-        # TODO: get ellipse setting
-        #R = self._default_Re
+        # Determine radius from provided metadata
+        # R = 6370.e3          # Radius of sphere (from original pyroms ROMS to MOM6 grid conversion script)
+        # R = self._default_Re # (GRS80 is the default for the proj python package)
         R = self.getRadius(self.gridInfo['gridParameters'])
 
         # Make a copy of the lon grid as values are changed for computation
         # xarray=0.19.0 requires unpacking of Dataset variables by using .data
         lon = self.grid.x.copy().data
-        lat = self.grid.y.data
+        lat = self.grid.y.copy().data
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
@@ -582,12 +590,19 @@ class GridUtils(object):
 
         # Presize the angle_dx array
         angle_dx = np.zeros(lat.shape)
+        angle2_dx = np.zeros(lat.shape)
+
+        # This was commented out in the original conversion code?
+        #angle_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+        #angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+        #angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+
         # Fix lon so they are 0 to 360 for computation of angle_dx
         lon = np.where(lon < 0., lon+360, lon)
-        angle_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
-        angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
-        angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
-        self.grid['angle_dx'] = (('nyp', 'nxp'), angle_dx)
+        angle2_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+        angle2_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+        angle2_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+        self.grid['angle_dx'] = (('nyp', 'nxp'), np.maximum(angle_dx, angle2_dx))
         #self.grid.angle_dx.attrs['standard_name'] = 'grid_vertex_x_angle_WRT_geographic_east'
         #self.grid.angle_dx.attrs['units'] = 'degrees_east'
         self.grid['angle_dx'].attrs['units'] = 'radians'
@@ -597,6 +612,7 @@ class GridUtils(object):
         self.grid['area'].attrs['standard_name'] = 'grid_cell_area'
         self.grid['area'].attrs['units'] = 'm2'
         self.grid['area'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['area'] ) ).hexdigest()
+        #breakpoint()
 
         return
 
@@ -1398,7 +1414,7 @@ class GridUtils(object):
                 lon, lat = proj.transform(yy, xx, direction='INVERSE')
             # Works for southern hemisphere
             if pD['lat_0'] == -90.0:
-                lon, lat = proj.transform(yy, xx, direction='INVERSE')
+                lon, lat = proj.transform(xx, yy, direction='INVERSE')
 
             lam_ = lon
             phi_ = lat
@@ -2134,8 +2150,6 @@ class GridUtils(object):
                 # Configure plot parameters, title is covered up by the plot?
                 ax = self.updateAxes(ax, kwargs['plotVariables'][pVar])
 
-                #breakpoint()
-
         return f, ax
 
     def setPlotCMap(self, varArgs):
@@ -2498,6 +2512,12 @@ class GridUtils(object):
                     return 'latlon'
                 if gridProjection in ('LambertConformalConic','Stereographic'):
                     return 'spherical'
+            if 'proj' in gridAttr:
+                projString = self.grid.attrs['proj']
+                if projString.find('proj=lcc') >=0 or projString.find('proj=stere') >=0:
+                    return 'spherical'
+                if projString.find('proj=merc') >=0:
+                    return 'latlon'
 
         if hasattr(self.grid, 'variables'):
             gridVars = self.grid.variables.keys()
@@ -2654,6 +2674,35 @@ class GridUtils(object):
                 self.printMsg("%20s: %s" % (k,self.gridInfo['gridParameters'][k]), level=logging.INFO)
         else:
             self.printMsg("No grid parameters found.", level=logging.ERROR)
+
+    def subsetGrid(self, scaleFactor):
+        """Subsets current grid by the specified scale factor.  Scale factor must
+        be an integer and be evenly divisble into the regular grid.  A subsetted
+        grid is returned or None on any error.
+        """
+
+        # Get regular grid size
+        (nyp, nxp) = self.grid['x'].shape
+        ny = int((nyp - 1) / 2)
+        nx = int((nxp - 1) / 2)
+
+        # Check for grids that are not divisible by the scale factor
+        if ny % scaleFactor != 0 or nx % scaleFactor != 0:
+            self.printMsg(".", level=logging.ERROR)
+            return None
+
+        newGrd = gridtools.gridutils.GridUtils()
+        newGrd.grid['x'] = self.grid['x'][::scaleFactor,::scaleFactor]
+        newGrd.grid['y'] = self.grid['y'][::scaleFactor,::scaleFactor]
+
+        # Copy global level metadata
+        for attr in self.grid.attrs.keys():
+            newGrd.grid.attrs[attr] = self.grid.attrs[attr]
+
+        # Recompute metrics
+        newGrd.computeGridMetricsSpherical()
+
+        return newGrd
     
     # plot parameter operations plot parameter routines
     # Plot Parameter Operations Plot Parameter Routines
