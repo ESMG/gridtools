@@ -1,5 +1,13 @@
 # Changelog
 
+# 2021-10-22
+
+ - First implementation of ice-9 algorithm derived from
+   example software written by Alistair Adcroft and
+   Niki Zadeh.  Added as bathyutils.ice9().
+ - Added citations for ice-9 algorithm as best we have
+   them for now.
+
 # 2021-10-20
 
  - Software development around subsetting existing grids.

@@ -315,6 +315,80 @@ def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kw
 
     return workData['newDepth']
 
+def ice9(grd, **kwargs):
+    '''
+    This is a implementation of the ice-9 algorithm for filling in disconnected ocean
+    bodies (lakes) for a given ocean grid.  Be sure to specify anticipated
+    MINIMUM_DEPTH, MASKING_DEPTH and MAXIMUM_DEPTH that will be used for the
+    model run.
+
+    :param grd: class object
+    :type grd: GridUtils
+    :param \**kwargs:
+        See below
+
+    **Keyword arguments**:
+
+        * *ocean_seeds* (``[(int, int)]``) --
+          Provide ice-9 algorithm with one or more (j,i) ocean body grid points to designate
+          as areas that should be treated as areas of continuous ocean points.  
+          If more than one seed is given, all the discovered wet points will be
+          merged together to form the final grid minus any detached ocean points (lakes).
+          NOTE: Only the first seed is used! Future releases will allow multiple seeds.
+        * *depth* (``grid``) --
+          The depth grid to use for ice-9 algorithm.  This should be the same size as
+          the provided latitude and logitude points defining the grid.  Values are
+          positive for depth (water) and negative for height (land).
+        * *periodic* (``boolean``) --
+          Tells the algorithm that the grid is periodic and should
+          check wrap points.  Default: False
+          NOTE: Not implemented!
+        * *returnFields* (``list``) --
+          List of fields to be returned in the grd object.  Default: ['wetMask']
+        * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
+        * *MASKING_DEPTH* (``float``) -- masking depth of ocean in meters. Default: 0.0
+        * *MAXIMUM_DEPTH* (``float``) -- maximum depth of ocean in meters. Default: -99999.0
+        * *zEdits* (``boolean``) --
+          Utilize zEdits for the provided depth field.  Store any updates to the depth field
+          in zEdits as well.  Default: False
+          NOTE: Not implemented!
+
+    The ice-9 algorithm was first mentioned in a program written by Niki Zadeh in the
+    `ocean_model_topog_generator` repository.  :cite:p:`Zadeh_2020_ocean_model_topog_generator`
+
+    Another reference to the ice-9 algorithm is metioned in the
+    repository `regrid_runoff` by  Alistair Adcroft.  :cite:p:`Adcroft_2020_regrid_runoff`.
+    '''
+
+    # Run through each ocean_seed provided
+    # TODO: This only runs through the first seed
+    for oceanSeed in kwargs['ocean_seeds']:
+        depth = kwargs['depth']
+        (nj, ni) = depth.shape
+        wetMask = xr.DataArray(data = np.zeros((nj, ni)), dims = ("ny", "nx"))
+        stack = set()
+        stack.add( oceanSeed )
+        while stack:
+            (j,i) = stack.pop()
+            # If we are already marked wet or see a land point
+            # skip to the next point.
+            if wetMask[j,i] or depth[j,i] <= kwargs['MASKING_DEPTH']: continue
+            wetMask[j,i] = 1
+
+            # Check surrounding points
+            # For periodic boundaries, check wrap points
+            if i>0: stack.add( (j,i-1) )
+            #else: stack.add( (j,ni-1) )
+            if i<ni-1: stack.add( (j,i+1) )
+            #else: stack.add( (j,0) )
+            if j>0: stack.add( (j-1,i) )
+            if j<nj-1: stack.add( (j+1,i) )
+            #else: stack.add( (j,ni-1-i) )
+
+        # Only run the first seed for now
+        break
+
+    return wetMask
 
 # Original functions from create_topog_refinedSampling.py
 

@@ -7,6 +7,7 @@
      - [ ] Southern hemisphere vertices are swapped
    - [X] BUG: app: adjust grid center latitude bounds to -90 to +90. Resolves #16.
    - [X] GridUtils.plotGrid() allow plotting of one or more grid points.
+   - [X] Grid filling options (flooding; ice-9 algorithm)
    - [ ] Additional metadata for tile variable: `standard_name`, `tile_spec_version`,
          `geometry`, `discretization` and `conformal`.
    - [ ] Add dataset subset/preparer function that will satisfy
@@ -15,7 +16,7 @@
          current set of tools and FRE-NCtools.
    - [ ] Auto extending known grid types to allow workarounds for calculations
          with artifacts around the edges.
-   - [ ] Add reference for Niki's `ocean_model_grid_generator`!
+   - [X] Add reference for Niki's `ocean_model_grid_generator`!
  - [ ] Release 0.x
    - [ ] Fix GridUtils.regridTopo() halo effect on outer grid edge
    - [ ] Improvements to roughness calculation.
@@ -33,7 +34,6 @@
    - [ ] Enhanced plotting support
    - [ ] Allow export of MOM6 grid to ROMS
      - [ ] implement ROMS.extend_ROMS_grid()
-   - [ ] Grid filling options (flooding) (ice9)
    - [ ] Enable gridtools library to be installable via conda
 
 # BUGS
@@ -230,6 +230,10 @@
 
 # WISH
 
+ - [ ] Add more features to the ice-9 algorithm
+   - [ ] zEdits
+   - [ ] Multiple seed points
+   - [ ] Periodic grid support
  - [ ] Plotting model grid: include option to highlight points on the grid.
  - [ ] Update gridTools.yml with some pinned versions to help package resolution
  - [ ] Write example program(s)

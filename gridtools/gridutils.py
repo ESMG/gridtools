@@ -3160,6 +3160,12 @@ class GridUtils(object):
         from . import bathyutils
         return bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
 
+    def ice9(self, **kwargs):
+        '''This calls the ice-9 algorithm from bathyutils.
+        See: :func:`gridtools.bathyutils.ice9()`'''
+        from . import bathyutils
+        return bathyutils.ice9(self, **kwargs)
+
     # meshutils routines
 
     def generateGridByRefinement(self, dsName, **kwargs):
