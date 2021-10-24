@@ -1821,7 +1821,7 @@ class GridUtils(object):
 
         return ncEncoding
     
-    def saveGrid(self, filename=None, directory=None):
+    def saveGrid(self, filename=None, directory=None, enc=None):
         '''
         This operation is destructive using the last known filename which can be overridden.
         '''
@@ -1844,7 +1844,11 @@ class GridUtils(object):
 
         # Save the grid here
         try:
-            self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+            gridEncoding = self.removeFillValueAttributes()
+            if enc:
+                for vrb in ['x', 'y', 'dx', 'dy', 'angle_dx', 'area']:
+                  gridEncoding[vrb] = {'dtype': enc}
+            self.grid.to_netcdf(self.xrFilename, encoding = gridEncoding)
             msg = "Successfully wrote netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
         except:
@@ -1882,6 +1886,8 @@ class GridUtils(object):
             * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
 
         .. note::
+            Integers stored in the mosaic tiles must be 32 bit integers.  If 64 bit integers are used,
+            the FMS coupler will die with invalid netcdf variable type.
             Using the defaults, this routine will write the following files to the ``INPUT`` directory with
             one tile named ``tile1``:
 

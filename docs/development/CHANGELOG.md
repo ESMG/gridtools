@@ -1,5 +1,12 @@
 # Changelog
 
+# 2021-10-23
+
+ - Adding support for different variable output types for
+   FMS/MOM6 grid files.  The FMS coupler will die if the
+   integer part of the mosaic tile files contain 64-bit
+   integers.  Reducing that size to 32-bit (i4/int32).
+
 # 2021-10-22
 
  - First implementation of ice-9 algorithm derived from
