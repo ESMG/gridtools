@@ -38,6 +38,8 @@
 
 # BUGS
 
+ - [ ] gridtools applications do not start up properly when jupyter is
+       started with `--ip=0.0.0.0`
  - [ ] Investigate reliably of produced grids between platforms
  - [ ] A nested dictionary will clobber other nested elements instead
        of updating elements.  Recode `setPlotParameters` and

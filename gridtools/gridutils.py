@@ -1374,17 +1374,18 @@ class GridUtils(object):
             if 'R' in pD.keys():
                 PROJSTRING = "%s +R=%f" % (PROJSTRING, pD['R'])
 
-            msg = 'Transformation proj string(%s)' % (PROJSTRING)
+            msg = 'Transformation PROJ (%s)' % (PROJSTRING)
             self.printMsg(msg, level=logging.INFO)                
 
             # create the coordinate reference system
             crs = CRS.from_proj4(PROJSTRING)
+
             # create the projection from lon/lat to x/y
             proj = Transformer.from_crs(crs.geodetic_crs, crs)
 
             # compute (x, y) from (lon, lat)
             gX, gY = proj.transform(cX, cY)
-            msg = 'Computing center point in meters: (%f, %f) to (%f, %f)' % (cY, cX, gX, gY)
+            msg = 'Computing center point in meters: (lat=%f, lon=%f) to (%f, %f)' % (cY, cX, gX, gY)
             self.printMsg(msg, level=logging.INFO)                
 
             gMode = 1
@@ -1406,16 +1407,10 @@ class GridUtils(object):
             x = np.arange(gX - halfDX, (gX + halfDX) + grX, grX, dtype=np.float32)
             y = np.arange(gY - halfDY, (gY + halfDY) + grY, grY, dtype=np.float32)
 
-            yy, xx = np.meshgrid(y, x)
+            xx, yy = np.meshgrid(x, y)
 
             # compute (lon, lat) from (x, y)
-            # Works for northern hemisphere
-            if pD['lat_0'] == 90.0:
-                lon, lat = proj.transform(yy, xx, direction='INVERSE')
-            # Works for southern hemisphere
-            if pD['lat_0'] == -90.0:
-                lon, lat = proj.transform(xx, yy, direction='INVERSE')
-
+            lon, lat = proj.transform(xx, yy, direction='INVERSE')
             lam_ = lon
             phi_ = lat
         

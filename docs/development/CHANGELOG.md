@@ -1,5 +1,19 @@
 # Changelog
 
+# 2021-10-27
+
+ - Finally fixed the "stereographic" grid generation.
+   The grids cannot be rotated yet, but patterns for
+   doing so are emerging.
+ - Developed some examples showing grid generation in
+   available projections.   Additional examples should
+   be created for other projections.
+
+# 2021-10-25
+
+ - gridtools applications do not display properly when
+   jupyter is started with `--ip=0.0.0.0`.
+
 # 2021-10-23
 
  - Adding support for different variable output types for
