@@ -1,5 +1,5 @@
 # Bathymetric tools
-# Implementations of bathometric grid generators
+# Implementation of bathometric grid generators and other utilities
 #  - https://github.com/nikizadehgfdl/ocean_model_topog_generator
 #    - compute_bathymetric_roughness_h2(**opts)
 
@@ -1041,10 +1041,13 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
         bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( grid_lat ) ).hexdigest()
     except:
-        print('hstd:',hstd_refsamp.shape)
-        print('grid_lon:',grid_lon.shape)
-        breakpoint()
-        #raise
+        #print('hstd:',hstd_refsamp.shape)
+        #print('grid_lon:',grid_lon.shape)
+        #breakpoint()
+        raise
+
+    # Add metadata to dataset
+
 
     # Return finished dataset
     return bathymetricRoughness

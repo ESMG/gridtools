@@ -1,5 +1,14 @@
 # Changelog
 
+# 2021-11-06
+
+Work towards release 0.3.2 with current fixes and improvements.
+ - Work on adding or appending to history global variable.
+ - Move to generic routine for adding/appending/updating
+   global variables.
+ - Global `history` values are separated by a `\n` according
+   to netCDF kitchen sink tools.
+
 # 2021-10-27
 
  - Finally fixed the "stereographic" grid generation.

@@ -487,15 +487,25 @@ class GridUtils(object):
         '''
         pass
 
-    def computeGridMetricsSpherical(self):
+    def computeGridMetricsSpherical(self, **kwargs):
         '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a
         grid in spherical coordinates.
+
+        **Keyword arguments**
+
+            * *historyMsg* (``string``) -- optional keyword message to append
+              to the global ``history`` attribute.
         '''
 
         self.grid.attrs['grid_version'] = "0.2"
         self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
-        self.grid.attrs['history'] = "%s: created grid with GridTools library" %\
+        historyMsg = "%s: created grid with GridTools library" %\
             (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        utils.checkArgument(kwargs, 'historyMsg', historyMsg)
+        if 'history' in self.grid.attrs.keys():
+            self.grid.attrs['history'] = "%s\n%s" % (self.grid.attrs['history'], kwargs['historyMsg'])
+        else:
+            self.grid.attrs['history'] = kwargs['historyMsg']
         try:
             self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
         except:
@@ -2701,7 +2711,9 @@ class GridUtils(object):
             newGrd.grid.attrs[attr] = self.grid.attrs[attr]
 
         # Recompute metrics
-        newGrd.computeGridMetricsSpherical()
+        historyMsg = "%s: subsetted grid with GridTools.subsetGrid() with scale factor %d" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
+        newGrd.computeGridMetricsSpherical(historyMsg=historyMsg)
 
         return newGrd
     
@@ -3159,13 +3171,19 @@ class GridUtils(object):
         '''This generates h2 and other fields.
         See: :func:`gridtools.bathyutils.computeBathymetricRoughness()`'''
         from . import bathyutils
-        return bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
+        roughnessGrids = bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
+
+        # Add history metadata
+        return roughnessGrids
 
     def ice9(self, **kwargs):
         '''This calls the ice-9 algorithm from bathyutils.
         See: :func:`gridtools.bathyutils.ice9()`'''
         from . import bathyutils
-        return bathyutils.ice9(self, **kwargs)
+        ice9Grids = bathyutils.ice9(self, **kwargs)
+
+        # Add history metadata
+        return ice9Grids
 
     # meshutils routines
 
