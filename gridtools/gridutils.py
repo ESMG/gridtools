@@ -493,87 +493,54 @@ class GridUtils(object):
 
         **Keyword arguments**
 
-            * *historyMsg* (``string``) -- optional keyword message to append
-              to the global ``history`` attribute.
+            * *history* (``string``) -- optional message to append
+              to the global ``history`` attribute.  A default message
+              is provided if one is not specified.
         '''
 
-        self.grid.attrs['grid_version'] = "0.2"
-        self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
-        historyMsg = "%s: created grid with GridTools library" %\
-            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
-        utils.checkArgument(kwargs, 'historyMsg', historyMsg)
-        if 'history' in self.grid.attrs.keys():
-            self.grid.attrs['history'] = "%s\n%s" % (self.grid.attrs['history'], kwargs['historyMsg'])
-        else:
-            self.grid.attrs['history'] = kwargs['historyMsg']
-        try:
-            self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
-        except:
-            pass
+        self.updateGridMetadata(**kwargs)
+
+        #self.grid.attrs['grid_version'] = "0.2"
+        #self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
+        #historyMsg = "%s: created grid with GridTools library" %\
+        #    (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        #utils.checkArgument(kwargs, 'historyMsg', historyMsg)
+        #if 'history' in self.grid.attrs.keys():
+        #    self.grid.attrs['history'] = "%s\n%s" % (self.grid.attrs['history'], kwargs['historyMsg'])
+        #else:
+        #    self.grid.attrs['history'] = kwargs['historyMsg']
+        #try:
+        #    self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        #except:
+        #    pass
 
         # Add additional metadata if available
-        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
-        for metaTag in addMetadata:
-            if metaTag in self.gridInfo['gridParameters'].keys():
-                self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
-        #self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
-        #self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
-        #self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
-        #self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
-        #self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
-        #self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
-        #self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
-        #self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
-
-        #try:
-        #    self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-        #except:
-        #    self.grid.attrs['conda_env'] = "Conda environment not found."
-
-        #try:
-        #    #os.system("conda list --explicit > package_versions.txt")
-        #    #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
-        #    sysObj = sysinfo.SysInfo(grd=self)
-        #    cmd = "conda list --explicit"
-        #    (out, err, rc) = sysObj.runCommand(cmd)
-        #    self.grid.attrs['package_versions'] = out
-        #    #self.grid.attrs['package_versions'] = "/n".join(out)
-        #except:
-        #    #raise
-        #    try:
-        #        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-        #    except:
-        #        self.grid.attrs['conda_env'] = "Conda environment not found."
-        #
-        #    self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
-
-        #try:
-        #    response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
-        #    self.grid.attrs['software_version'] =  print(response.json()["name"])
-        #except:
-        #    self.grid.attrs['software_version'] = ""
+        #addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        #for metaTag in addMetadata:
+        #    if metaTag in self.gridInfo['gridParameters'].keys():
+        #        self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
 
         # Collect system metadata
-        sysObj = sysinfo.SysInfo(grd=self)
-        sysObj.loadVersionData()
-        self.grid.attrs['software_version'] = sysObj.dumpVersionData()
+        #sysObj = sysinfo.SysInfo(grd=self)
+        #sysObj.loadVersionData()
+        #self.grid.attrs['software_version'] = sysObj.dumpVersionData()
 
         # If the global attribute 'proj' is not set, try to set it using
         # provided gridParameters.  Use the global 'proj' attribute if
         # already set.
 
-        try:
-            if not('proj' in self.grid.attrs.keys()):
-                self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
-        except:
-            projString = self.formProjString(self.gridInfo['gridParameters'])
-            if projString:
-                self.grid.attrs['proj'] = projString
-                self.gridInfo['gridParameters']['projection']['proj'] = projString
-            else:
-                msg = "WARNING: Projection string could not be determined from grid parameters."
-                self.printMsg(msg, level=logging.WARNING)
-                self.debugMsg('')
+        #try:
+        #    if not('proj' in self.grid.attrs.keys()):
+        #        self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
+        #except:
+        #    projString = self.formProjString(self.gridInfo['gridParameters'])
+        #    if projString:
+        #        self.grid.attrs['proj'] = projString
+        #        self.gridInfo['gridParameters']['projection']['proj'] = projString
+        #    else:
+        #        msg = "WARNING: Projection string could not be determined from grid parameters."
+        #        self.printMsg(msg, level=logging.WARNING)
+        #        self.debugMsg('')
 
         # Determine radius from provided metadata
         # R = 6370.e3          # Radius of sphere (from original pyroms ROMS to MOM6 grid conversion script)
@@ -1466,7 +1433,7 @@ class GridUtils(object):
 
     # xarray grid operations grid functions
     # Xarray Grid Operations Grid Functions
-    
+
     def closeGrid(self):
         '''Closes and open dataset file pointer.'''
         if self.xrOpen:
@@ -1860,6 +1827,143 @@ class GridUtils(object):
             msg = "Failed to write netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
 
+    def checkGridMetadata(self, kwargs, varKey, defaultValue, append=False):
+        '''
+        Update or overwrite global metadata values based on keyword arguments.
+
+        **Keyword arguments**
+
+            * *append* (``boolean``) -- Updated metadata is appended to any
+              existing metadata.  If the attribute does not exist, it is
+              added.
+        '''
+
+        returnValue = defaultValue
+        kwKeys = kwargs.keys()
+        gridKeys = self.grid.attrs.keys()
+
+        # Use the submitted keyword value, otherwise use the default
+        if varKey in kwargs.keys():
+            returnValue = kwargs[varKey]
+
+        # If we are not to update the metadata, then we use
+        # the existing grid metadata value.  If the existing
+        # value is None or empty, replace it with the new value.
+        currentValue = None
+        if varKey in gridKeys:
+            currentValue = self.grid.attrs[varKey]
+
+        if kwargs['updateMetadata']:
+            if append:
+                if currentValue is not None:
+                    if len(currentValue) == 0:
+                        returnValue = "%s" % (returnValue)
+                    else:
+                        returnValue = "%s\n%s" % (currentValue, returnValue)
+            else:
+                if currentValue is not None:
+                    if len(currentValue) > 0:
+                        returnValue = self.grid.attrs[varKey]
+        else:
+            # No update permitted unless the existing global attribute
+            # is empty or missing
+            if currentValue is not None:
+                if len(currentValue) > 0:
+                    returnValue = currentValue
+
+        return returnValue
+
+    def updateGridMetadata(self, **kwargs):
+        '''
+        Generic routine to apply metadata to appropriate entries to the existing grid
+        loaded into the gridutils object. This also checks any existing gridParameters.
+        This attempts to set several attributes.  If only setting one or two attributes,
+        consider using :func:`gridtools.gridutils.checkGridMetadata()`.
+
+        **Keyword arguments**:
+
+            * *updateMetadata* (``boolean``) -- Allow updates to metadata global attributes.
+              If False, existing metadata is not overwritten.  If an attribute is missing,
+              the global attribute is added. Default: True
+        '''
+        # If any keyword argument is unset, set to the default
+        utils.checkArgument(kwargs, 'updateMetadata', True)
+
+        #self.grid.attrs['grid_version'] = "0.2"
+        self.grid.attrs['grid_version'] = self.checkGridMetadata(kwargs, 'grid_version', "0.2")
+        msg = "GridTools: %s" % (self.getVersion())
+        self.grid.attrs['code_version'] = self.checkGridMetadata(kwargs, 'code_version', msg)
+        historyMsg = "%s: created grid with GridTools library" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        #utils.checkArgument(kwargs, 'historyMsg', historyMsg)
+        #if 'history' in self.grid.attrs.keys():
+        #    self.grid.attrs['history'] = "%s\n%s" % (self.grid.attrs['history'], kwargs['historyMsg'])
+        #else:
+        #    self.grid.attrs['history'] = kwargs['historyMsg']
+        self.grid.attrs['history'] = self.checkGridMetadata(kwargs, 'history', historyMsg, append=True)
+
+        if hasattr(self, 'gridInfo'):
+            if 'gridParameters' in self.gridInfo:
+                if 'projection' in self.gridInfo['gridParameters']:
+                    if 'name' in self.gridInfo['gridParameters']['projection']:
+                        self.grid.attrs['projection'] = self.checkGridMetadata(kwargs, 'projection', None)
+        #try:
+        #    self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        #except:
+        #    pass
+
+        # Add additional metadata if available
+        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        for metaTag in addMetadata:
+            if metaTag in self.gridInfo['gridParameters'].keys():
+                #self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
+                globAttr = 'grid_%s' % (metaTag)
+                self.grid.attrs[globAttr] = self.checkGridMetadata(kwargs, globAttr, self.gridInfo['gridParameters'][metaTag])
+
+        # Collect system metadata
+        sysObj = sysinfo.SysInfo(grd=self)
+        sysObj.loadVersionData()
+        #self.grid.attrs['software_version'] = sysObj.dumpVersionData()
+        self.grid.attrs['software_version'] = self.checkGridMetadata(kwargs, 'software_version', sysObj.dumpVersionData())
+
+        # If the global attribute 'proj' is not set, try to set it using
+        # provided gridParameters.  Use the global 'proj' attribute if
+        # already set.
+
+        projString = None
+
+        # If the grid has a 'proj' use it as the authority
+        if hasattr(self, 'grid'):
+            if 'proj' in self.grid.attrs.keys():
+                projString = self.grid.attrs['proj']
+
+        # If 'proj' was not set, attempt to use a defined 'proj' in the
+        # projection parameters
+        if projString is None and hasattr(self, 'gridInfo'):
+            if 'gridParameters' in self.gridInfo:
+                if 'projection' in self.gridInfo['gridParameters']:
+                    if 'proj' in self.gridInfo['gridParameters']['projection']:
+                        projString = self.gridInfo['gridParameters']['projection']['proj']
+
+        # Last attempt to define projString
+        if projString is None:
+            projString = self.formProjString(self.gridInfo['gridParameters'])
+            # If we get to this point, set the 'proj' parameters above
+            self.grid.attrs['proj'] = self.checkGridMetadata(kwargs, 'proj', projString)
+            self.gridInfo['gridParameters']['projection']['proj'] = projString
+
+        #try:
+        #    if not('proj' in self.grid.attrs.keys()):
+        #        self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
+        #except:
+        #    projString = self.formProjString(self.gridInfo['gridParameters'])
+        #    if projString:
+        #        self.grid.attrs['proj'] = projString
+        #        self.gridInfo['gridParameters']['projection']['proj'] = projString
+        #    else:
+        #        msg = "WARNING: Projection string could not be determined from grid parameters."
+        #        self.printMsg(msg, level=logging.WARNING)
+
     def makeSoloMosaic(self, **kwargs):
         '''
         This replicates some of the processes of ``make_solo_mosaic`` from :cite:p:`GFDL_MSG_2021_FRE_nctools`.
@@ -2001,6 +2105,11 @@ class GridUtils(object):
 
             * *showModelGrid* (``boolean``) -- set False to hide the model grid. Default: True
             * *plotVariables* (``dict()``) -- one or more variables and plot parameters. Default: None
+            * *showGridPoints* (``list()``) -- list of grid points to show on the plot. The list contains
+              tuples of `(j,i)`, `(j,i,c)` or `(j,i,c,s)`.  The default color (c) is `red` with a size
+              (s) of 5.  To change just the size of the point, the color must also be specified.
+              NOTE: For MOM6 grids, the (j,i) refer to points on the supergrid.  Points on the
+              regular grid should be multiples of two.
 
         **Keyword arguments for plotVariables**:
 
@@ -2022,6 +2131,8 @@ class GridUtils(object):
             kwargs['showModelGrid'] = True
         if not('plotVariables' in kwargs.keys()):
             kwargs['plotVariables'] = dict()
+        if not('showGridPoints' in kwargs.keys()):
+            kwargs['showGridPoints'] = list()
 
         plotProjection = self.getPlotParameter('name', subKey='projection', default=None)
 
@@ -2124,8 +2235,20 @@ class GridUtils(object):
                     if j <= nj-1:
                         ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
 
-            # DEBUG PLOT (0,0)
-            ax.scatter(self.grid['x'][0,0], self.grid['y'][0,0], color="red", s=5, transform=transform)
+            # Overplot specified grid points
+            for pts in kwargs['showGridPoints']:
+                jpt = pts[0]
+                ipt = pts[1]
+                defaultColor = "red"
+                defaultSize = 5.0
+                ptlen = len(pts)
+                if ptlen == 3:
+                    defaultColor = pts[2]
+                if ptlen == 4:
+                    defaultColor = pts[2]
+                    defaultSize = pts[3]
+                ax.scatter(self.grid['x'][jpt,ipt], self.grid['y'][jpt,ipt],
+                        color=defaultColor, s=defaultSize, transform=transform, zorder=3.0)
 
         # Loop through provided variables
         if kwargs['plotVariables']:
@@ -2711,9 +2834,9 @@ class GridUtils(object):
             newGrd.grid.attrs[attr] = self.grid.attrs[attr]
 
         # Recompute metrics
-        historyMsg = "%s: subsetted grid with GridTools.subsetGrid() with scale factor %d" %\
+        history = "%s: subsetted grid with GridTools.subsetGrid() with scale factor %d" %\
             (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
-        newGrd.computeGridMetricsSpherical(historyMsg=historyMsg)
+        newGrd.computeGridMetricsSpherical(history=history)
 
         return newGrd
     
