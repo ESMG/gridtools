@@ -4,7 +4,11 @@
 
 Testing for release 0.3.2
 
- - Fix GitHub CI
+ - Update API for python script 7 for
+   computeBathymetricRoughness(); add informational
+   message to say if REusing an existing bathymetry.
+ - Begin testing on aarch64 platform
+ - Fix GitHub CI (currently passes)
  - Completed testing on local Ubuntu node with 64GB
  - Python script example 3 and 8 now demonstrates use of
    an extended grid with the function regridTopo() to

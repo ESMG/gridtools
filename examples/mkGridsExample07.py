@@ -103,12 +103,13 @@ bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example7.nc')
 # it.  If you want to test the routine again, erase the output
 # file.
 if os.path.isfile(bathyGridFilename):
+    grd.printMsg("Using existing bathymetry file: %s" % (bathyGridFilename))
     bathyGrids = xr.open_dataset(bathyGridFilename)
 else:
     # Data sources cannot be in chunked mode for use in this routine
     bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
             maxMb=99, superGrid=False, useClipping=False,
-            FixByOverlapQHGridShift=True,
+            useQHGridShift=True, useOverlap=True,
             auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
     )
 
