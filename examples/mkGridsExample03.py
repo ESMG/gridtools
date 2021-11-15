@@ -7,6 +7,9 @@
 # grid should be comparable to a similar
 # grid created by FRE-NCtools.
 
+# NOTE: This script takes a VERY long time
+# to run.
+
 import sys, os, logging, cartopy
 import xarray as xr
 from gridtools.gridutils import GridUtils
@@ -246,7 +249,7 @@ resultGrids.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example3_regridTopo.nc')
     plotVariables={
         'depth': {
             'values': resultGrids['depth'],
-            'title': 'GEBCO 2020 applied with GridUtils.regridTopo()',
+            'title': 'GEBCO 2020: GridUtils.regridTopo()',
             'cbar_kwargs': {
                 'orientation': 'horizontal',
             }
@@ -255,5 +258,45 @@ resultGrids.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example3_regridTopo.nc')
 )
 
 figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Bathy_Example3_regridTopo.png'),
+        dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+
+# The original routine leaves an artifact around the grid edge.  This can
+# be fixed by extending the grid by one grid point, recomputing and
+# then clipping the extended result.
+
+extGrd = grd.extendGrid(2, 2, 2, 2)
+
+# Put the extended grid into a gridtools grid.  Attach it to
+# the same data source as above.
+grd2 = GridUtils()
+grd2.useDataSource(ds)
+grd2.readGrid(local=extGrd)
+
+resultGridsExt = grd2.regridTopo('ds:GEBCO_2020', topoVarName='depth', periodic=False)
+
+# Subset the result grid back to the original grid
+resultGrids2 = xr.Dataset()
+resultGrids2['depth'] = resultGridsExt['depth'][1:-1,1:-1]
+resultGrids2['ocean_mask'] = resultGridsExt['ocean_mask'][1:-1,1:-1]
+
+resultGrids2.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example3_regridTopo_ext.nc'),
+        encoding=grd2.removeFillValueAttributes(data=resultGrids2))
+
+# Plot the new bathy grid
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'depth': {
+            'values': resultGrids2['depth'],
+            'title': 'GEBCO 2020: GridUtils.regridTopo() with an extended grid',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
+        }
+    },
+)
+
+figure.savefig(os.path.join(wrkDir, 'MERC_20x30_Bathy_Example3_regridTopo_ext.png'),
         dpi=None, facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)

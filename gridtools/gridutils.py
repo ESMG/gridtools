@@ -589,7 +589,6 @@ class GridUtils(object):
         self.grid['area'].attrs['standard_name'] = 'grid_cell_area'
         self.grid['area'].attrs['units'] = 'm2'
         self.grid['area'].attrs['sha256'] = hashlib.sha256( np.array( self.grid['area'] ) ).hexdigest()
-        #breakpoint()
 
         return
 
@@ -633,7 +632,7 @@ class GridUtils(object):
                     if 'R' in param['projection']:
                         projString = "+R=%s %s" % (param['projection']['R'], projString)
 
-        if projString == None:
+        if projString is None:
             msg = "Unable to set projection string."
             self.printMsg(msg, level=logging.WARNING)
             self.debugMsg(msg)
@@ -1020,6 +1019,10 @@ class GridUtils(object):
             newGridCreated = True
 
         if newGridCreated:
+            # Show an informational message here
+            msg = "INFO: A new grid has been created."
+            self.printMsg(msg, level=logging.INFO)
+
             # Fill in a tile name and geometry
             self.grid['tile'] = tileName
             self.grid.tile['geometry'] = geometryType
@@ -1035,7 +1038,7 @@ class GridUtils(object):
             except:
                 msg = "WARNING: Projection string could not be determined from grid parameters."
                 self.printMsg(msg, level=logging.WARNING)
-                self.debugMsg('')            
+                self.debugMsg('')
 
             # Declare the xarray dataset open even though it is really only in memory at this point
             self.xrOpen = True
@@ -1744,7 +1747,6 @@ class GridUtils(object):
 
                     self.grid = self.grid.set_coords(['lon', 'lat'])
                 else:
-                    #breakpoint()
                     pass
 
         
@@ -1906,7 +1908,8 @@ class GridUtils(object):
             if 'gridParameters' in self.gridInfo:
                 if 'projection' in self.gridInfo['gridParameters']:
                     if 'name' in self.gridInfo['gridParameters']['projection']:
-                        self.grid.attrs['projection'] = self.checkGridMetadata(kwargs, 'projection', None)
+                        self.grid.attrs['projection'] =\
+                            self.checkGridMetadata(kwargs, 'projection', self.gridInfo['gridParameters']['projection']['name'])
         #try:
         #    self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
         #except:
@@ -1948,6 +1951,11 @@ class GridUtils(object):
         # Last attempt to define projString
         if projString is None:
             projString = self.formProjString(self.gridInfo['gridParameters'])
+
+        if projString is None:
+            msg = "WARNING: Grid metadata: grid projection could not be determined."
+            self.printMsg(msg, level=logging.WARNING)
+        else:
             # If we get to this point, set the 'proj' parameters above
             self.grid.attrs['proj'] = self.checkGridMetadata(kwargs, 'proj', projString)
             self.gridInfo['gridParameters']['projection']['proj'] = projString
@@ -2834,7 +2842,7 @@ class GridUtils(object):
             newGrd.grid.attrs[attr] = self.grid.attrs[attr]
 
         # Recompute metrics
-        history = "%s: subsetted grid with GridTools.subsetGrid() with scale factor %d" %\
+        history = "%s: subset grid with GridTools.subsetGrid() using scale factor %d" %\
             (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
         newGrd.computeGridMetricsSpherical(history=history)
 

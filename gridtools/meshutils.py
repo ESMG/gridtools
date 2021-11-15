@@ -21,8 +21,16 @@ def writeLandmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     dsDataset = xr.Dataset()
     dsDataset[outVariable] = xr.where(dsData[dsVariable] <= masking_depth, 1.0, 0.0)
     dsDataset[outVariable].attrs['sha256'] = utils.sha256sum(dsDataset[outVariable])
-    dsDataset['x'] = dsData['x']
-    dsDataset['y'] = dsData['y']
+    # Try to copy coordinates from the supplied variable otherwise, try
+    # the supplied grid.
+    copyCoords = ['x', 'y']
+    for varCoord in copyCoords:
+        if hasattr(dsData, varCoord):
+            dsDataset[varCoord] = dsData[varCoord]
+        else:
+            if hasattr(grd, varCoord):
+                dsDataset[varCoord] = grd[varCoord]
+
     dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))
 
     return
@@ -45,6 +53,14 @@ def writeOceanmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     dsDataset = xr.Dataset()
     dsDataset[outVariable] = xr.where(dsData[dsVariable] > masking_depth, 1.0, 0.0)
     dsDataset[outVariable].attrs['sha256'] = utils.sha256sum(dsDataset[outVariable])
-    dsDataset['x'] = dsData['x']
-    dsDataset['y'] = dsData['y']
+    # Try to copy coordinates from the supplied variable otherwise, try
+    # the supplied grid.
+    copyCoords = ['x', 'y']
+    for varCoord in copyCoords:
+        if hasattr(dsData, varCoord):
+            dsDataset[varCoord] = dsData[varCoord]
+        else:
+            if hasattr(grd, varCoord):
+                dsDataset[varCoord] = grd[varCoord]
+
     dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))

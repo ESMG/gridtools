@@ -18,7 +18,7 @@ dy = 2500. / 2.
 x = np.arange(-2902500., 2902500. + dx, dx, dtype=np.float32)
 y = np.arange(-2902500., 2902500. + dy, dy, dtype=np.float32)
 
-yy, xx = np.meshgrid(y, x)
+xx, yy = np.meshgrid(x, y)
 
 from pyproj import CRS, Transformer
 
@@ -30,9 +30,14 @@ crs = CRS.from_proj4(PROJSTRING)
 proj = Transformer.from_crs(crs.geodetic_crs, crs)
 
 # compute the lon/lat
-lon, lat = proj.transform(yy, xx, direction='INVERSE')
+lon, lat = proj.transform(xx, yy, direction='INVERSE')
 
 # Confirm we have the correct grid points and lat lon values
+print('''
+Expected answers:
+-2902500.0 -2902500.0 53.8170746379705 -45.0
+2902500.0 2902500.0 53.8170746379705 135.0
+---''')
 print(yy[0,0], xx[0,0], lat[0,0], lon[0,0])
 print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1],\
         lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])

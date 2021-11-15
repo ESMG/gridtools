@@ -1,5 +1,46 @@
 # Changelog
 
+## 2021-11-15
+
+Testing for release 0.3.2
+
+ - Fix GitHub CI
+ - Completed testing on local Ubuntu node with 64GB
+ - Python script example 3 and 8 now demonstrates use of
+   an extended grid with the function regridTopo() to
+   eliminate grid artifacts.
+ - Fix grid axis for generation of IBCAO grid in python
+   script for Example 5 and 5a.  Show expected answers for
+   grid corners.
+
+## 2021-11-14
+
+Working towards release 0.3.2, testing examples:
+
+ - Show how to fix the artifact using extended grids with
+   the function regridTopo() in example 3.
+ - Update meshutils.writeLandMask() and meshutils.writeOceanMask()
+   to search for x and y coordinates if not provided by the supplied
+   variable.
+ - Further fix to updateGridMetadata().
+ - Notebook example 7a and 7b did not save an
+   example land and ocean mask.  They should now work
+   independently of the python script example 7 now.
+ - Scan all examples for API call change to computeBathymetricRoughness()
+   - FixByOverlapQHGridShift => useQHGridShift, useOverlap
+ - Example 7 should create three separate sets of example
+   files.
+ - Create another example 07b that demonstrates extending
+   the grid for use in the bathymetric roughness routine.
+ - API update for computing metrics for mkGridsExmaple04a.
+   Set i grid lines yellow to show grid orientation.
+ - Fix variable axis in mkGridsExample04 to match the
+   gridtools library.  Results are the same.
+ - Adjust stereographic southern hemisphere example
+   in mkGridItereative.
+ - Gridtools app would not launch with IP.  It comes up
+   with IP=0.0.0.0 and browsing to IP.
+
 ## 2021-11-12
 
 Gridtools updates working towards release 0.3.2

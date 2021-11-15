@@ -18,7 +18,7 @@ grd = GridUtils()
 
 # We can turn on extra output from the module
 grd.printMsg("Setting print and logging messages to the DEBUG level.")
-logFilename = os.path.join(wrkDir, 'LCC_20x30.log')
+logFilename = os.path.join(wrkDir, 'LCC_20x30_7.log')
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -148,7 +148,7 @@ grd.makeSoloMosaic(
     inputDirectory=inputDir,
     overwrite=True,
 )
-grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid.nc"))
+grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid_7.nc"))
 
 # Do some plotting!
 
@@ -187,7 +187,7 @@ grd.setPlotParameters(
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None,
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy_7.png'), dpi=None,
         facecolor='w', edgecolor='w', orientation='landscape',
         transparent=False, bbox_inches=None, pad_inches=0.1)
 
@@ -205,7 +205,7 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None,
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy.png'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy_7.png'), dpi=None, facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
 
 # Plot original gebco just using the grid extent, not the model grid points
