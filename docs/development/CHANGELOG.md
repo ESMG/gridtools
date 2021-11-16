@@ -4,6 +4,7 @@
 
 Testing for release 0.3.2
 
+ - Show i vertex in yellow for python script example 5a and 6.
  - Testing on chinook node
  - Update API for Example 3 for computeBathymetricRoughness()
 
