@@ -194,7 +194,7 @@ else:
     # Data sources cannot be in chunked mode for use in this routine
     bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
             maxMb=99, superGrid=False, useClipping=False,
-            FixByOverlapQHGridShift=True,
+            useQHGridShift=True, useOverlap=True,
             auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
     )
 
@@ -224,7 +224,7 @@ bathyGrids['depth'] = xr.where(bathyGrids['depth'] < 0.0, 0.0, bathyGrids['depth
     plotVariables={
         'depth': {
             'values': bathyGrids['depth'],
-            'title': 'GEBCO 2020 applied with computeBathyRoughness()',
+            'title': 'GEBCO 2020: computeBathyRoughness()',
             'cbar_kwargs': {
                 'orientation': 'horizontal',
             }

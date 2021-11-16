@@ -1,9 +1,17 @@
 # Changelog
 
+## 2021-11-16
+
+Testing for release 0.3.2
+
+ - Testing on chinook node
+ - Update API for Example 3 for computeBathymetricRoughness()
+
 ## 2021-11-15
 
 Testing for release 0.3.2
 
+ - Tested app at mybinder.org
  - Update API for python script 7 for
    computeBathymetricRoughness(); add informational
    message to say if REusing an existing bathymetry.
