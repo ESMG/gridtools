@@ -153,7 +153,6 @@ dependencies:
     - notebook==6.4.6
     - numba==0.54.1
     - numpy==1.20.3
-    - numpypi==1.0.0+40b7b0d
     - owslib==0.25.0
     - packaging==21.2
     - pandas==1.3.4
@@ -215,7 +214,6 @@ dependencies:
     - webencodings==0.5.1
     - websocket-client==1.2.1
     - xarray==0.20.1
-    - xesmf==0.5.4.dev8+g7a2830c
     - xgcm==0.5.2
     - zict==2.0.0
     - zipp==3.6.0

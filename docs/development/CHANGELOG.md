@@ -4,6 +4,7 @@
 
 Working towards release 0.3.2
 
+ - Remove pip requirements that snuck into `gridTools_export-linux-64-RTD.yml`.
  - Modify `roms_io.py` to mandate netcdf4 or netcdf3.  Do not fall back to `pyroms`.
  - Remove `cartopy` from requirements.txt; this triggers a lot of dependency checks.
    Include in user installation instructions that a combination of conda, pip and manual
