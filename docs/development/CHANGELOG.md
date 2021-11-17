@@ -1,9 +1,33 @@
 # Changelog
 
+## 2021-11-17
+
+Working towards release 0.3.2
+
+ - Modify `roms_io.py` to mandate netcdf4 or netcdf3.  Do not fall back to `pyroms`.
+ - Remove `cartopy` from requirements.txt; this triggers a lot of dependency checks.
+   Include in user installation instructions that a combination of conda, pip and manual
+   installation of `cartopy` might be necessary.
+ - The RTD installation does not need to be fully functional.  It only needs to be able
+   to load the modules by import.  The `gridTools_export-linux-64-RTD.yml` has been pared
+   down to a minimal installation to be overlaid by the `requirements.txt` file using pip.
+ - RTD with conda performs a two stage install:
+   - `conda env create --quiet --name stable --file conda/gridTools_export-linux-64-RTD.yml`
+   - `python -m pip install -U -r requirements.txt`
+   - Current failure is in the first stage.
+ - Try to rebuild with a minimal RTD stack.
+ - Current conda configuration has a peak memory footprint of 1489580 kB
+ - Just python=3 uses 409452 kB
+ - Remove `m2r2` from software stack.
+
 ## 2021-11-16
 
 Testing for release 0.3.2
-
+ 
+ - RTD is failing.  We need to shift some items out of
+   `gridTools_export-linux-64-RTD.yml` and into
+   requirements.txt.
+   Try: `/usr/bin/time -v conda env create --quiet --name stable --file conda/gridTools_export-linux-64-RTD.yml`
  - Writing release documentation; need to check on RTD.
  - Testing completed on chinook node
  - Updated README for examples directory
