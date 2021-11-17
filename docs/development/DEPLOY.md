@@ -45,7 +45,7 @@ and the DEPLOYMENT TEMPLATE header above.
    - [ ] Ensure CI/Actions continue to pass (requires manual request)
    - [ ] Check CI/Actions Artifacts for proper results
    - [ ] Ensure MDs on GitHub renders correctly
- - [ ] Add and commit a tag with x.y.z
+ - [ ] Add and commit a tag with x.y.z; add commit hash to archive/x.y.z.md
  - [ ] Ensure Read the Docs renders correctly for `stable` (triggered after new tag is pushed)
  - [ ] Run through a Release on the GitHub site
  - [ ] Place a release notice on the MOM6 forum

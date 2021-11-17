@@ -51,12 +51,6 @@ This script demonstrates some of the logging
 and debugging methods integrated into the
 gridtools library.
 
-## mkGridsShowLoggers.py
-
-This scripts demonstrates how to access logging
-from other python modules should it become
-necessary for debugging problems.
-
 ## mkGridsExample03.py
 
 This example generates a Mercator grid off
@@ -219,6 +213,24 @@ script copy and pasted to start the editor.
 
 Once editing is complete, there are more commands
 required to save the edited grid.
+
+## mkGridsExample11.ipynb
+
+NOTE: INCOMPLETE EXAMPLE
+
+This example might be replaced by example 12.
+
+## mkGridsExample12.ipynb
+
+This shows the grid extension capabilities for various grid
+projections.  It shows how model grid can be grown in any
+direction.
+
+## mkGridsShowLoggers.py
+
+This scripts demonstrates how to access logging
+from other python modules should it become
+necessary for debugging problems.
 
 ## NewGridMOM6.ipynb
 

@@ -2,23 +2,7 @@
 
 ## Milestones
 
- - [ ] Release 0.3.2
-   - [X] Update meshutils.writeLandMask() and meshutils.writeOceanMask() to search for x and y
-         coordinates if not provided by the supplied variable.
-   - [X] BUG: Fix example7 scripts so they can run independently of each other as examples.
-   - [X] BUG: `gridtools.generate_regional_spherical_meters` fix spherical grid generation
-   - [X] BUG: app: adjust grid center latitude bounds to -90 to +90. Resolves #16.
-   - [X] GridUtils.plotGrid() allow plotting of one or more grid points.
-   - [X] Grid filling options (flooding; ice-9 algorithm)
-   - [X] Plotting model grid: include option to show grid points on the grid.
-   - [X] Fix GridUtils.regridTopo() halo effect on outer grid edge
-     - [X] option to create ocean mask fraction
-     - [X] investigate artifact generated in the grid corners; fix by extending grid and clipping result
-   - [X] Implemented metadata functions: gridutils.updateGridMetadata(); gridutils.checkGridMetadata()
-   - [X] Add or append to 'history' global variable.
-   - [X] Auto extending known grid types to allow workarounds for calculations
-         with artifacts around the edges.
-   - [X] Add reference for Niki's `ocean_model_grid_generator`!
+ - [X] Release 0.3.x
  - [ ] Release 0.x
    - [ ] Additional metadata for tile variable: `standard_name`, `tile_spec_version`,
          `geometry`, `discretization` and `conformal`.
@@ -26,14 +10,16 @@
          current set of tools and FRE-NCtools.
    - [ ] Add dataset subset/preparer function that will satisfy
          FRE-NCtools `make_topog`.
-   - [ ] Improvements to roughness calculation.
+   - [ ] Improvements to roughness calculation
    - [ ] Finish port ROMS mask editor as-is to gridtools for MOM6/ROMS grids (pylab)
    - [ ] Rewrite/Optimize pylab mask editor
    - [ ] Application improvements
    - [ ] Boundery condition grid creation and support (OBCs)
      - [ ] Save only the points we need instead of the whole supergrid
    - [ ] Sponge data preparation
-   - [ ] Subset existing grids and infrastructure
+   - [ ] Subsetting
+     - [ ] Add more flexibility for handling model grids
+     - [ ] Boundary files
    - [ ] Leverage dask (for users that lack access to large memory nodes)
    - [ ] More graceful handling of periodic grid edges: +0,+360 vs -180,+180
    - [ ] Enhanced grid/plot projection options (non-map based;
@@ -57,7 +43,7 @@
 # TASKS
 
  - [ ] Generic tool to subset a MOM6 grid for a given area for debugging.
-   - [ ] Name this function subsetGridDebug().
+   - [X] Name this function subsetGridDebug().
    - [ ] Allow selection of offset, spacing and range.
  - [ ] Show example of original roughness calculation
  - [ ] grid extension and other operations for `GNOMONIC_ED` grid (FRE)
@@ -67,7 +53,7 @@
        variable
  - [ ] Create our own conda repository since there is now a name conflict with
        at least PyPi.
- - [ ] Sponge data preparation
+ - [ ] Boundary/sponge data preparation
    - [ ] Current scripts generate u,v fields on h-points; this needs
          to be changed to C-grid u/v-points instead
  - [ ] general documentation
@@ -85,8 +71,6 @@
      - [ ] having tilt may not produce conformal grids
      - [X] Niki''s example added; but it may not be correct
      - [ ] Niki might have solved lat lon tilt?
-   - [ ] make Stereographic grids
-     - [ ] user testing
    - [ ] grid generation in other projections (tri-polar, etc)
    - [ ] on saveGrid():
      - [X] convert lon [+0,+360] to [-180,+180]
@@ -105,7 +89,7 @@
        - [ ] MOM6: Obey `MASKING_DEPTH`, `MINIMUM_DEPTH`, `ALLOW_LANDMASK_CHANGES`,
              `MAXIMUM_DEPTH`, `TOPO_EDITS_FILE` MOM6/src/initialization parameters
        - [ ] show outline of full grid
-         - [ ] Example 09a has a wierd artifact showing grid boundary
+         - [ ] Example 09a has a weird artifact showing grid boundary
        - [ ] show other underlying fields - topo?
        - [ ] ROMS: write edited mask
        - [X] MOM6: write edited mask
@@ -153,7 +137,6 @@
    - [ ] update any tool metadata that is appropriate for that grid
    - [ ] parse and utilize any available proj string; must be a global
          or variable attribute
- - [ ] Develop a field "flood" routine similar to pyroms
  - [ ] Perform checks for ensureEvenI and ensureEvenJ everywhere.
        This applies only to the grid not the supergrid.
 
@@ -200,7 +183,7 @@
    - [X] Create a message buffer/system for information.
    - [ ] Create a way to monitor a log file;
          https://discourse.holoviz.org/t/scrollable-log-text-viewer/317
-   - [ ] log/display github revision of gridtools used by mybinder.org instances
+   - [ ] log/display github revision of gridtools used by mybinder.org instances/application
  - [ ] For now, the gridParameters are always in reference to a center
        point in a grid in the future, one may fix a side or point of
        the grid and grow out from that point instead of the center.
