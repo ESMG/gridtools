@@ -1,5 +1,5 @@
 # General imports and definitions
-import os, re, sys, datetime, logging, importlib, copy
+import os, re, sys, datetime, logging, importlib, copy, math
 import cartopy, warnings, hashlib
 import numpy as np
 import xarray as xr
@@ -487,85 +487,70 @@ class GridUtils(object):
         '''
         pass
 
-    def computeGridMetricsSpherical(self):
+    def computeGridMetricsSpherical(self, **kwargs):
         '''Compute MOM6 grid metrics: angle_dx, dx, dy and area for a
         grid in spherical coordinates.
+
+        **Keyword arguments**
+
+            * *history* (``string``) -- optional message to append
+              to the global ``history`` attribute.  A default message
+              is provided if one is not specified.
         '''
 
-        self.grid.attrs['grid_version'] = "0.2"
-        self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
-        self.grid.attrs['history'] = "%s: created grid with GridTools library" %\
-            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
-        self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        self.updateGridMetadata(**kwargs)
+
+        #self.grid.attrs['grid_version'] = "0.2"
+        #self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
+        #historyMsg = "%s: created grid with GridTools library" %\
+        #    (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        #utils.checkArgument(kwargs, 'historyMsg', historyMsg)
+        #if 'history' in self.grid.attrs.keys():
+        #    self.grid.attrs['history'] = "%s\n%s" % (self.grid.attrs['history'], kwargs['historyMsg'])
+        #else:
+        #    self.grid.attrs['history'] = kwargs['historyMsg']
+        #try:
+        #    self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        #except:
+        #    pass
 
         # Add additional metadata if available
-        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
-        for metaTag in addMetadata:
-            if metaTag in self.gridInfo['gridParameters'].keys():
-                self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
-        #self.grid.attrs['grid_centerX'] = self.gridInfo['gridParameters']['centerX']
-        #self.grid.attrs['grid_centerY'] = self.gridInfo['gridParameters']['centerY']
-        #self.grid.attrs['grid_centerUnits'] = self.gridInfo['gridParameters']['centerUnits']
-        #self.grid.attrs['grid_dx'] = self.gridInfo['gridParameters']['dx']
-        #self.grid.attrs['grid_dxUnits'] = self.gridInfo['gridParameters']['dxUnits']
-        #self.grid.attrs['grid_dy'] = self.gridInfo['gridParameters']['dy']
-        #self.grid.attrs['grid_dyUnits'] = self.gridInfo['gridParameters']['dyUnits']
-        #self.grid.attrs['grid_tilt'] = self.gridInfo['gridParameters']['tilt']
-
-        #try:
-        #    self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-        #except:
-        #    self.grid.attrs['conda_env'] = "Conda environment not found."
-
-        #try:
-        #    #os.system("conda list --explicit > package_versions.txt")
-        #    #self.grid.attrs['package_versions'] = str(pd.read_csv("package_versions.txt"))
-        #    sysObj = sysinfo.SysInfo(grd=self)
-        #    cmd = "conda list --explicit"
-        #    (out, err, rc) = sysObj.runCommand(cmd)
-        #    self.grid.attrs['package_versions'] = out
-        #    #self.grid.attrs['package_versions'] = "/n".join(out)
-        #except:
-        #    #raise
-        #    try:
-        #        self.grid.attrs['conda_env'] = os.environ['CONDA_PREFIX']
-        #    except:
-        #        self.grid.attrs['conda_env'] = "Conda environment not found."
-        #
-        #    self.grid.attrs['package_versions'] = os.environ['CONDA_PREFIX']
-
-        #try:
-        #    response = requests.get("https://api.github.com/ESMG/gridtools/releases/latest")
-        #    self.grid.attrs['software_version'] =  print(response.json()["name"])
-        #except:
-        #    self.grid.attrs['software_version'] = ""
+        #addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        #for metaTag in addMetadata:
+        #    if metaTag in self.gridInfo['gridParameters'].keys():
+        #        self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
 
         # Collect system metadata
-        sysObj = sysinfo.SysInfo(grd=self)
-        sysObj.loadVersionData()
-        self.grid.attrs['software_version'] = sysObj.dumpVersionData()
+        #sysObj = sysinfo.SysInfo(grd=self)
+        #sysObj.loadVersionData()
+        #self.grid.attrs['software_version'] = sysObj.dumpVersionData()
 
-        try:
-            self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
-        except:
-            projString = self.formProjString(self.gridInfo['gridParameters'])
-            if projString:
-                self.grid.attrs['proj'] = projString
-                self.gridInfo['gridParameters']['projection']['proj'] = projString
-            else:
-                msg = "WARNING: Projection string could not be determined from grid parameters."
-                self.printMsg(msg, level=logging.WARNING)
-                self.debugMsg('')
+        # If the global attribute 'proj' is not set, try to set it using
+        # provided gridParameters.  Use the global 'proj' attribute if
+        # already set.
 
-        #R = 6370.e3 # Radius of sphere
-        # TODO: get ellipse setting
-        #R = self._default_Re
+        #try:
+        #    if not('proj' in self.grid.attrs.keys()):
+        #        self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
+        #except:
+        #    projString = self.formProjString(self.gridInfo['gridParameters'])
+        #    if projString:
+        #        self.grid.attrs['proj'] = projString
+        #        self.gridInfo['gridParameters']['projection']['proj'] = projString
+        #    else:
+        #        msg = "WARNING: Projection string could not be determined from grid parameters."
+        #        self.printMsg(msg, level=logging.WARNING)
+        #        self.debugMsg('')
+
+        # Determine radius from provided metadata
+        # R = 6370.e3          # Radius of sphere (from original pyroms ROMS to MOM6 grid conversion script)
+        # R = self._default_Re # (GRS80 is the default for the proj python package)
         R = self.getRadius(self.gridInfo['gridParameters'])
 
         # Make a copy of the lon grid as values are changed for computation
         # xarray=0.19.0 requires unpacking of Dataset variables by using .data
         lon = self.grid.x.copy().data
-        lat = self.grid.y.data
+        lat = self.grid.y.copy().data
 
         # Approximate edge lengths as great arcs
         self.grid['dx'] = (('nyp', 'nx'),  R * spherical.angle_through_center( (lat[ :,1:],lon[ :,1:]), (lat[:  ,:-1],lon[:  ,:-1]) ))
@@ -582,12 +567,19 @@ class GridUtils(object):
 
         # Presize the angle_dx array
         angle_dx = np.zeros(lat.shape)
+        angle2_dx = np.zeros(lat.shape)
+
+        # This was commented out in the original conversion code?
+        #angle_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+        #angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+        #angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+
         # Fix lon so they are 0 to 360 for computation of angle_dx
         lon = np.where(lon < 0., lon+360, lon)
-        angle_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
-        angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
-        angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
-        self.grid['angle_dx'] = (('nyp', 'nxp'), angle_dx)
+        angle2_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+        angle2_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+        angle2_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+        self.grid['angle_dx'] = (('nyp', 'nxp'), np.maximum(angle_dx, angle2_dx))
         #self.grid.angle_dx.attrs['standard_name'] = 'grid_vertex_x_angle_WRT_geographic_east'
         #self.grid.angle_dx.attrs['units'] = 'degrees_east'
         self.grid['angle_dx'].attrs['units'] = 'radians'
@@ -640,12 +632,19 @@ class GridUtils(object):
                     if 'R' in param['projection']:
                         projString = "+R=%s %s" % (param['projection']['R'], projString)
 
-        if projString == None:
+        if projString is None:
             msg = "Unable to set projection string."
             self.printMsg(msg, level=logging.WARNING)
             self.debugMsg(msg)
 
         return projString
+
+    def getXYDist(self, x1, y1, x2, y2):
+        '''Compute distance between two points in x/y space.'''
+    
+        dst = math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))
+
+        return dst
 
     def makeGrid(self, setFilename=None):
         '''Using supplied grid parameters, populate a grid in memory.'''
@@ -1020,6 +1019,10 @@ class GridUtils(object):
             newGridCreated = True
 
         if newGridCreated:
+            # Show an informational message here
+            msg = "INFO: A new grid has been created."
+            self.printMsg(msg, level=logging.INFO)
+
             # Fill in a tile name and geometry
             self.grid['tile'] = tileName
             self.grid.tile['geometry'] = geometryType
@@ -1035,7 +1038,7 @@ class GridUtils(object):
             except:
                 msg = "WARNING: Projection string could not be determined from grid parameters."
                 self.printMsg(msg, level=logging.WARNING)
-                self.debugMsg('')            
+                self.debugMsg('')
 
             # Declare the xarray dataset open even though it is really only in memory at this point
             self.xrOpen = True
@@ -1122,7 +1125,7 @@ class GridUtils(object):
         ax.coastlines()
         ax.gridlines()
         (nj,ni) = lon.shape 
-        # plotting verticies
+        # plotting vertices
         for i in range(0,ni+1,2):
             ax.plot(lon[:,i], lat[:,i], 'k', transform=cartopy.crs.Geodetic())
         for j in range(0,nj+1,2):
@@ -1351,17 +1354,18 @@ class GridUtils(object):
             if 'R' in pD.keys():
                 PROJSTRING = "%s +R=%f" % (PROJSTRING, pD['R'])
 
-            msg = 'Transformation proj string(%s)' % (PROJSTRING)
+            msg = 'Transformation PROJ (%s)' % (PROJSTRING)
             self.printMsg(msg, level=logging.INFO)                
 
             # create the coordinate reference system
             crs = CRS.from_proj4(PROJSTRING)
+
             # create the projection from lon/lat to x/y
             proj = Transformer.from_crs(crs.geodetic_crs, crs)
 
-            # compute (y, x) from (lon, lat)
+            # compute (x, y) from (lon, lat)
             gX, gY = proj.transform(cX, cY)
-            msg = 'Computing center point in meters: (%f, %f) to (%f, %f)' % (cY, cX, gX, gY)
+            msg = 'Computing center point in meters: (lat=%f, lon=%f) to (%f, %f)' % (cY, cX, gX, gY)
             self.printMsg(msg, level=logging.INFO)                
 
             gMode = 1
@@ -1383,11 +1387,10 @@ class GridUtils(object):
             x = np.arange(gX - halfDX, (gX + halfDX) + grX, grX, dtype=np.float32)
             y = np.arange(gY - halfDY, (gY + halfDY) + grY, grY, dtype=np.float32)
 
-            yy, xx = np.meshgrid(y, x)
+            xx, yy = np.meshgrid(x, y)
 
-            # compute (y, x) from (lon, lat)
-            lon, lat = proj.transform(yy, xx, direction='INVERSE')
-
+            # compute (lon, lat) from (x, y)
+            lon, lat = proj.transform(xx, yy, direction='INVERSE')
             lam_ = lon
             phi_ = lat
         
@@ -1433,7 +1436,7 @@ class GridUtils(object):
 
     # xarray grid operations grid functions
     # Xarray Grid Operations Grid Functions
-    
+
     def closeGrid(self):
         '''Closes and open dataset file pointer.'''
         if self.xrOpen:
@@ -1449,11 +1452,11 @@ class GridUtils(object):
         :rtype: none
 
         Supported grid conversions:
-            +--------+--------+---------------------------------------------------+
-            | SOURCE | TARGET | CODE CITATIONS                                    |
-            +--------+--------+---------------------------------------------------+
-            | ROMS   | MOM6   | :cite:p:`Ilicak_2020_ROMS_to_MOM6`                |
-            +--------+--------+---------------------------------------------------+
+            +--------+--------+-----------------------------------------------------------------+
+            | SOURCE | TARGET | CODE CITATIONS                                                  |
+            +--------+--------+-----------------------------------------------------------------+
+            | ROMS   | MOM6   | convert_ROMS_grid_to_MOM6.py :cite:p:`Ilicak_2020_ROMS_to_MOM6` |
+            +--------+--------+-----------------------------------------------------------------+
 
         **Keyword arguments**:
 
@@ -1744,7 +1747,7 @@ class GridUtils(object):
 
                     self.grid = self.grid.set_coords(['lon', 'lat'])
                 else:
-                    breakpoint()
+                    pass
 
         
 
@@ -1792,7 +1795,7 @@ class GridUtils(object):
 
         return ncEncoding
     
-    def saveGrid(self, filename=None, directory=None):
+    def saveGrid(self, filename=None, directory=None, enc=None):
         '''
         This operation is destructive using the last known filename which can be overridden.
         '''
@@ -1815,12 +1818,159 @@ class GridUtils(object):
 
         # Save the grid here
         try:
-            self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+            gridEncoding = self.removeFillValueAttributes()
+            if enc:
+                for vrb in ['x', 'y', 'dx', 'dy', 'angle_dx', 'area']:
+                  gridEncoding[vrb] = {'dtype': enc}
+            self.grid.to_netcdf(self.xrFilename, encoding = gridEncoding)
             msg = "Successfully wrote netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
         except:
             msg = "Failed to write netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
+
+    def checkGridMetadata(self, kwargs, varKey, defaultValue, append=False):
+        '''
+        Update or overwrite global metadata values based on keyword arguments.
+
+        **Keyword arguments**
+
+            * *append* (``boolean``) -- Updated metadata is appended to any
+              existing metadata.  If the attribute does not exist, it is
+              added.
+        '''
+
+        returnValue = defaultValue
+        kwKeys = kwargs.keys()
+        gridKeys = self.grid.attrs.keys()
+
+        # Use the submitted keyword value, otherwise use the default
+        if varKey in kwargs.keys():
+            returnValue = kwargs[varKey]
+
+        # If we are not to update the metadata, then we use
+        # the existing grid metadata value.  If the existing
+        # value is None or empty, replace it with the new value.
+        currentValue = None
+        if varKey in gridKeys:
+            currentValue = self.grid.attrs[varKey]
+
+        if kwargs['updateMetadata']:
+            if append:
+                if currentValue is not None:
+                    if len(currentValue) == 0:
+                        returnValue = "%s" % (returnValue)
+                    else:
+                        returnValue = "%s\n%s" % (currentValue, returnValue)
+            else:
+                if currentValue is not None:
+                    if len(currentValue) > 0:
+                        returnValue = self.grid.attrs[varKey]
+        else:
+            # No update permitted unless the existing global attribute
+            # is empty or missing
+            if currentValue is not None:
+                if len(currentValue) > 0:
+                    returnValue = currentValue
+
+        return returnValue
+
+    def updateGridMetadata(self, **kwargs):
+        '''
+        Generic routine to apply metadata to appropriate entries to the existing grid
+        loaded into the gridutils object. This also checks any existing gridParameters.
+        This attempts to set several attributes.  If only setting one or two attributes,
+        consider using :func:`gridtools.gridutils.checkGridMetadata()`.
+
+        **Keyword arguments**:
+
+            * *updateMetadata* (``boolean``) -- Allow updates to metadata global attributes.
+              If False, existing metadata is not overwritten.  If an attribute is missing,
+              the global attribute is added. Default: True
+        '''
+        # If any keyword argument is unset, set to the default
+        utils.checkArgument(kwargs, 'updateMetadata', True)
+
+        #self.grid.attrs['grid_version'] = "0.2"
+        self.grid.attrs['grid_version'] = self.checkGridMetadata(kwargs, 'grid_version', "0.2")
+        msg = "GridTools: %s" % (self.getVersion())
+        self.grid.attrs['code_version'] = self.checkGridMetadata(kwargs, 'code_version', msg)
+        historyMsg = "%s: created grid with GridTools library" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+        #utils.checkArgument(kwargs, 'historyMsg', historyMsg)
+        #if 'history' in self.grid.attrs.keys():
+        #    self.grid.attrs['history'] = "%s\n%s" % (self.grid.attrs['history'], kwargs['historyMsg'])
+        #else:
+        #    self.grid.attrs['history'] = kwargs['historyMsg']
+        self.grid.attrs['history'] = self.checkGridMetadata(kwargs, 'history', historyMsg, append=True)
+
+        if hasattr(self, 'gridInfo'):
+            if 'gridParameters' in self.gridInfo:
+                if 'projection' in self.gridInfo['gridParameters']:
+                    if 'name' in self.gridInfo['gridParameters']['projection']:
+                        self.grid.attrs['projection'] =\
+                            self.checkGridMetadata(kwargs, 'projection', self.gridInfo['gridParameters']['projection']['name'])
+        #try:
+        #    self.grid.attrs['projection'] = self.gridInfo['gridParameters']['projection']['name']
+        #except:
+        #    pass
+
+        # Add additional metadata if available
+        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        for metaTag in addMetadata:
+            if metaTag in self.gridInfo['gridParameters'].keys():
+                #self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
+                globAttr = 'grid_%s' % (metaTag)
+                self.grid.attrs[globAttr] = self.checkGridMetadata(kwargs, globAttr, self.gridInfo['gridParameters'][metaTag])
+
+        # Collect system metadata
+        sysObj = sysinfo.SysInfo(grd=self)
+        sysObj.loadVersionData()
+        #self.grid.attrs['software_version'] = sysObj.dumpVersionData()
+        self.grid.attrs['software_version'] = self.checkGridMetadata(kwargs, 'software_version', sysObj.dumpVersionData())
+
+        # If the global attribute 'proj' is not set, try to set it using
+        # provided gridParameters.  Use the global 'proj' attribute if
+        # already set.
+
+        projString = None
+
+        # If the grid has a 'proj' use it as the authority
+        if hasattr(self, 'grid'):
+            if 'proj' in self.grid.attrs.keys():
+                projString = self.grid.attrs['proj']
+
+        # If 'proj' was not set, attempt to use a defined 'proj' in the
+        # projection parameters
+        if projString is None and hasattr(self, 'gridInfo'):
+            if 'gridParameters' in self.gridInfo:
+                if 'projection' in self.gridInfo['gridParameters']:
+                    if 'proj' in self.gridInfo['gridParameters']['projection']:
+                        projString = self.gridInfo['gridParameters']['projection']['proj']
+
+        # Last attempt to define projString
+        if projString is None:
+            projString = self.formProjString(self.gridInfo['gridParameters'])
+
+        if projString is None:
+            msg = "WARNING: Grid metadata: grid projection could not be determined."
+            self.printMsg(msg, level=logging.WARNING)
+        else:
+            # If we get to this point, set the 'proj' parameters above
+            self.grid.attrs['proj'] = self.checkGridMetadata(kwargs, 'proj', projString)
+            self.gridInfo['gridParameters']['projection']['proj'] = projString
+
+        #try:
+        #    if not('proj' in self.grid.attrs.keys()):
+        #        self.grid.attrs['proj'] = self.gridInfo['gridParameters']['projection']['proj']
+        #except:
+        #    projString = self.formProjString(self.gridInfo['gridParameters'])
+        #    if projString:
+        #        self.grid.attrs['proj'] = projString
+        #        self.gridInfo['gridParameters']['projection']['proj'] = projString
+        #    else:
+        #        msg = "WARNING: Projection string could not be determined from grid parameters."
+        #        self.printMsg(msg, level=logging.WARNING)
 
     def makeSoloMosaic(self, **kwargs):
         '''
@@ -1853,6 +2003,8 @@ class GridUtils(object):
             * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
 
         .. note::
+            Integers stored in the mosaic tiles must be 32 bit integers.  If 64 bit integers are used,
+            the FMS coupler will die with invalid netcdf variable type.
             Using the defaults, this routine will write the following files to the ``INPUT`` directory with
             one tile named ``tile1``:
 
@@ -1961,6 +2113,11 @@ class GridUtils(object):
 
             * *showModelGrid* (``boolean``) -- set False to hide the model grid. Default: True
             * *plotVariables* (``dict()``) -- one or more variables and plot parameters. Default: None
+            * *showGridPoints* (``list()``) -- list of grid points to show on the plot. The list contains
+              tuples of `(j,i)`, `(j,i,c)` or `(j,i,c,s)`.  The default color (c) is `red` with a size
+              (s) of 5.  To change just the size of the point, the color must also be specified.
+              NOTE: For MOM6 grids, the (j,i) refer to points on the supergrid.  Points on the
+              regular grid should be multiples of two.
 
         **Keyword arguments for plotVariables**:
 
@@ -1982,6 +2139,8 @@ class GridUtils(object):
             kwargs['showModelGrid'] = True
         if not('plotVariables' in kwargs.keys()):
             kwargs['plotVariables'] = dict()
+        if not('showGridPoints' in kwargs.keys()):
+            kwargs['showGridPoints'] = list()
 
         plotProjection = self.getPlotParameter('name', subKey='projection', default=None)
 
@@ -2084,6 +2243,21 @@ class GridUtils(object):
                     if j <= nj-1:
                         ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
 
+            # Overplot specified grid points
+            for pts in kwargs['showGridPoints']:
+                jpt = pts[0]
+                ipt = pts[1]
+                defaultColor = "red"
+                defaultSize = 5.0
+                ptlen = len(pts)
+                if ptlen == 3:
+                    defaultColor = pts[2]
+                if ptlen == 4:
+                    defaultColor = pts[2]
+                    defaultSize = pts[3]
+                ax.scatter(self.grid['x'][jpt,ipt], self.grid['y'][jpt,ipt],
+                        color=defaultColor, s=defaultSize, transform=transform, zorder=3.0)
+
         # Loop through provided variables
         if kwargs['plotVariables']:
             for pVar in kwargs['plotVariables'].keys():
@@ -2117,8 +2291,6 @@ class GridUtils(object):
 
                 # Configure plot parameters, title is covered up by the plot?
                 ax = self.updateAxes(ax, kwargs['plotVariables'][pVar])
-
-                #breakpoint()
 
         return f, ax
 
@@ -2181,6 +2353,360 @@ class GridUtils(object):
                 self.self.gridInfo['gridParameters'].pop(k, None)
                             
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
+
+    def extendGrid(self, jStart, jEnd, iStart, iEnd, gridMethod='auto', gridProj='auto'):
+        '''Extend the current grid by jStart, jEnd, iStart, iEnd points using
+        the specified method.  The grid can be extended using 'spherical' space
+        or 'latlon' space.  If the method is 'auto', the routine tries to 
+        determine which to use.  The grid is extended in all directions
+        using the maximum of provided parameters and then clipped to
+        the proper dimensions.  Grids extended using 'spherical' space
+        require the projection used when the grid was created to perform
+        forward and reverse transformation of coordinates.
+
+        This function assumes an existing grid is present and that
+        the variables x and y are longitude and latitude.
+
+        This function returns the extended grid.
+
+        .. note::
+
+            Since MOM6 grids are defined with a supergrid, to extend
+            the regular grid one point in all directions, this routine
+            should specify to extend the grid two points in all
+            directions.
+
+        **Grid Extension Technique**::
+
+            This description shows the extension of a grid by one point.  This
+            also applies to any requested grid size.
+
+            Process
+
+            # Original grid (o); Points to fill (.)
+            #  . . . . .
+            #  . o o o .
+            #  . o o o .
+            #  . o o o .
+            #  . . . . .
+
+            # Step 1: Extend grid along j-direction
+            # New points shown by (A)
+            #  . . . . .
+            #  A o o o A
+            #  A o o o A
+            #  A o o o A
+            #  . . . . .
+            #
+
+            # Step 2: Extend grid along the i-direction
+            # New points shown by (B)
+            #  B B B B B
+            #  A o o o A
+            #  A o o o A
+            #  A o o o A
+            #  B B B B B
+
+            # Step 3: Clip grid back to requested size
+            # given by iStart, iEnd, jStart, jEnd.
+
+            # To prepend one column of points,
+            # please specify extendGrid(0,0,1,0).
+            # The grid returned should look like:
+            #  A o o o
+            #  A o o o
+            #  A o o o
+
+            # To prepend one column of points and
+            # append a row of points to the end,
+            # please specify extendGrid(0,1,1,0).
+            # The grid returned should look like:
+            #  B B B B
+            #  A o o o
+            #  A o o o
+            #  A o o o
+
+        '''
+
+        # Local variables
+        maxIncrease = max(jStart, jEnd, iStart, iEnd)
+        x = None
+        y = None
+        extGrid = xr.Dataset()
+
+        # If gridMethod='auto' try to determine if we should extend
+        # the grid via 'spherical' or 'latlon'.
+
+        if gridMethod == 'auto':
+            gridMethod = self.extendGridDetectMethod()
+            if not(gridMethod in ('spherical','latlon')):
+                msg = "ERROR: Unable to automatically detect grid type. Returning an empty grid."
+                self.printMsg(msg, level=logging.ERROR)
+                self.debugMsg(msg)
+                return extGrid
+
+            # INFO
+            msg = ("INFO: Auto detected gridding method (%s)." % (gridMethod))
+            self.printMsg(msg, level=logging.INFO)
+
+        if gridProj == 'auto':
+            if hasattr(self.grid, 'attrs'):
+                gridAttr = self.grid.attrs.keys()
+                if 'proj' in gridAttr:
+                    gridProj = self.grid.attrs['proj']
+
+            # INFO
+            msg = ("INFO: Auto detected projection details (%s)." % (gridProj))
+            self.printMsg(msg, level=logging.INFO)
+
+        # An existing grid should be present
+        try:
+            extGrid['x'] = self.grid['x'].copy()
+            extGrid['y'] = self.grid['y'].copy()
+        except:
+            msg = "ERROR: Existing grid not found.  Returning an empty grid."
+            self.printMsg(msg, level=logging.ERROR)
+            self.debugMsg(msg)
+            return extGrid
+
+        extGrid.attrs['extendedGrid'] = False
+        if gridMethod == 'spherical':
+            extGrid = self.extendGridSpherical(extGrid, maxIncrease, gridProj)
+        if gridMethod == 'latlon':
+            extGrid = self.extendGridLatLon(extGrid, maxIncrease)
+
+        if extGrid.attrs['extendedGrid']:
+            # No need to do anything if requested size equals maxIncrease
+            if maxIncrease == iStart and maxIncrease == iEnd and maxIncrease == jStart and maxIncrease == jEnd:
+                return extGrid
+            # Clip extended grid to requested size
+            (ny, nx) = extGrid['x'].shape
+            clipGrid = xr.Dataset()
+            # Y/lat
+            jjStart = maxIncrease - jStart
+            jjEnd   = ny - (maxIncrease - jEnd)
+            # X/lon
+            iiStart = maxIncrease - iStart
+            iiEnd   = nx - (maxIncrease - iEnd)
+            print("Request:",jStart,jEnd,iStart,iEnd)
+            print("MaxIncrease:",maxIncrease)
+            print("Grid shape:",ny,nx)
+            print("Grid clip:",jjStart,jjEnd,iiStart,iiEnd)
+            clipGrid['x'] = extGrid['x'][jjStart:jjEnd,iiStart:iiEnd]
+            clipGrid['y'] = extGrid['y'][jjStart:jjEnd,iiStart:iiEnd]
+            extGrid = clipGrid
+            print("Grid shape:", extGrid['x'].shape)
+        else:
+            msg = "ERROR: Extending grid failed.  Returning incomplete grid."
+            self.printMsg(msg, level=logging.ERROR)
+            self.debugMsg(msg)
+
+        return extGrid
+
+    def extendGridSpherical(self, inputGrid, maxIncrease, gridProj):
+        '''
+        This uniformly extends the input grid by maxIncrease points using spherical coordinates
+        in meters.  This function requires a grid projection to accurately perform the forward
+        and reverse transformation of grid points.
+
+        To increase the grid size we need maxIncrease points on either size (twice as big).
+        '''
+
+        # create the coordinate reference system
+        crs = CRS.from_proj4(gridProj)
+
+        # create the projection from lon/lat to x/y
+        projObj = Transformer.from_crs(crs.geodetic_crs, crs)
+
+        # Transform lat/lon to spherical coordinates
+        gX, gY = projObj.transform(inputGrid['x'], inputGrid['y'])
+
+        # Start with an empty grid
+        extGrd = xr.Dataset()
+        extGrd.attrs['extendedGrid'] = True
+
+        # Get current size of input grid
+        (nyp, nxp) = inputGrid['x'].shape
+
+        # Create extended grid with new size
+        x = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+        y = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+
+        # Place array and dimensions into the new grid
+        # Copy input grid into the center of the new grid
+        extGrd['x'] = (('nyp', 'nxp'), x)
+        extGrd['y'] = (('nyp', 'nxp'), y)
+        extGrd['x'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['x'][:,:]
+        extGrd['y'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['y'][:,:]
+        # Get the shape of the new grid
+        (extyp, extxp) = x.shape
+
+        # Extend grid along j-direction using meters and transform back to
+        # latitude and longitude.
+        for j in range(0, nyp):
+            (newY, newX) = self.findLineFromPoints(gY[j,:], gX[j,:], maxIncrease, maxIncrease)
+            newLon, newLat = projObj.transform(newX, newY, direction='INVERSE')
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                extGrd['x'][j+maxIncrease,ind-1] = newLon[(newPt*2)]
+                extGrd['y'][j+maxIncrease,ind-1] = newLat[(newPt*2)]
+                extGrd['x'][j+maxIncrease,extxp-ind] = newLon[(newPt*2)+1]
+                extGrd['y'][j+maxIncrease,extxp-ind] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        # Extend grid along i-direction using meters and transform back to
+        # latitude and longitude coordinates.  Need to include
+        # the extended points in the j-direction to find
+        # the corners.
+        for i in range(0, extxp):
+            lon = extGrd['x'][maxIncrease:extyp-maxIncrease,i].data
+            lat = extGrd['y'][maxIncrease:extyp-maxIncrease,i].data
+            gXX, gYY = projObj.transform(lon, lat)
+            (newY, newX) = self.findLineFromPoints(gYY, gXX, maxIncrease, maxIncrease)
+            newLon, newLat = projObj.transform(newX, newY, direction='INVERSE')
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                extGrd['x'][ind-1,i] = newLon[(newPt*2)]
+                extGrd['y'][ind-1,i] = newLat[(newPt*2)]
+                extGrd['x'][extyp-ind,i] = newLon[(newPt*2)+1]
+                extGrd['y'][extyp-ind,i] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        return extGrd
+
+    def extendGridLatLon(self, inputGrid, maxIncrease):
+        '''
+        This uniformly extends the input grid by maxIncrease points using latitude and longitude
+        coordinates in degrees.
+
+        To increase the grid size we need maxIncrease points on either size (twice as big).
+        '''
+
+        # Start with an empty grid
+        extGrd = xr.Dataset()
+        extGrd.attrs['extendedGrid'] = True
+
+        # Get shape of the input grid
+        (nyp, nxp) = inputGrid['x'].shape
+
+        # Create extended grid with new size
+        x = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+        y = np.zeros((nyp+(maxIncrease*2), nxp+(maxIncrease*2)))
+
+        # Place array and dimensions into the new grid
+        # Copy input grid into the center of the new grid
+        extGrd['x'] = (('nyp', 'nxp'), x)
+        extGrd['y'] = (('nyp', 'nxp'), y)
+        extGrd['x'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['x'][:,:]
+        extGrd['y'][maxIncrease:nyp+maxIncrease,maxIncrease:nxp+maxIncrease] = inputGrid['y'][:,:]
+        # Get the shape of the new grid
+        (extyp, extxp) = x.shape
+
+        # Extend grid along j-direction using latitude
+        # and longitude coordinates.
+        for j in range(0, nyp):
+            (newLat, newLon) = self.findLineFromPoints(inputGrid['y'][j,:], inputGrid['x'][j,:], maxIncrease, maxIncrease)
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                # jStart (head)
+                extGrd['x'][j+maxIncrease,ind-1] = newLon[(newPt*2)]
+                extGrd['y'][j+maxIncrease,ind-1] = newLat[(newPt*2)]
+                # jEnd (tail)
+                extGrd['x'][j+maxIncrease,extxp-ind] = newLon[(newPt*2)+1]
+                extGrd['y'][j+maxIncrease,extxp-ind] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        # Extend grid along i-direction using latitude
+        # and longitude coordinates.  Need to include
+        # the extended points in the j-direction to find
+        # the corners.
+        for i in range(0, extxp):
+            xpts = extGrd['x'][maxIncrease:extyp-maxIncrease,i].data
+            ypts = extGrd['y'][maxIncrease:extyp-maxIncrease,i].data
+            (newLat, newLon) = self.findLineFromPoints(ypts, xpts, maxIncrease, maxIncrease)
+            ind = maxIncrease
+            for newPt in range(0, maxIncrease):
+                extGrd['x'][ind-1,i] = newLon[(newPt*2)]
+                extGrd['y'][ind-1,i] = newLat[(newPt*2)]
+                extGrd['x'][extyp-ind,i] = newLon[(newPt*2)+1]
+                extGrd['y'][extyp-ind,i] = newLat[(newPt*2)+1]
+                ind = ind - 1
+
+        return extGrd
+
+    def extendGridDetectMethod(self):
+        '''
+        This function looks at the grid metadata and searches for hints
+        to see how the grid should be extended.
+
+        **Sources probed for information**:
+        
+            * Global attribute: projection
+            * Variable 'tile' attribute: geometry
+        '''
+
+        # Simple cases
+        if hasattr(self.grid, 'attrs'):
+            gridAttr = self.grid.attrs.keys()
+            if 'projection' in gridAttr:
+                gridProjection = self.grid.attrs['projection']
+                if gridProjection == 'Mercator':
+                    return 'latlon'
+                if gridProjection in ('LambertConformalConic','Stereographic'):
+                    return 'spherical'
+            if 'proj' in gridAttr:
+                projString = self.grid.attrs['proj']
+                if projString.find('proj=lcc') >=0 or projString.find('proj=stere') >=0:
+                    return 'spherical'
+                if projString.find('proj=merc') >=0:
+                    return 'latlon'
+
+        if hasattr(self.grid, 'variables'):
+            gridVars = self.grid.variables.keys()
+            if 'tile' in gridVars:
+                tileAttr = self.grid.variables['tile'].attrs.keys()
+                if 'geometry' in tileAttr:
+                    gridGeometry = self.grid.variables['tile'].attrs['geometry']
+                    if gridGeometry == 'spherical':
+                        return 'spherical'
+                    # This may not be right
+                    return 'latlon'
+
+        return None
+
+
+    def findLineFromPoints(self, ptsY, ptsX, nY, nX):
+        '''Find the extension points at the end of given set of points.
+        This routine assumes a nearly linear regularly spaced array of points
+        is provided.
+
+        Returned are the new points on the given line.
+
+        ([y1, y2], [x1, x2]) where (y1, x1) is the head of
+        the line and (y2, x2) is the tail of the line.
+
+        NOTE: Number of points to extend should be the same nY = nX.  If
+        the points are not regularly spaced, extension of a line with
+        a large number of points is not going to work very well.
+        '''
+
+        newy = []
+        newx = []
+
+        diffY = np.diff(ptsY)
+        diffX = np.diff(ptsX)
+
+        # lat
+        for ind in range(1, nY+1):
+            newy.append(ptsY[0] - (diffY[0]*ind))
+            newy.append(ptsY[-1] + (diffY[-1]*ind))
+
+        # lon
+        for ind in range(1, nX+1):
+            newx.append(ptsX[0] - (diffX[0]*ind))
+            newx.append(ptsX[-1] + (diffX[-1]*ind))
+
+        return (newy, newx)
 
     def getGridParameter(self, gkey, subKey=None, default=None, inform=True):
         '''Return the requested grid parameter or the default if none is available.
@@ -2290,6 +2816,37 @@ class GridUtils(object):
                 self.printMsg("%20s: %s" % (k,self.gridInfo['gridParameters'][k]), level=logging.INFO)
         else:
             self.printMsg("No grid parameters found.", level=logging.ERROR)
+
+    def subsetGrid(self, scaleFactor):
+        """Subsets current grid by the specified scale factor.  Scale factor must
+        be an integer and be evenly divisble into the regular grid.  A subsetted
+        grid is returned or None on any error.
+        """
+
+        # Get regular grid size
+        (nyp, nxp) = self.grid['x'].shape
+        ny = int((nyp - 1) / 2)
+        nx = int((nxp - 1) / 2)
+
+        # Check for grids that are not divisible by the scale factor
+        if ny % scaleFactor != 0 or nx % scaleFactor != 0:
+            self.printMsg(".", level=logging.ERROR)
+            return None
+
+        newGrd = gridtools.gridutils.GridUtils()
+        newGrd.grid['x'] = self.grid['x'][::scaleFactor,::scaleFactor]
+        newGrd.grid['y'] = self.grid['y'][::scaleFactor,::scaleFactor]
+
+        # Copy global level metadata
+        for attr in self.grid.attrs.keys():
+            newGrd.grid.attrs[attr] = self.grid.attrs[attr]
+
+        # Recompute metrics
+        history = "%s: subset grid with GridTools.subsetGrid() using scale factor %d" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
+        newGrd.computeGridMetricsSpherical(history=history)
+
+        return newGrd
     
     # plot parameter operations plot parameter routines
     # Plot Parameter Operations Plot Parameter Routines
@@ -2453,7 +3010,7 @@ class GridUtils(object):
             self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
     # data source operations data source routines
-    # Data source operations Data source routines
+    # Data Source Operations Data Source Routines
 
     def addDataSource(self, dataSource, delete=False):
         '''Add a data source to the catalog.  See: datasource.addDataSource()'''
@@ -2742,9 +3299,22 @@ class GridUtils(object):
         return bathyutils.applyExistingOceanmask(self, dsData, dsVariable, maskFile, maskVariable, **kwargs)
 
     def computeBathymetricRoughness(self, dsName, **kwargs):
-        '''This generates h2 and other fields.  See: bathytools.computeBathymetricRoughness()'''
+        '''This generates h2 and other fields.
+        See: :func:`gridtools.bathyutils.computeBathymetricRoughness()`'''
         from . import bathyutils
-        return bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
+        roughnessGrids = bathyutils.computeBathymetricRoughness(self, dsName, **kwargs)
+
+        # Add history metadata
+        return roughnessGrids
+
+    def ice9(self, **kwargs):
+        '''This calls the ice-9 algorithm from bathyutils.
+        See: :func:`gridtools.bathyutils.ice9()`'''
+        from . import bathyutils
+        ice9Grids = bathyutils.ice9(self, **kwargs)
+
+        # Add history metadata
+        return ice9Grids
 
     # meshutils routines
 

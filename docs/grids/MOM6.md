@@ -60,3 +60,11 @@ variables and dimensions:
  * Dimensions
    * nx, ny : grid centers
    * nxp, nxp : grid verticies
+
+### Nomenclature
+
+ * The supergrid is twice the horizonal resolution.
+ * The supergrid contains all the staggered points, but the model only
+   solves equations for the actual grid.
+ * When talking about the resolution of a MOM6 grid, the convention is
+   to talk about the resolution of the grid not the supergrid.

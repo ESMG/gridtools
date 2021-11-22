@@ -291,6 +291,11 @@ class MOM6(object):
          where to find the grid file(s).  Based on tools in version 5 of MOM
          (http://www.mom-ocean.org/).
 
+        **Keyword arguments**:
+
+        * *intType* (``str``) -- The default type to be written out to for the FMS
+          coupler tile files.  Default: int32
+
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
 
@@ -602,8 +607,14 @@ class MOM6(object):
             # Global attributes
             self._add_global_attributes(ds)
 
-            ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds,\
-                stringVars={'contact': 255}))
+            enc = grd.removeFillValueAttributes(data = ds, stringVars = {'contact': 255})
+            # For the FMS coupler, *_cell variables must be i4/int32
+            intType = 'int32'
+            if 'intType' in kwargs.keys():
+                intType = kwargs['intType']
+            enc['tile1_cell'] = {'dtype': intType}
+            enc['tile2_cell'] = {'dtype': intType}
+            ds.to_netcdf(destinationFile, encoding = enc)
 
         return
 

@@ -671,7 +671,7 @@ class App(object):
         self.glatts = pn.widgets.Spinner(name="Latitude of True Scale(lat_ts) (-90 to 90)", value=40.0, step=1.0, start=-90.0, end=90.0, width=100)
         self.gtilt = pn.widgets.Spinner(name="Tilt (-90 to 90)", value=30.0, step=0.1, start=-90.0, end=90.0, width=100)
         self.gridCenterX = pn.widgets.Spinner(name='Grid Center(Longitude or X)', value=230.0, step=0.1, start=0.0, end=360.0, width=100)
-        self.gridCenterY = pn.widgets.Spinner(name='Grid Center(Latitude or Y)', value=40.0, step=0.1, start=0.0, end=90.0, width=100)
+        self.gridCenterY = pn.widgets.Spinner(name='Grid Center(Latitude or Y)', value=40.0, step=0.1, start=-90.0, end=90.0, width=100)
         self.gridCenterUnits = pn.widgets.Select(name='Grid Center Units', options=self.unitNames, value=self.unitNames[0])
         self.gridControlUpdateButton = pn.widgets.Button(name='Make Grid', button_type='primary')
         self.gridControlUpdateButton.on_click(self.make_grid)

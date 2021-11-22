@@ -480,8 +480,8 @@ class ROMS(object):
         write_nc_var(grd.hgrid.y_v, 'y_v', ('eta_v', 'xi_v'), 'y location of V-points', 'meter')
         write_nc_var(grd.hgrid.x_psi, 'x_psi', ('eta_psi', 'xi_psi'), 'x location of PSI-points', 'meter')
         write_nc_var(grd.hgrid.y_psi, 'y_psi', ('eta_psi', 'xi_psi'), 'y location of PSI-points', 'meter')
-        write_nc_var(grd.hgrid.x_vert, 'x_vert', ('eta_vert', 'xi_vert'), 'x location of cell verticies', 'meter')
-        write_nc_var(grd.hgrid.y_vert, 'y_vert', ('eta_vert', 'xi_vert'), 'y location of cell verticies', 'meter')
+        write_nc_var(grd.hgrid.x_vert, 'x_vert', ('eta_vert', 'xi_vert'), 'x location of cell vertices', 'meter')
+        write_nc_var(grd.hgrid.y_vert, 'y_vert', ('eta_vert', 'xi_vert'), 'y location of cell vertices', 'meter')
 
         if hasattr(grd.hgrid, 'lon_rho'):
             write_nc_var(grd.hgrid.lon_rho, 'lon_rho', ('eta_rho', 'xi_rho'), 'longitude of RHO-points', 'degree_east')
@@ -492,8 +492,8 @@ class ROMS(object):
             write_nc_var(grd.hgrid.lat_v, 'lat_v', ('eta_v', 'xi_v'), 'latitude of V-points', 'degree_north')
             write_nc_var(grd.hgrid.lon_psi, 'lon_psi', ('eta_psi', 'xi_psi'), 'longitude of PSI-points', 'degree_east')
             write_nc_var(grd.hgrid.lat_psi, 'lat_psi', ('eta_psi', 'xi_psi'), 'latitude of PSI-points', 'degree_north')
-            write_nc_var(grd.hgrid.lon_vert, 'lon_vert', ('eta_vert', 'xi_vert'), 'longitude of cell verticies', 'degree_east')
-            write_nc_var(grd.hgrid.lat_vert, 'lat_vert', ('eta_vert', 'xi_vert'), 'latitude of cell verticies', 'degree_north')
+            write_nc_var(grd.hgrid.lon_vert, 'lon_vert', ('eta_vert', 'xi_vert'), 'longitude of cell vertices', 'degree_east')
+            write_nc_var(grd.hgrid.lat_vert, 'lat_vert', ('eta_vert', 'xi_vert'), 'latitude of cell vertices', 'degree_north')
 
         nc.createVariable('spherical', 'c')
         nc.variables['spherical'].long_name = 'Grid type logical switch'

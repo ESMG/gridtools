@@ -3,6 +3,7 @@
 # conda: gridTools
 
 import sys, os, logging
+import xarray as xr
 import cartopy
 from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
@@ -136,7 +137,7 @@ grd.setPlotParameters(
     plotVariables={
         'depth': {
             'values': resultGrids['depth'],
-            'title': 'GEBCO 2020 applied to GridUtils.regridTopo()',
+            'title': 'GEBCO 2020: GridUtils.regridTopo(): depth',
             'cbar_kwargs': {
                 'orientation': 'horizontal',
             }
@@ -153,7 +154,7 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Bathy_Example8.png'), dpi=None, f
     plotVariables={
         'oceanMask': {
             'values': resultGrids['ocean_mask'],
-            'title': 'GEBCO 2020 applied to GridUtils.regridTopo()',
+            'title': 'GEBCO 2020: GridUtils.regridTopo(): ocean_mask',
             'cbar_kwargs': {
                 'orientation': 'horizontal',
             }
@@ -162,4 +163,89 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Bathy_Example8.png'), dpi=None, f
 )
 
 figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OceanMask_Example8.png'), dpi=None, facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+
+# Do the same thing again but with an extended grid to eliminate the corner grid
+# point artifacts.
+
+# Create an extended grid
+extGrd = grd.extendGrid(2, 2, 2, 2)
+
+# Put the extended grid into a gridtools grid.  Attach it to
+# the same data source as above.
+grd2 = GridUtils()
+grd2.useDataSource(ds)
+grd2.readGrid(local=extGrd)
+
+# Use topoutils.TopoUtils.regridTopo() function on extended grid
+resultGridsExt = grd2.regridTopo('ds:GEBCO_2020', topoVarName='depth', periodic=False)
+
+# Subset the result grid back to the original grid
+resultGrids2 = xr.Dataset()
+resultGrids2['depth'] = resultGridsExt['depth'][1:-1,1:-1]
+resultGrids2['ocean_mask'] = resultGridsExt['ocean_mask'][1:-1,1:-1]
+
+# Write fields out to a file
+# TODO: provide a data source service hook?
+resultGrids2.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example8_ext.nc'),
+        encoding=grd.removeFillValueAttributes(data=resultGrids2))
+
+# Do some plotting!
+
+# Set plot parameters for the grid and topography
+
+grd.setPlotParameters(
+    {
+        'figsize': (8,8),
+        'projection': {
+            'name': 'NearsidePerspective',
+            'lat_0': 40.0,
+            'lon_0': 230.0
+        },
+        'extent': [-160.0 ,-100.0, 20.0, 60.0],
+        'iLinewidth': 1.0,
+        'jLinewidth': 1.0,
+        'showGridCells': True,
+        'title': "Nearside Perspective: 20x30 with %.1f degree tilt" % (gtilt),
+        'iColor': 'k',
+        'jColor': 'k',
+        'transform': cartopy.crs.PlateCarree(),
+        'satelliteHeight': 35785831.0,
+    }
+)
+
+# Plot the new bathy grid
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'depth': {
+            'values': resultGrids2['depth'],
+            'title': 'GEBCO 2020: GridUtils.regridTopo(): depth_ext',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
+        }
+    },
+)
+
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_Bathy_Example8_ext.png'), dpi=None,
+        facecolor='w', edgecolor='w',
+        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+
+# Plot the fractional ocean mask
+(figure, axes) = grd.plotGrid(
+    showModelGrid=False,
+    plotVariables={
+        'oceanMask': {
+            'values': resultGrids2['ocean_mask'],
+            'title': 'GEBCO 2020: GridUtils.regridTopo(): ocean_mask_ext',
+            'cbar_kwargs': {
+                'orientation': 'horizontal',
+            }
+        }
+    },
+)
+
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OceanMask_Example8_ext.png'), dpi=None,
+        facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
