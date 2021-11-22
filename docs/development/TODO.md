@@ -2,7 +2,7 @@
 
 ## Milestones
 
- - [X] Release 0.3.x
+ - [ ] Release 0.3.x
  - [ ] Release 0.x
    - [ ] Additional metadata for tile variable: `standard_name`, `tile_spec_version`,
          `geometry`, `discretization` and `conformal`.
@@ -43,7 +43,7 @@
 # TASKS
 
  - [ ] Generic tool to subset a MOM6 grid for a given area for debugging.
-   - [X] Name this function subsetGridDebug().
+   - [X] Name this function subsetGrid().
    - [ ] Allow selection of offset, spacing and range.
  - [ ] Show example of original roughness calculation
  - [ ] grid extension and other operations for `GNOMONIC_ED` grid (FRE)

@@ -1,9 +1,19 @@
 # Changelog
 
+## 2021-11-22
+
+Working towards release 0.3.2
+
+ - Fixed some formatting in documentation
+ - Updated operational pathways graphic
+ - Working through release tasks
+
 ## 2021-11-17
 
 Working towards release 0.3.2
 
+ - Documentation cleanup for gridutils.extendGrid()
+ - RTD is working!
  - Remove pip requirements that snuck into `gridTools_export-linux-64-RTD.yml`.
  - Modify `roms_io.py` to mandate netcdf4 or netcdf3.  Do not fall back to `pyroms`.
  - Remove `cartopy` from requirements.txt; this triggers a lot of dependency checks.

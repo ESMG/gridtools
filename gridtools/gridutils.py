@@ -1452,11 +1452,11 @@ class GridUtils(object):
         :rtype: none
 
         Supported grid conversions:
-            +--------+--------+---------------------------------------------------+
-            | SOURCE | TARGET | CODE CITATIONS                                    |
-            +--------+--------+---------------------------------------------------+
-            | ROMS   | MOM6   | :cite:p:`Ilicak_2020_ROMS_to_MOM6`                |
-            +--------+--------+---------------------------------------------------+
+            +--------+--------+-----------------------------------------------------------------+
+            | SOURCE | TARGET | CODE CITATIONS                                                  |
+            +--------+--------+-----------------------------------------------------------------+
+            | ROMS   | MOM6   | convert_ROMS_grid_to_MOM6.py :cite:p:`Ilicak_2020_ROMS_to_MOM6` |
+            +--------+--------+-----------------------------------------------------------------+
 
         **Keyword arguments**:
 
@@ -2376,7 +2376,7 @@ class GridUtils(object):
             should specify to extend the grid two points in all
             directions.
 
-        **Grid Extension Technique**:
+        **Grid Extension Technique**::
 
             This description shows the extension of a grid by one point.  This
             also applies to any requested grid size.
