@@ -35,6 +35,7 @@
  * https://github.com/pydata/xarray/issues/2899
  * https://github.com/rabernat/intro_to_physical_oceanography
  * https://github.com/SciTools/cartopy/issues/787
+ * https://gitlab.com/remikz/nccmp
  * https://guides.github.com/features/mastering-markdown/
  * http://holoviews.org/user_guide/Dashboards.html
  * https://math.libretexts.org/Bookshelves/Calculus/Book%3A_Calculus_(OpenStax)/12%3A_Vectors_in_Space/12.7%3A_Cylindrical_and_Spherical_Coordinates#:~:text=In%20the%20Cartesian%20coordinate%20system%2C%20the%20location%20of%20a%20point,an%20angle%20measure%20(%CE%B8).
@@ -42,8 +43,10 @@
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/image_masked.html
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_levels.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-levels-py
  * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html#sphx-glr-gallery-images-contours-and-fields-pcolormesh-grids-py
- * https://matplotlib.org/stable/tutorials/colors/colormaps.html
  * https://matplotlib.org/stable/tutorials/colors/colorbar_only.html#sphx-glr-tutorials-colors-colorbar-only-py
+ * https://matplotlib.org/stable/tutorials/colors/colormaps.html
+ * https://matplotlib.org/stable/tutorials/colors/colormap-manipulation.html
+ * https://matplotlib.org/stable/tutorials/colors/colors.html
  * https://matplotlib.org/stable/users/event_handling.html
  * https://matplotlib.org/stable/users/interactive.html
  * https://matthewrocklin.com/blog/work/2017/07/03/scaling
@@ -67,6 +70,7 @@
  * https://scitools.org.uk/cartopy/docs/latest/index.html
  * https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
  * https://scitools.org.uk/cartopy/docs/latest/gallery/effects_of_the_ellipse.html
+ * https://scitools.org.uk/cartopy/docs/latest/matplotlib/gridliner.html
  * https://softwareengineering.stackexchange.com/questions/329348/classes-vs-modules-in-python
  * https://www.sphinx-doc.org/en/master/latex.html#latexsphinxsetup
  * https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html
@@ -82,6 +86,7 @@
  * https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy
  * https://stackoverflow.com/questions/13530489/adding-background-color-of-notes-to-sphinx-generated-pdf-files
  * https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+ * https://stackoverflow.com/questions/18717877/prevent-plot-from-showing-in-jupyter-notebook
  * https://stackoverflow.com/questions/20180543/how-to-check-version-of-python-modules
  * https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
  * https://stackoverflow.com/questions/20961287/what-is-pylab

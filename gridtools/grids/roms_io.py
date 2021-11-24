@@ -85,10 +85,14 @@ try:
     #MFDataset.__doc__ = __doc__
 
 except:
-    import pyroms.extern.pupynere
-    import warnings
+    #import pyroms.extern.pupynere
+    #import warnings
 
-    warnings.warn('netCDF[3/4] not found -- using pupynere.')
+    #warnings.warn('netCDF[3/4] not found -- using pupynere.')
+    
+    # netcdf4 is MANDITORY for gridtools
+    import netCDF4 as netCDF
+
 
     def Dataset(ncfile):
         if isinstance(ncfile, str):

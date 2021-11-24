@@ -59,7 +59,7 @@ grd.setPlotParameters(
         'showGrid': False,
         'showGridCells': True,
         'title': 'Stereographic: mini IBCAO',
-        'iColor': 'k',
+        'iColor': 'y',
         'jColor': 'k'
     }
 )

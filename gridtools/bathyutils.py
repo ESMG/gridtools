@@ -1,5 +1,5 @@
 # Bathymetric tools
-# Implementations of bathometric grid generators
+# Implementation of bathometric grid generators and other utilities
 #  - https://github.com/nikizadehgfdl/ocean_model_topog_generator
 #    - compute_bathymetric_roughness_h2(**opts)
 
@@ -315,10 +315,84 @@ def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kw
 
     return workData['newDepth']
 
+def ice9(grd, **kwargs):
+    '''
+    This is a implementation of the ice-9 algorithm for filling in disconnected ocean
+    bodies (lakes) for a given ocean grid.  Be sure to specify anticipated
+    MINIMUM_DEPTH, MASKING_DEPTH and MAXIMUM_DEPTH that will be used for the
+    model run.
+
+    :param grd: class object
+    :type grd: GridUtils
+    :param \**kwargs:
+        See below
+
+    **Keyword arguments**:
+
+        * *ocean_seeds* (``[(int, int)]``) --
+          Provide ice-9 algorithm with one or more (j,i) ocean body grid points to designate
+          as areas that should be treated as areas of continuous ocean points.  
+          If more than one seed is given, all the discovered wet points will be
+          merged together to form the final grid minus any detached ocean points (lakes).
+          NOTE: Only the first seed is used! Future releases will allow multiple seeds.
+        * *depth* (``grid``) --
+          The depth grid to use for ice-9 algorithm.  This should be the same size as
+          the provided latitude and logitude points defining the grid.  Values are
+          positive for depth (water) and negative for height (land).
+        * *periodic* (``boolean``) --
+          Tells the algorithm that the grid is periodic and should
+          check wrap points.  Default: False
+          NOTE: Not implemented!
+        * *returnFields* (``list``) --
+          List of fields to be returned in the grd object.  Default: ['wetMask']
+        * *MINIMUM_DEPTH* (``float``) -- minimum depth of ocean in meters. Default: 0.0
+        * *MASKING_DEPTH* (``float``) -- masking depth of ocean in meters. Default: 0.0
+        * *MAXIMUM_DEPTH* (``float``) -- maximum depth of ocean in meters. Default: -99999.0
+        * *zEdits* (``boolean``) --
+          Utilize zEdits for the provided depth field.  Store any updates to the depth field
+          in zEdits as well.  Default: False
+          NOTE: Not implemented!
+
+    The ice-9 algorithm was first mentioned in a program written by Niki Zadeh in the
+    `ocean_model_topog_generator` repository.  :cite:p:`Zadeh_2020_ocean_model_topog_generator`
+
+    Another reference to the ice-9 algorithm is metioned in the
+    repository `regrid_runoff` by  Alistair Adcroft.  :cite:p:`Adcroft_2020_regrid_runoff`.
+    '''
+
+    # Run through each ocean_seed provided
+    # TODO: This only runs through the first seed
+    for oceanSeed in kwargs['ocean_seeds']:
+        depth = kwargs['depth']
+        (nj, ni) = depth.shape
+        wetMask = xr.DataArray(data = np.zeros((nj, ni)), dims = ("ny", "nx"))
+        stack = set()
+        stack.add( oceanSeed )
+        while stack:
+            (j,i) = stack.pop()
+            # If we are already marked wet or see a land point
+            # skip to the next point.
+            if wetMask[j,i] or depth[j,i] <= kwargs['MASKING_DEPTH']: continue
+            wetMask[j,i] = 1
+
+            # Check surrounding points
+            # For periodic boundaries, check wrap points
+            if i>0: stack.add( (j,i-1) )
+            #else: stack.add( (j,ni-1) )
+            if i<ni-1: stack.add( (j,i+1) )
+            #else: stack.add( (j,0) )
+            if j>0: stack.add( (j-1,i) )
+            if j<nj-1: stack.add( (j+1,i) )
+            #else: stack.add( (j,ni-1-i) )
+
+        # Only run the first seed for now
+        break
+
+    return wetMask
 
 # Original functions from create_topog_refinedSampling.py
 
-def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
+def break_array_to_blocks(a, xb=4, yb=1, useOverlap=False, useSupergrid=False):
     a_win = []
     # TODO: xb==8 or other values are not completely supported
     if ((xb == 4 or xb == 8) and yb == 1):
@@ -329,9 +403,10 @@ def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
 
         j1 = a.shape[0]//yb
 
-        # If we are not using the super grid, we want to overlap
-        # the blocks to get rid of a zero band between the blocks
-        if not(useSupergrid):
+        # If we are using the overlap, add points in the
+        # j-direction which we dispose of to get rid of the
+        # zero bands.
+        if useOverlap:
             a_win.append(a[0:j1,0:i1+1])
             a_win.append(a[0:j1,i1:i2+1])
             a_win.append(a[0:j1,i2:i3+1])
@@ -347,15 +422,18 @@ def break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
         raise Exception('This routine can only make 2x2 blocks!')
         ##Niki: Implement a better algo and lift this restriction
 
-def undo_break_array_to_blocks(a, xb=4, yb=1, useSupergrid=False):
+def undo_break_array_to_blocks(a, xb=4, yb=1, useOverlap=False, extendedGrid=False,
+        useSupergrid=False, useQHGridShift=False):
     if (xb == 4 and yb == 1):
-        if not(useSupergrid):
+        if useOverlap:
             ao = np.append(a[0][:,:-1], a[1], axis=1)
             ao = np.append(ao[:,:-1]  , a[2], axis=1)
             ao = np.append(ao[:,:-1]  , a[3], axis=1)
-            # Trim y+1,x and y,x+1
-            ao = ao[:-1,:-1]
-            #pdb.set_trace()
+            # If we are using the QHGridShift,
+            # trim y+1,x and y,x+1, otherwise send
+            # the grid back untrimmed.
+            if useQHGridShift:
+                ao = ao[:-1,:-1]
         else:
             ao = np.append(a[0], a[1], axis=1)
             ao = np.append(ao  , a[2], axis=1)
@@ -603,20 +681,37 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         * *auxVariables* (``list``) --
           Specify additional variables to include with bathymetric roughness. See below. Default: []
         * *superGrid* (``boolean``) --
-          If ``True``, the bathymetric roughness grid returned is a super grid.  Otherwise, the ocean roughness is the same size as the current grid. Default: False
+          If ``True``, the bathymetric roughness grid returned is a supergrid.
+          Otherwise, the ocean roughness is the same size as the current grid. Default: False
         * *useClipping* (``boolean``) --
-          Use ``True`` if the current grid is periodic and should be clipped prior to computing the bathymetric roughness. Defualt: False
+          Use ``True`` if the current grid is periodic and should be
+          clipped prior to computing the bathymetric roughness. Defualt: False
         * *useFixByOverlapQHGridShift* (``boolean``) --
           When using a regular grid, use overlapping grid technique to fill in partition boundaries.
           See IMPLEMENTATION NOTES below. Default: True
+        * *useQHGridShift* (``boolean``) --
+          For a regular grid, use the Q point values as the H values to fill missing points.
+        * *useOverlap* (``boolean``) --
+          Use overlapping grid technique to fill in partition boundaries.  The outer column and
+          row will still be missing.
+        * *extendedGrid* (``boolean``) --
+          If True, the grid provided by this routine has been extended and should use the overlap
+          technique on h-points only and not q-points which are then shifted back to h-points.
+          See IMPLEMENTATION NOTES below. Default: False
 
     This routine is based on a paper by Adcroft :cite:p:`Adcroft_2013` and python code from
     `OMtopogen/create_topog_refinedSampling.py` :cite:p:`Zadeh_2020_ocean_model_topog_generator`.
 
     .. note::
 
+      :maxMB:
+          The memory limit for successive grid refinements.  This should be maximized for the
+          memory footprint of the compute node.  If the program crashes, use lower amounts of
+          memory.
+
       :auxVariables:
-          h_std, h_min, h_max, and height variables. Ask for one or more additional variables by python list [] to auxVariables.
+          h_std, h_min, h_max, and height variables. Ask for one or more
+          additional variables by python list [] to auxVariables.
           Default is an empty list: []
 
       :gridPoint:
@@ -645,9 +740,14 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
       * For the supergrid, four zero bands along longitude are returned
         representing the four grid partitions.  This needs to be fixed
         in the future.
-      * For h-points, h2 is created on the q-points and shifted by 1/2
-        a grid cell back to the h-points.  Accuracy of the roughness
-        and other resultant variables are off by a 1/2 grid cell.
+      * **useFixByOverlapQHGridShift** by default is True.  Roughness (h2) is
+        diagnosed on the q-points and shifted by 1/2 a grid cell back to the
+        h-points.  Accuracy of the roughness and other resultant variables are
+        off by a 1/2 grid cell.  This only works for the regular grid, not the
+        supergrid.  If the grid is extended, setting **extendedGrid** to True,
+        tells this routine to attempt to diagnose h2 on the h-points without
+        shifting the grid.  The extended grid should be extended by two grid
+        points on the supergrid.
       * Support for 'q' and 'uv' grid points are not supported.
       * If the program is running out of memory, reduce the maxMb value.
         This reduces the available memory footprint available to
@@ -673,9 +773,44 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         kwargs['maxMb'] = 8000
     max_mb = kwargs['maxMb']
 
-    #TODO: Not using the supergrid implies useFixByOverlapQHGridShift
+    if not('useOverlap' in kwargs.keys()):
+        kwargs['useOverlap'] = False
+    useOverlap = kwargs['useOverlap']
+
+    if not('useQHGridShift' in kwargs.keys()):
+        kwargs['useQHGridShift'] = False
+    useQHGridShift = kwargs['useQHGridShift']
+
+    if not('extendedGrid' in kwargs.keys()):
+        kwargs['extendedGrid'] = False
+    extendedGrid = kwargs['extendedGrid']
+
+    # useFixByOverlapQHGridShift = True implies superGrid = False
+    # this method uses q-points and shifts back to h-points.
+    #useOverlap = False
     #if not('useFixByOverlapQHGridShift' in kwargs.keys()):
     #    kwargs['useFixByOverlapQHGridShift'] = True
+    #    if useSupergrid:
+    #        grd.printMsg("ERROR: Use of the superGrid is not permitted when useFixByOverlapQHGridShift is True.",\
+    #            level=logging.ERROR)
+    #if kwargs['useFixByOverlapQHGridShift']:
+    #    useOverlap = True
+
+    # extendedGrid
+    # This tells the FixByOverlap routine to use the h-points instead
+    # of q-points but still use the overlap method to produce a full
+    # set of h-points for roughness.  The grid passed should have been
+    # extended to overcome the problem of this routine at the edges.
+    #extendedGrid = False
+    #if not('extendedGrid' in kwargs.keys()):
+    #    kwargs['extendedGrid'] = False
+    #else:
+    #    if kwargs['extendedGrid']:
+    #        extendedGrid = kwargs['extendedGrid']
+    #        useOverlap = True
+
+    #if not(useSupergrid):
+    #    useOverlap = True
 
     # Unimplemented or not fully implemented kwargs
     if not('open_channels' in kwargs.keys()):
@@ -726,6 +861,8 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     target_grid = grd.grid
     target_lon = grd.grid['x']
     target_lat = grd.grid['y']
+    grid_lon = target_grid['x']
+    grid_lat = target_grid['y']
 
     # Optionally, subset to just the grid instead of the supergrid
     if not(kwargs['superGrid']):
@@ -734,11 +871,21 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         grd.printMsg(msg, level=logging.INFO)
         grid_lon = target_grid['x'][1::2,1::2]
         grid_lat = target_grid['y'][1::2,1::2]
-        # We use the q-points of the supergrid to provide an extra column
-        # to create an overlap in the partitions to cover over the gap the
-        # routine creates.
-        target_lon = target_grid['x'][::2,::2]
-        target_lat = target_grid['y'][::2,::2]
+        target_lon = target_grid['x'][1::2,1::2]
+        target_lat = target_grid['y'][1::2,1::2]
+        if kwargs['useQHGridShift']:
+            # We use the q-points of the supergrid to provide an extra column
+            # to fill the grid without extending the grid.  This introduces an
+            # error of 1/2 grid point in the data.
+            target_lon = target_grid['x'][::2,::2]
+            target_lat = target_grid['y'][::2,::2]
+            msg = ("Using diagnosed q-points for h-points on regular grid.")
+            grd.printMsg(msg, level=logging.INFO)
+
+    if kwargs['useOverlap']:
+        # This uses the grid overlap technique.
+        msg = ("Using grid overlap technique.")
+        grd.printMsg(msg, level=logging.INFO)
 
     # x and y have shape (nyp,nxp). Topog does not need the last col for global grids (period in x).
     # Useful for GLOBAL GRIDS!
@@ -781,13 +928,21 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
     # if( .NOT. is_mesh_regular() ) throw
     msg = ('RAM allocation to refinements (Mb): %f' % (max_mb))
     grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag useSuperGrid   : %s" % (useSupergrid))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag useOverlap     : %s" % (useOverlap))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag useQHGridShift : %s" % (useQHGridShift))
+    grd.printMsg(msg, level=logging.INFO)
+    msg = ("Flag extendedGrid   : %s" % (extendedGrid))
+    grd.printMsg(msg, level=logging.INFO)
 
     # Rework partitioning (dask opportunity)
     # Niki: Why 4,1 partition?
     xb = 4
     yb = 1
-    lons = break_array_to_blocks(target_lon, xb, yb, useSupergrid=useSupergrid)
-    lats = break_array_to_blocks(target_lat, xb, yb, useSupergrid=useSupergrid)
+    lons = break_array_to_blocks(target_lon, xb, yb, useOverlap=useOverlap, useSupergrid=useSupergrid)
+    lats = break_array_to_blocks(target_lat, xb, yb, useOverlap=useOverlap, useSupergrid=useSupergrid)
 
     # We must loop over the 4 partitions
     # TODO: The number of points being collected and the number of hits algorithm does not
@@ -808,27 +963,33 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
 
     msg = ("Merging the blocks ...")
     grd.printMsg(msg, level=logging.INFO)
-    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useSupergrid=useSupergrid)
-    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useSupergrid=useSupergrid)
-    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useSupergrid=useSupergrid)
-    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useSupergrid=useSupergrid)
+    height_refsamp = undo_break_array_to_blocks(Hlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
+    hstd_refsamp = undo_break_array_to_blocks(Hstdlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
+    hmin_refsamp = undo_break_array_to_blocks(Hminlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
+    hmax_refsamp = undo_break_array_to_blocks(Hmaxlist, xb, yb, useOverlap=useOverlap,
+            extendedGrid=extendedGrid, useSupergrid=useSupergrid, useQHGridShift=useQHGridShift)
 
     #Niki: Why isn't h periodic in x?  I.e., height_refsamp[:,0] != height_refsamp[:,-1]
-    #ANS? For global grids, the column was potentially clipped.
-    # TODO: rework for periodic grids?
+    # ANS?: The overlapping grid row was clipped?
+    # TODO: check periodic grids without clipping
+    # TODO: no need to display these messages if the grid is not periodic
     msg = ("Periodicity test  : %f %f" % (height_refsamp[0,0], height_refsamp[0,-1]))
     grd.printMsg(msg, level=logging.INFO)
     msg = ("Periodicity break : %f" % ((np.abs(height_refsamp[:,0] - height_refsamp[:,-1])).max()))
     grd.printMsg(msg, level=logging.INFO)
 
-    # Non-supergrid hack
+    # For non-supergrids, we use the h-point lon lats for
+    # both for the shifted and the unshifted versions of
+    # the grid.
     if not(kwargs['superGrid']):
         # Subset to MOM6 regular grid
-        msg = ("Shifting q-points onto h-points of regular grid.")
-        grd.printMsg(msg, level=logging.INFO)
         target_lon = target_grid['x'][1::2,1::2]
         target_lat = target_grid['y'][1::2,1::2]
 
+    #breakpoint()
     # Assemble grids
     bathymetricRoughness = xr.Dataset()
 
@@ -867,17 +1028,26 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
         bathymetricRoughness['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C %s-points' % (kwargs['gridPoint'])
         bathymetricRoughness['depth'].attrs['sha256'] = hashlib.sha256( np.array( height_refsamp ) ).hexdigest()
 
-    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-    bathymetricRoughness['x'] = (('ny','nx'), target_lon.data)
-    bathymetricRoughness['x'].attrs['units'] = 'degrees_east'
-    bathymetricRoughness['x'].attrs['standard_name'] = 'longitude'
-    bathymetricRoughness['x'].attrs['sha256'] = hashlib.sha256( np.array( target_lon ) ).hexdigest()
+    try:
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        bathymetricRoughness['x'] = (('ny','nx'), grid_lon.data)
+        bathymetricRoughness['x'].attrs['units'] = 'degrees_east'
+        bathymetricRoughness['x'].attrs['standard_name'] = 'longitude'
+        bathymetricRoughness['x'].attrs['sha256'] = hashlib.sha256( np.array( grid_lon ) ).hexdigest()
 
-    # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-    bathymetricRoughness['y'] = (('ny','nx'), target_lat.data)
-    bathymetricRoughness['y'].attrs['units'] = 'degrees_north'
-    bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
-    bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( target_lat ) ).hexdigest()
+        # xarray=0.19.0 requires unpacking of Dataset variables by using .data
+        bathymetricRoughness['y'] = (('ny','nx'), grid_lat.data)
+        bathymetricRoughness['y'].attrs['units'] = 'degrees_north'
+        bathymetricRoughness['y'].attrs['standard_name'] = 'latitude'
+        bathymetricRoughness['y'].attrs['sha256'] = hashlib.sha256( np.array( grid_lat ) ).hexdigest()
+    except:
+        #print('hstd:',hstd_refsamp.shape)
+        #print('grid_lon:',grid_lon.shape)
+        #breakpoint()
+        raise
+
+    # Add metadata to dataset
+
 
     # Return finished dataset
     return bathymetricRoughness

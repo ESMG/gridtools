@@ -18,7 +18,7 @@ grd = GridUtils()
 
 # We can turn on extra output from the module
 grd.printMsg("Setting print and logging messages to the DEBUG level.")
-logFilename = os.path.join(wrkDir, 'LCC_20x30.log')
+logFilename = os.path.join(wrkDir, 'LCC_20x30_7.log')
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -103,12 +103,13 @@ bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example7.nc')
 # it.  If you want to test the routine again, erase the output
 # file.
 if os.path.isfile(bathyGridFilename):
+    grd.printMsg("Using existing bathymetry file: %s" % (bathyGridFilename))
     bathyGrids = xr.open_dataset(bathyGridFilename)
 else:
     # Data sources cannot be in chunked mode for use in this routine
     bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
             maxMb=99, superGrid=False, useClipping=False,
-            FixByOverlapQHGridShift=True,
+            useQHGridShift=True, useOverlap=True,
             auxVariables=['hStd', 'hMin', 'hMax', 'depth'],
     )
 
@@ -148,7 +149,7 @@ grd.makeSoloMosaic(
     inputDirectory=inputDir,
     overwrite=True,
 )
-grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid.nc"))
+grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid_7.nc"))
 
 # Do some plotting!
 
@@ -187,8 +188,9 @@ grd.setPlotParameters(
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None, facecolor='w', edgecolor='w',
-        orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy_7.png'), dpi=None,
+        facecolor='w', edgecolor='w', orientation='landscape',
+        transparent=False, bbox_inches=None, pad_inches=0.1)
 
 # Plot depth grid after we apply an existing landmask with minimum
 # depth set to 1000 meters
@@ -204,7 +206,7 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy.png'), dpi=None, faceco
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy.png'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy_7.png'), dpi=None, facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
 
 # Plot original gebco just using the grid extent, not the model grid points
