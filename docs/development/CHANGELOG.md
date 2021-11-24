@@ -1,5 +1,9 @@
 # Changelog
 
+## 2021-11-24
+
+Commit dev to main to release 0.3.2.
+
 ## 2021-11-22
 
 Working towards release 0.3.2
