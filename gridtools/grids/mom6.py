@@ -395,24 +395,33 @@ class MOM6(object):
         ds['mask'].attrs['units'] = 'none'
         ds['mask'].attrs['sha256'] = utils.sha256sum( ds['mask'] )
 
+        # Supergrid can be ('y','x') or ('lat','lon)
+        lonVar = 'x'
+        latVar = 'y'
+        if not('x' in self.mom6_grid['supergrid']):
+            if 'lon' in self.mom6_grid['supergrid']:
+                lonVar = 'lon'
+                latVar = 'lat'
+
         if 'supergrid' in self.mom6_grid:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2].data)
+            ds[lonVar] = (('ny', 'nx'), self.mom6_grid['supergrid'][lonVar][1::2,1::2].data)
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2].data)
-        ds['x'].attrs['sha256'] = utils.sha256sum( ds['x'] )
-        ds['x'].attrs['standard_name'] = 'longitude'
-        ds['x'].attrs['units'] = 'degrees_east'
+            ds[lonVar] = (('ny', 'nx'), grd.grid[lonVar][1::2,1::2].data)
+        ds[lonVar].attrs['sha256'] = utils.sha256sum( ds[lonVar] )
+        ds[lonVar].attrs['standard_name'] = 'longitude'
+        ds[lonVar].attrs['units'] = 'degrees_east'
+
         if 'supergrid' in self.mom6_grid:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2].data)
+            ds[latVar] = (('ny', 'nx'), self.mom6_grid['supergrid'][latVar][1::2,1::2].data)
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2].data)
-        ds['y'].attrs['sha256'] = utils.sha256sum( ds['y'] )
-        ds['y'].attrs['standard_name'] = 'latitude'
-        ds['y'].attrs['units'] = 'degrees_north'
+            ds[latVar] = (('ny', 'nx'), grd.grid[latVar][1::2,1::2].data)
+        ds[latVar].attrs['sha256'] = utils.sha256sum( ds[latVar] )
+        ds[latVar].attrs['standard_name'] = 'latitude'
+        ds[latVar].attrs['units'] = 'degrees_north'
 
         # Global attributes
         self._add_global_attributes(ds)
@@ -459,24 +468,33 @@ class MOM6(object):
         ds['mask'].attrs['units'] = 'none'
         ds['mask'].attrs['sha256'] = utils.sha256sum( ds['mask'] )
 
+        # Supergrid can be ('y','x') or ('lat','lon)
+        lonVar = 'x'
+        latVar = 'y'
+        if not('x' in self.mom6_grid['supergrid']):
+            if 'lon' in self.mom6_grid['supergrid']:
+                lonVar = 'lon'
+                latVar = 'lat'
+
         if 'supergrid' in self.mom6_grid:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['x'] = (('ny', 'nx'), self.mom6_grid['supergrid']['x'][1::2,1::2].data)
+            ds[lonVar] = (('ny', 'nx'), self.mom6_grid['supergrid'][lonVar][1::2,1::2].data)
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['x'] = (('ny', 'nx'), grd.grid['x'][1::2,1::2].data)
-        ds['x'].attrs['sha256'] = utils.sha256sum( ds['x'] )
-        ds['x'].attrs['standard_name'] = 'longitude'
-        ds['x'].attrs['units'] = 'degrees_east'
+            ds[lonVar] = (('ny', 'nx'), grd.grid[lonVar][1::2,1::2].data)
+        ds[lonVar].attrs['sha256'] = utils.sha256sum( ds[lonVar] )
+        ds[lonVar].attrs['standard_name'] = 'longitude'
+        ds[lonVar].attrs['units'] = 'degrees_east'
+
         if 'supergrid' in self.mom6_grid:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['y'] = (('ny', 'nx'), self.mom6_grid['supergrid']['y'][1::2,1::2].data)
+            ds[latVar] = (('ny', 'nx'), self.mom6_grid['supergrid'][latVar][1::2,1::2].data)
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-            ds['y'] = (('ny', 'nx'), grd.grid['y'][1::2,1::2].data)
-        ds['y'].attrs['sha256'] = utils.sha256sum( ds['y'] )
-        ds['y'].attrs['standard_name'] = 'latitude'
-        ds['y'].attrs['units'] = 'degrees_north'
+            ds[latVar] = (('ny', 'nx'), grd.grid[latVar][1::2,1::2].data)
+        ds[latVar].attrs['sha256'] = utils.sha256sum( ds[latVar] )
+        ds[latVar].attrs['standard_name'] = 'latitude'
+        ds[latVar].attrs['units'] = 'degrees_north'
 
         # Global attributes
         self._add_global_attributes(ds)

@@ -226,6 +226,13 @@ This shows the grid extension capabilities for various grid
 projections.  It shows how model grid can be grown in any
 direction.
 
+## mkGridsExample13.py
+
+This python script demonstrates the conversion of a ROMS
+grid to a MOM6 grid.  NOTE: This only converts the grid.
+The library does not yet support conversion of boundary
+or forcing files.
+
 ## mkGridsShowLoggers.py
 
 This scripts demonstrates how to access logging

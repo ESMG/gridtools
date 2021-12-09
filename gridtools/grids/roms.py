@@ -12,6 +12,7 @@ import netCDF4 as netCDF
 from .roms_hgrid import *
 from .roms_vgrid import *
 from . import roms_io as io
+from gridtools.gridutils import GridUtils
 
 class ROMS(object):
 
@@ -30,7 +31,7 @@ class ROMS(object):
 
         return self.roms_grid
 
-    def read_ROMS_grid(self, grd):
+    def read_ROMS_grid(self, grd, hVar='h'):
         '''Load the ROMS grid previous read by GridUtils().
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
@@ -57,7 +58,7 @@ class ROMS(object):
 
         # Extract fields that do not follow the naming pattern
         #self.roms_grid['rho']['h'] = roms_ds.variables['h'][:] # on the rho grid, but not called "h_rho"
-        self.roms_grid['rho']['h'] = grd.grid['h'] # on the rho grid, but not called "h_rho"
+        self.roms_grid['rho']['h'] = grd.grid[hVar] # on the rho grid, but not called "h_rho"
 
         self.roms_grid['metadata'] = dict()
 

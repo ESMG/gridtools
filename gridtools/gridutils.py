@@ -1577,7 +1577,7 @@ class GridUtils(object):
             roms = mdlSource.ROMS()
             mom6 = mdlTarget.MOM6()
             # roms_grid = read_ROMS_grid(roms_grid_filename)
-            roms.read_ROMS_grid(self)
+            roms.read_ROMS_grid(self, hVar=kwargs['topographyVariable'])
             # roms_grid = trim_ROMS_grid(roms_grid)
             roms.trim_ROMS_grid()
             # mom6_grid = convert_ROMS_to_MOM6(mom6_grid, roms_grid)
@@ -1630,6 +1630,16 @@ class GridUtils(object):
         To access the opened grid, use: `obj.xrDS`.  This grid now needs
         to be formally read by `readGrid()` and the grid will be
         available to `obj.grid` and `obj.nativeGrid`.
+
+        **Keyword arguments**:
+
+            * *gridType* (``string``) -- Model grid type. Default: MOM6
+            * *gridid* (``string; ROMS model grid ID``) -- Model grid identification using the gridid.txt file.
+              The environment variable `ROMS_GRIDID_FILE` must be set.
+
+        **NOTES**:
+
+            Available grid types: MOM6 and ROMS.
         '''
 
         # If we have a file pointer and it is open, close it and re-open the new file
@@ -1680,7 +1690,14 @@ class GridUtils(object):
         This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc).
         This routine does not verify the read grid vs. type of grid specified.
 
+        **Keyword arguments**:
+
+            * *gridType* (``string``) -- Model grid type. Default: MOM6
+
         .. note::
+
+            Available grid types: MOM6 and ROMS.
+
             A copy of the native grid native structure can be found
             by using `obj.nativeGrid`.  The `obj.grid` variable may
             be modified by the gridtools library.
@@ -1706,9 +1723,6 @@ class GridUtils(object):
             self.xrOpen = True
             self.xrDS = local
             self.grid = local
-            # This should be an xarray with an available copy method
-            self.nativeGrid = local.copy()
-            return
 
         if self.xrOpen:
             # Save grid metadata
@@ -1722,7 +1736,6 @@ class GridUtils(object):
                 self.nativeGrid = self.xrDS.copy()
 
             if gridType == 'ROMS':
-
                 if 'ROMS_gridid' in self.gridInfo.keys():
                     sourceGridModule = gridType.lower()
                     try:
@@ -1748,8 +1761,6 @@ class GridUtils(object):
                     self.grid = self.grid.set_coords(['lon', 'lat'])
                 else:
                     pass
-
-        
 
     def removeFillValueAttributes(self, data=None, stringVars=None):
         '''Helper function to format the netCDF file to emulate the
@@ -3059,8 +3070,6 @@ class GridUtils(object):
         **Keyword arguments**
 
             * *chunks* (``int, tuple of int or mapping of hashable to int``) -- xarray chunk description.
-            * *gridid* (``ROMS model grid ID``) -- Model grid identification using the gridid.txt file.
-              The environment variable `ROMS_GRIDID_FILE` must be set.
 	'''
         # Process keyword arguments
         chunks = kwargs.pop('chunks', None)

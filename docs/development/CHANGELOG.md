@@ -1,5 +1,15 @@
 # Changelog
 
+## 2021-12-08
+
+Begin work on release 0.3.3
+
+ - Checking gridtools module for proper operation of ROMS to MOM6 grid
+   conversion.  There were a couple bugs that are hopefully fixed.
+ - Add python script example 13 demonstrating grid conversion from ROMS to
+   MOM6.
+ - Document some keyword arguments
+
 ## 2021-11-24
 
 Commit dev to main to release 0.3.2.

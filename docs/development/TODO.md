@@ -2,7 +2,10 @@
 
 ## Milestones
 
- - [ ] Release 0.3.x
+ - [ ] Release 0.3.3
+   - [X] fix a few bugs confirming operation of gridtools.convertGrid()
+   - [X] add python script example 13 showing ROMS to MOM6 grid
+         conversion using gridtools.convertGrid()
  - [ ] Release 0.x
    - [ ] Additional metadata for tile variable: `standard_name`, `tile_spec_version`,
          `geometry`, `discretization` and `conformal`.
