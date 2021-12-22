@@ -1,5 +1,28 @@
 # Changelog
 
+## 2021-12-22
+
+Continued work on release 0.3.3
+
+ - Whitespace cleanup
+ - Log plotting of roughness works well with pcolormesh()
+ - Update example references for proper location of GEBCO 2020.
+ - Add functions to roms grid routines for porting to MOM6:
+   - transect()
+   - jday2date()
+ - plotGrid() API changes:
+   - rename showModelGrid to showGrid
+   - internally use keyword arguments within function
+   - Add xscale and yscale arguments to plotVariable keywords
+
+## 2021-12-17
+
+Continued work on release 0.3.3
+
+ - gridutils.plotGrid() needs better documentation and testing
+ - gridutils.plotGrid() lines up better with plot parameters; some keywords can now
+   override plot parameters.
+
 ## 2021-12-08
 
 Begin work on release 0.3.3

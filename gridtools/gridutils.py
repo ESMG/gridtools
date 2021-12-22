@@ -9,11 +9,11 @@ import requests, urllib.parse
 import matplotlib as mpl
 import gridtools
 
-# Needed for panel.pane                
+# Needed for panel.pane
 from matplotlib.figure import Figure
 # not needed for mpl >= 3.1
 # Does not cause any problems to continue to use it
-from matplotlib.backends.backend_agg import FigureCanvas  
+from matplotlib.backends.backend_agg import FigureCanvas
 
 # Required for:
 #  * ROMS to MOM6 grid conversion
@@ -35,7 +35,7 @@ class GridUtils(object):
         self._default_Re = 6.378137e6
         self._default_ellps = 'GRS80'
         self._default_availableGridTypes = ['MOM6']
-        
+
         # Application object
         self.applicationObj = None
         # File pointers
@@ -373,10 +373,10 @@ class GridUtils(object):
         .. note::
             Areas of code that typically cause errors have try/except blocks.  Some of these
             have python debugging breakpoints that are active when the debug level is set
-            to a positive number.        
+            to a positive number.
 
             Currently defined debug levels:
-                0=off 
+                0=off
                 1=extra messages
                 2=raise an exception
                 3=stop at breakpoints
@@ -2092,12 +2092,12 @@ class GridUtils(object):
             dpi = self.getPlotParameter('dpi', default=self.plotParameterDefaults['dpi'])
 
         fig = Figure(figsize=figsize, dpi=dpi)
-        
+
         #dpiVal = mpl.rcParams['figure.dpi']
         #print(dpiVal)
 
         return fig
-    
+
     def plotGrid(self, **kwargs):
         '''Perform a plot operation.  This function supports plotting a variable from a data
         source or the model grid that was loaded or created.  A plot may contain both.
@@ -2122,7 +2122,9 @@ class GridUtils(object):
 
         **Keyword arguments**:
 
-            * *showModelGrid* (``boolean``) -- set False to hide the model grid. Default: True
+            * *showGrid* (``boolean``) -- overrides plot parameter showGrid.
+            * *showGridCells* (``boolean``) -- overrides plot parameter for showGridCells.
+            * *showSupergrid* (``boolean``) -- overrides plot parameter for showSupergrid.
             * *plotVariables* (``dict()``) -- one or more variables and plot parameters. Default: None
             * *showGridPoints* (``list()``) -- list of grid points to show on the plot. The list contains
               tuples of `(j,i)`, `(j,i,c)` or `(j,i,c,s)`.  The default color (c) is `red` with a size
@@ -2146,14 +2148,24 @@ class GridUtils(object):
         '''
 
         # Set defaults for keyword arguments
-        if not('showModelGrid' in kwargs.keys()):
-            kwargs['showModelGrid'] = True
         if not('plotVariables' in kwargs.keys()):
             kwargs['plotVariables'] = dict()
         if not('showGridPoints' in kwargs.keys()):
             kwargs['showGridPoints'] = list()
 
+        showGrid = self.getPlotParameter('showGrid', default=True)
+        showGridCells = self.getPlotParameter('showGridCells', default=False)
+        showSupergrid = self.getPlotParameter('showSupergrid', default=False)
+
         plotProjection = self.getPlotParameter('name', subKey='projection', default=None)
+
+        # Some keywords override plot parameters
+        if 'showGrid' in kwargs.keys():
+            showGrid = kwargs['showGrid']
+        if 'showGridCells' in kwargs.keys():
+            showGridCells = kwargs['showGridCells']
+        if 'showSupergrid' in kwargs.keys():
+            showSupergrid = kwargs['showSupergrid']
 
         if not(plotProjection):
             msg = "ERROR: Please set the plot 'projection' parameter 'name'."
@@ -2217,7 +2229,7 @@ class GridUtils(object):
         title = self.getPlotParameter('title', default=None)
         if title:
             ax.set_title(title)
-            
+
         try:
             nj = self.grid.dims['nyp']
             ni = self.grid.dims['nxp']
@@ -2233,24 +2245,25 @@ class GridUtils(object):
         jLinewidth = self.getPlotParameter('jLinewidth', default=1.0)
 
         # Plot the model grid only if specified
-        if kwargs['showModelGrid']:
-            plotAllVertices = self.getPlotParameter('showGridCells', default=False)
-            plotSupergrid = self.getPlotParameter('showSupergrid', default=False)
+        if showGrid:
             plotStep = 2
-            if plotSupergrid:
+            if showSupergrid:
                 plotStep = 1
-            #self.printMsg("Current grid parameters:", level=logging.INFO)
+            self.printMsg("Grid parameter (showGrid): %s" % (showGrid), level=logging.DEBUG)
+            self.printMsg("Grid parameter (showGridCells): %s" % (showGridCells), level=logging.DEBUG)
+            self.printMsg("Grid parameter (showSupergrid): %s" % (showSupergrid), level=logging.DEBUG)
+            self.printMsg("Grid parameter (plotStep): %d" % (plotStep), level=logging.DEBUG)
 
             # plotting vertices
             # For a non conforming projection, we have to plot every line between
             # the points of each grid box
 
             for i in range(0, ni+1, plotStep):
-                if (i == 0 or i == (ni-1)) or plotAllVertices:
+                if (i == 0 or i == (ni-1)) or showGridCells or showSupergrid:
                     if i <= ni-1:
                         ax.plot(self.grid['x'][:,i], self.grid['y'][:,i], iColor, linewidth=iLinewidth, transform=transform)
             for j in range(0, nj+1, plotStep):
-                if (j == 0 or j == (nj-1)) or plotAllVertices:
+                if (j == 0 or j == (nj-1)) or showGridCells or showSupergrid:
                     if j <= nj-1:
                         ax.plot(self.grid['x'][j,:], self.grid['y'][j,:], jColor, linewidth=jLinewidth, transform=transform)
 
@@ -2292,18 +2305,34 @@ class GridUtils(object):
                 ds = ds.set_coords(['y', 'x'])
 
                 # Set cmap, norm, levels
+                #breakpoint()
                 cmap = self.setPlotCMap(kwargs['plotVariables'][pVar])
                 norm = self.setPlotNorm(kwargs['plotVariables'][pVar])
                 levels = self.setPlotLevels(kwargs['plotVariables'][pVar])
                 cbar_kwargs = self.setPlotCbarkwargs(kwargs['plotVariables'][pVar])
+                xscale = self.setPlotXScale(kwargs['plotVariables'][pVar])
+                yscale = self.setPlotYScale(kwargs['plotVariables'][pVar])
 
                 ds[pVar].plot(x='x', y='y', ax=ax, transform=transform, cmap=cmap,
-                    norm=norm, levels=levels, cbar_kwargs=cbar_kwargs)
+                    norm=norm, levels=levels, cbar_kwargs=cbar_kwargs, xscale=xscale,
+                    yscale=yscale)
 
                 # Configure plot parameters, title is covered up by the plot?
                 ax = self.updateAxes(ax, kwargs['plotVariables'][pVar])
 
         return f, ax
+
+    def setPlotXScale(self, varArgs):
+        '''Set the desired xscale for plotting.  Default: 'linear' '''
+        if 'xscale' in varArgs.keys():
+            return varArgs['xscale']
+        return 'linear'
+
+    def setPlotYScale(self, varArgs):
+        '''Set the desired yscale for plotting.  Default: 'linear' '''
+        if 'yscale' in varArgs.keys():
+            return varArgs['yscale']
+        return 'linear'
 
     def setPlotCMap(self, varArgs):
         '''Set user defined color map or use matplotlib default.'''
@@ -2793,7 +2822,7 @@ class GridUtils(object):
             See: `Lambert Conformal Conic <https://proj.org/operations/projections/lcc.html>`_,
             `Mercator <https://proj.org/operations/projections/merc.html>`_ and
             `Stereographic <https://proj.org/operations/projections/stere.html>`_ for more details.
-                
+
             :MOM6 specific options:
                 * *gridMode* (``integer``) -- 2 = supergrid(*); 1 = actual grid [1 or **2**]
 
@@ -2801,9 +2830,9 @@ class GridUtils(object):
             These options are similar to :func:`setPlotParameters` which control how this
             grid or other information is plotted.  For instance, the **grid** projection and
             the **plot** projection can be in *different* projections.
-            
+
         """
-        
+
         # For now pass all keys into the plot parameter dictionary.  Sanity checking is done
         # by the respective makeGrid functions.
         for k in gridParameters.keys():
@@ -2811,14 +2840,14 @@ class GridUtils(object):
                 self.gridInfo['gridParameters'][subKey][k] = gridParameters[k]
             else:
                 self.gridInfo['gridParameters'][k] = gridParameters[k]
-        
+
         if not(subKey):
             self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
     def showGridMetadata(self):
         """Show current grid metadata."""
         print(self.gridInfo)
-            
+
     def showGridParameters(self):
         """Show current grid parameters."""
         if len(self.gridInfo['gridParameterKeys']) > 0:
@@ -2858,13 +2887,13 @@ class GridUtils(object):
         newGrd.computeGridMetricsSpherical(history=history)
 
         return newGrd
-    
+
     # plot parameter operations plot parameter routines
     # Plot Parameter Operations Plot Parameter Routines
-        
+
     def deletePlotParameters(self, pList, subKey=None):
         """This deletes a given list of plot parameters."""
-        
+
         # Top level subkeys
         if subKey:
             if subKey in self.gridInfo['plotParameterKeys']:
@@ -2878,12 +2907,12 @@ class GridUtils(object):
         for k in pList:
             if k in self.gridInfo['plotParameterKeys']:
                 self.self.gridInfo['plotParameters'].pop(k, None)
-                
+
         self.gridInfo['plotParameterKeys'] = self.gridInfo['plotParameters'].keys()
 
     def getPlotParameter(self, pkey, subKey=None, default=None, inform=True):
         '''Return the requested plot parameter or the default if none is available.
-        
+
            To access dictionary values in projection, use the subKey argument.
 
            This function will emit an informational message when a default parameter
@@ -2935,12 +2964,12 @@ class GridUtils(object):
         :type subKey: string
         :return: none
         :rtype: none
-        
+
         .. note::
             Plot parameters persist for as long as the python :class:`GridUtils` object exists.
 
             See the user manual for additional details.
-            
+
             **Primary keys**
 
             * *figsize* (``(float inches, float inches)``) -- matplotlib figure size (width, height)
@@ -2990,7 +3019,7 @@ class GridUtils(object):
             * *y_0* (``float meters``) -- False northing [**0.0**]
             * *k_0* (``float``) -- Depending on projection, this value determines the
               scale factor for natural origin or the ellipsoid [**1.0**]
-                
+
             The subkey 'projection' mostly follows proj.org terminology for any giving projection.
             See: `Lambert Conformal Conic <https://proj.org/operations/projections/lcc.html>`_,
             `Mercator <https://proj.org/operations/projections/merc.html>`_ and
@@ -3001,7 +3030,7 @@ class GridUtils(object):
             of the grid.  In this library, it is possible that the **grid** projection and
             the **plot** projection can be in *different* projections.
         """
-        
+
         # For now pass all keys into the plot parameter dictionary.  Sanity checking is done
         # by the respective plotGrid* fuctions.
         for k in plotParameters.keys():

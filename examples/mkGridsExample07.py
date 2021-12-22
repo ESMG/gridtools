@@ -79,7 +79,7 @@ grd.useDataSource(ds)
 # created with the given expression.
 ds.addDataSource({
     'GEBCO_2020': {
-            'url' : 'file:///import/AKWATERS/jrcermakiii/bathy/gebco/GEBCO_2020.nc',
+            'url' : 'file:///import/AKWATERS/jrcermakiii/bathy/gebco/2020/GEBCO_2020.nc',
             'variableMap' : {
                     'lat': 'lat',
                     'lon': 'lon',
