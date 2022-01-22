@@ -2,6 +2,9 @@
 
 [CREDITS](CREDITS.md) and citations have been consolidated.
 
+## Bookmarks 2022
+ * https://automating-gis-processes.github.io/CSC/notebooks/L2/geopandas-basics.html#Creating-geometries-into-a-GeoDataFrame
+ * https://automating-gis-processes.github.io/CSC18/lessons/L4/point-in-polygon.html
 ## Bookmarks 2021
  * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
  * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
