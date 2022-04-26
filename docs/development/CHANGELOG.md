@@ -1,5 +1,59 @@
 # Changelog
 
+## 2022-04-26
+
+Updates
+
+ - Add option to allow differnet calcuations of `angle_dx`.
+ - Update example 13 demonstrating use of alternate `angle_dx` calculation.
+ - Add the ability to use alternate `angle_dx` calculation in makeGrid().
+ - Example 6 now shows the grid outline.
+ - Example 6 demonstrates `angle_dx` calcuation methods.
+ - Add `angleCalcMethod` to the manual for grid parameters.
+ - Add keyword arguments to various functions to support `angleCalcMethod`.
+
+## 2022-03-15
+
+Updates
+
+ - Add bottleneck to python requirements
+ - Allow makeSoloMosaic() to write out other topographic variables like 'h2' if
+   provided.  Add depthVariable keyword argument.
+ - Modify `mom6.write_MOM6_topography_file()` to use keyword topographyVariables.
+ - Modify `mom6._generate_mask() to use keyword depthVariable and
+   topographyVariables.
+ - Modify gridtools.utils.get_git_repo_version_info() so it provides some
+   hint of a version number.
+
+## 2022-03-14
+
+Updates
+
+ - Consistent use of numpy as np in gridtools.gridutils
+ - Add angleCalcMethod keyword argument to `gridtools.subsetGrid()`.
+ - Add angleCalcMethod keyword argument to `gridtools.convertGrid()`.
+ - Pass keyword arguments to `gridtools.mom6.approximate_MOM6_grid_metrics()`
+ - Pass keyword arguments to `gridtools.mom6._fill_in_MOM6_supergrid_metrics_spherical()`
+ - Pass keyword arguments to `gridtools.mom6._fill_in_MOM6_supergrid_metrics_cartesian()`
+
+## 2022-03-09
+
+Updates
+
+ - Discovery: If performing value replacement of a xarray.Dataset
+   using xarray.where(), assign the updated values to
+   xarray.Dataset.values to prevent erasure of existing attributes.
+ - Subsetting a grid did not fully update projection information for
+   a grid.
+
+## 2022-02-03
+
+Continued work on release 0.3.3
+
+ - Issue #19 will be resolved with an additional keyword
+   argument. This will have to include documentation and
+   an example demonstrating this issue.
+
 ## 2021-12-22
 
 Continued work on release 0.3.3

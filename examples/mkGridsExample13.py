@@ -37,7 +37,7 @@ Tcline  = 250
 os.environ["ROMS_GRIDID_FILE"] = "/import/AKWATERS/jrcermakiii/configs/ROMS/gridid.txt"
 
 # Define where output should be written
-wrkDir = '/import/AKWATERS/jrcermakiii/scratch'
+wrkDir = '/home/cermak/workdir/configs/Arctic6'
 
 # We are writing output of the grid conversion to the INPUT directory normally
 # used for MOM6.  When MOM6 is run, it is looking for model grid usually from
@@ -55,8 +55,7 @@ grd = GridUtils()
 # grd.openGrid(None, gridType='ROMS', gridid='ARCTIC6')
 # grd.readGrid()
 
-# USE THIS
-
+# USE openDataset()/readGrid()
 romsGrid = grd.openDataset("/home/cermak/workdir/configs/Arctic6/roms/grid_Arctic_6.nc")
 grd.readGrid(gridType="ROMS", local=romsGrid)
 
@@ -64,6 +63,10 @@ grd.readGrid(gridType="ROMS", local=romsGrid)
 # The grid type will be changed from ROMS to MOM6.
 # A ROMS grid may have topography defined in the vertical grid.
 # Either 'h' or 'hraw' may be used.  It may not exist.
+
+# NOTE: For this particular grid, the default angle_dx calcuations
+# were incorrect. Alternate methods can be triggered with the
+# angleCalcMethod keyword option.  See:
 grd.convertGrid('MOM6',
         overwrite=True,
         writeTopography=True,
@@ -73,8 +76,13 @@ grd.convertGrid('MOM6',
         writeCouplerMosaic=True,
         writeExchangeGrids=True,
         inputDirectory=inputDir,
-        topographyVariable='h'
+        topographyVariable='h',
+        angleCalcMethod=1
 )
 
+# Add projection metadata to the converted grid
+arcticGridPROJ = "+proj=stere +lat_0=90 +lon_0=-160.0 +R=6370000"
+grd.grid.attrs['proj'] = arcticGridPROJ
+
 # Finally, save the ocean_hgrid.nc
-grd.saveGrid(filename='ocean_hgrid.nc', directory=inputDir)
+grd.saveGrid(directory=inputDir, filename='ocean_hgrid.nc')

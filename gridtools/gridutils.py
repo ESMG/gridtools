@@ -117,7 +117,7 @@ class GridUtils(object):
             app = {
                 'messages': panel.widget.TextBox     # Generally a pointer to a panel widget for display of text
                 'defaultFigureSize': (8,6)           # Default figure size to return from matplotlib
-                'usePaneMatplotlib': True/False      # Instructs GridUtils to use panel.pane.Matplotlib for plot objects 
+                'usePaneMatplotlib': True/False      # Instructs GridUtils to use panel.pane.Matplotlib for plot objects
             }
 
         '''
@@ -493,12 +493,14 @@ class GridUtils(object):
 
         **Keyword arguments**
 
+            * *angleCalcMethod* (``integer``) -- set the method for calculating angle_dx. Default: 0
             * *history* (``string``) -- optional message to append
               to the global ``history`` attribute.  A default message
               is provided if one is not specified.
         '''
 
         self.updateGridMetadata(**kwargs)
+        utils.checkArgument(kwargs, 'angleCalcMethod', 0)
 
         #self.grid.attrs['grid_version'] = "0.2"
         #self.grid.attrs['code_version'] = "GridTools: %s" % (self.getVersion())
@@ -569,10 +571,15 @@ class GridUtils(object):
         angle_dx = np.zeros(lat.shape)
         angle2_dx = np.zeros(lat.shape)
 
-        # This was commented out in the original conversion code?
-        #angle_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
-        #angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
-        #angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+        # A special edge case where angle computation has problems with certain grids.
+        # See: https://github.com/ESMG/gridtools/issues/19
+        #
+        # angle_dx Angle Calculation Method: 1
+        if 'angleCalcMethod' in kwargs.keys():
+            if kwargs['angleCalcMethod'] == 1:
+                angle_dx[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+                angle_dx[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+                angle_dx[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
 
         # Fix lon so they are 0 to 360 for computation of angle_dx
         lon = np.where(lon < 0., lon+360, lon)
@@ -641,7 +648,7 @@ class GridUtils(object):
 
     def getXYDist(self, x1, y1, x2, y2):
         '''Compute distance between two points in x/y space.'''
-    
+
         dst = math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))
 
         return dst
@@ -665,12 +672,14 @@ class GridUtils(object):
         gridMode = None
         ensureEvenI = None
         ensureEvenJ = None
+        angleCalcMethod = 0
         if gridType == 'MOM6':
             gridMode = self.getGridParameter('gridMode', default='2')
             gridMode = int(gridMode)
 
             ensureEvenI = self.getGridParameter('ensureEvenI', default=True)
             ensureEvenJ = self.getGridParameter('ensureEvenJ', default=True)
+            angleCalcMethod = self.getGridParameter('angleCalcMethod', default=0)
 
         # All grids must have centerX, centerY and centerUnits defined.
         centerX = self.getGridParameter('centerX', default='Error')
@@ -857,12 +866,12 @@ class GridUtils(object):
                         self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                         newGridCreated = True
-                    
+
                 # Units = degrees
                 if dxUnits == 'degrees':
                     msg = "WARNING: Spherical grids specified in degrees may not be conformal."
                     self.printMsg(msg, level=logging.WARNING)
-                    
+
                     lonGrid, latGrid = self.generate_regional_spherical_degrees(
                         centerUnits, centerX, centerY,
                         dx, dxUnits,
@@ -893,7 +902,7 @@ class GridUtils(object):
                         self.grid.y.attrs['sha256'] = hashlib.sha256( np.array( latGrid ) ).hexdigest()
 
                         newGridCreated = True
-                    
+
         # Make a grid in the North Polar Stereo projection
         if self.gridInfo['gridParameters']['projection']['name'] == "NorthPolarStereo":
 
@@ -951,7 +960,7 @@ class GridUtils(object):
 
         # Make a grid in the Lambert Conformal Conic projection
         if self.gridInfo['gridParameters']['projection']['name'] == 'LambertConformalConic':
-            
+
             # This projection only supports degrees at the moment
             try:
                 unsupported = False
@@ -966,7 +975,7 @@ class GridUtils(object):
             except:
                 # Default units are degrees
                 pass
-            
+
             # Sometimes tilt may not be specified, so use a default of 0.0
             if 'tilt' in self.gridInfo['gridParameters'].keys():
                 tilt = self.gridInfo['gridParameters']['tilt']
@@ -979,7 +988,7 @@ class GridUtils(object):
             #    tilt,
             #    self.gridInfo['gridParameters']['gridResolution'], self.gridInfo['gridParameters']['gridMode']
             #)
-            
+
             lonGrid, latGrid = self.generate_regional_spherical_degrees(
                         centerUnits, centerX, centerY,
                         dx, dxUnits,
@@ -993,7 +1002,7 @@ class GridUtils(object):
                         ensureEvenI=ensureEvenI,
                         ensureEvenJ=ensureEvenJ
                     )
-            
+
             # Adjust lonGrid to -180 to +180
             lonGrid = np.where(lonGrid > 180.0, lonGrid - 360.0, lonGrid)
 
@@ -1015,7 +1024,7 @@ class GridUtils(object):
                 self.gridInfo['gridParameters']['projection']['lat_0'] - (self.gridInfo['gridParameters']['dy'] / 2.0)
             self.gridInfo['gridParameters']['projection']['lat_2'] =\
                 self.gridInfo['gridParameters']['projection']['lat_0'] + (self.gridInfo['gridParameters']['dy'] / 2.0)
-            
+
             newGridCreated = True
 
         if newGridCreated:
@@ -1046,7 +1055,8 @@ class GridUtils(object):
             # Compute grid metrics
             if gridType == 'MOM6':
                 if gridMode == 2:
-                    self.computeGridMetricsSpherical()
+                    kwargs = {'angleCalcMethod': angleCalcMethod}
+                    self.computeGridMetricsSpherical(**kwargs)
                 else:
                     msg = "NOTE: Grid metrics were not computed."
                     self.printMsg(msg, level=logging.INFO)
@@ -1057,7 +1067,7 @@ class GridUtils(object):
         # If the grid was just created, the user can provide using setFilename
         if setFilename:
             self.xrFilename = setFilename
-                                
+
     # Original grid generation functions from Niki Zadeh
     # Replace above comment with attribution in each function to mark lineage
 
@@ -1479,6 +1489,7 @@ class GridUtils(object):
             * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
             * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
             * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
+            * *angleCalcMethod* (``integer``) -- set the method for calculating angle_dx. Default: 0
 
         **Keyword arguments (ROMS)**:
 
@@ -1552,6 +1563,7 @@ class GridUtils(object):
         utils.checkArgument(kwargs, 'overwrite', False)
         utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
         utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+        utils.checkArgument(kwargs, 'angleCalcMethod', 0)
 
         # ROMS specific kwargs
         utils.checkArgument(kwargs, 'topographyVariable', 'h')
@@ -1588,7 +1600,7 @@ class GridUtils(object):
             # It is needed here for a corner case to support makeSoloMosaic()
             kwargs['topographyGrid'] = mom6.mom6_grid['cell_grid']['depth']
             # mom6_grid = approximate_MOM6_grid_metrics(mom6_grid)
-            mom6.approximate_MOM6_grid_metrics()
+            mom6.approximate_MOM6_grid_metrics(**kwargs)
 
             # Replace the grid
             self.grid = mom6.getGrid()
@@ -1620,12 +1632,12 @@ class GridUtils(object):
             msg = ('INFO: Successful conversion of grid (%s => %s).' % (sourceGrid, targetGrid))
             self.printMsg(msg, level=logging.INFO)
             return
-            
+
     def openGrid(self, inputUrl, **kwargs):
         '''Open a grid file.  This creates and open
         file pointer which is local to the gridtools object.
 
-	Specify with file: or OpenDAP (http://, https://) or ds:.
+        Specify with file: or OpenDAP (http://, https://) or ds:.
 
         To access the opened grid, use: `obj.xrDS`.  This grid now needs
         to be formally read by `readGrid()` and the grid will be
@@ -1664,7 +1676,7 @@ class GridUtils(object):
                 self.xrOpen = True
                 self.gridInfo['type'] = gridType
                 return
-            
+
         try:
             if chunks:
                 self.xrChunks = chunks
@@ -1686,7 +1698,7 @@ class GridUtils(object):
     def readGrid(self, **kwargs):
         '''Read a grid.  This is more of a convenience function for applications
         that need to pass grids to gridtools instead of using the openGrid function.
-        
+
         This can be generalized to work with "other" grids if we desired? (ROMS, HyCOM, etc).
         This routine does not verify the read grid vs. type of grid specified.
 
@@ -1969,6 +1981,9 @@ class GridUtils(object):
         else:
             # If we get to this point, set the 'proj' parameters above
             self.grid.attrs['proj'] = self.checkGridMetadata(kwargs, 'proj', projString)
+            # We are not always guaranteed to have any grid parameters at this point
+            if not('projection' in self.gridInfo['gridParameters']):
+                self.gridInfo['gridParameters']['projection'] = dict()
             self.gridInfo['gridParameters']['projection']['proj'] = projString
 
         #try:
@@ -1996,6 +2011,8 @@ class GridUtils(object):
 
             * *topographyGrid* (``xarray``) -- topographic grid to be used with the model grid. REQUIRED. Default: None
             * *topographyFilename* (``string``) -- filename used to write topographic grid. Default: "ocean_topog.nc"
+            * *topographyVariables* (``list``) -- python list of variables to copy from specified grid. Default: []
+            * *depthVariable* (``string``) -- variable name for the ocean depth. Default: "depth"
             * *mosaicFilename* (``string``) -- filename for mosaic file. Default: "ocean_mosaic.nc"
             * *oceanGridFilename* (``string``) -- filename for ocean grid file. Default: "ocean_hgrid.nc"
             * *writeLandmask* (``boolean``) -- set True to write land mask file. Default: False
@@ -2035,6 +2052,8 @@ class GridUtils(object):
 
         # Check and set any defaults to kwargs
         utils.checkArgument(kwargs, 'topographyFilename', "ocean_topog.nc")
+        utils.checkArgument(kwargs, 'topographyVariables', [])
+        utils.checkArgument(kwargs, 'depthVariable', "depth")
         utils.checkArgument(kwargs, 'mosaicFilename', "ocean_mosaic.nc")
         utils.checkArgument(kwargs, 'oceanGridFilename', "ocean_hgrid.nc")
         utils.checkArgument(kwargs, 'writeLandmask', False)
@@ -2071,7 +2090,7 @@ class GridUtils(object):
             mom6.write_MOM6_exchange_grid_files(self, **kwargs)
         if kwargs['writeCouplerMosaic']:
             mom6.write_MOM6_coupler_mosaic_file(self, **kwargs)
-    
+
     # plot operations plot functions
     # Plot Operations Plot Functions
     # Plotting specific functions
@@ -2857,7 +2876,7 @@ class GridUtils(object):
         else:
             self.printMsg("No grid parameters found.", level=logging.ERROR)
 
-    def subsetGrid(self, scaleFactor):
+    def subsetGrid(self, scaleFactor, **kwargs):
         """Subsets current grid by the specified scale factor.  Scale factor must
         be an integer and be evenly divisble into the regular grid.  A subsetted
         grid is returned or None on any error.
@@ -2870,7 +2889,7 @@ class GridUtils(object):
 
         # Check for grids that are not divisible by the scale factor
         if ny % scaleFactor != 0 or nx % scaleFactor != 0:
-            self.printMsg(".", level=logging.ERROR)
+            self.printMsg("Unable to subset grid.  One of the regular grid dimensions\nis not evenly divisible by the scale factor.", level=logging.ERROR)
             return None
 
         newGrd = gridtools.gridutils.GridUtils()
@@ -2884,7 +2903,8 @@ class GridUtils(object):
         # Recompute metrics
         history = "%s: subset grid with GridTools.subsetGrid() using scale factor %d" %\
             (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
-        newGrd.computeGridMetricsSpherical(history=history)
+
+        newGrd.computeGridMetricsSpherical(history=history, **kwargs)
 
         return newGrd
 

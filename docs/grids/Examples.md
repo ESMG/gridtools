@@ -34,7 +34,7 @@ This example recreates the the grid demonstrated by Niki Zadah's
 [jupyter notebook](https://github.com/nikizadehgfdl/grid_generation/blob/dev/jupynotebooks/regional_grid_spherical.ipynb).
 
 # North Polar Stereo
- 
+
 ## Arctic6
 
 This grid description was provided by Kate Hedstrom.

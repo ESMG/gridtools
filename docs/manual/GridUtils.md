@@ -206,7 +206,8 @@ grd.setGridParameters({
 		'k_0': 1.0
 	},
 	'gridMode': 2,
-	'ensureEvenJ': True
+	'ensureEvenJ': True,
+	'angleCalcMethod': 0
 })
 ```
 
@@ -245,10 +246,13 @@ Parameter | Definition | Type | Valid Values | Default
 gridMode | grid generation mode | integer | **(1)** | 2
 ensureEvenI | ensure even number of grid points in the i direction | boolean | True, False | True
 ensureEvenJ | ensure even number of grid points in the j direction | boolean | True, False | True
+angleCalcMethod | Trigger different `angle_dx` calculation methods | integer | 0, 1 | 0
 
 NOTES:
  * **(1)** Valid values are 1 and 2.  Grid mode one (1) generates only the specified grid with grid cell distances given by the grid resolution.  Grid metrics will NOT be computed.  Grid mode two (2) generates a standard MOM6 grid with supergrid.  Grid metrics will be computed.
  * `ensureEvenJ` flag allows the grid generator clip the grid if the number of points in the j direction is uneven.
+ * `angleCalcMethod` applies to spherical grids.  In some cases, the default calculation method may not be
+suitable for the grid.  The only other method available is angleCalcMethod=1.
 
 Projection definitions:
 

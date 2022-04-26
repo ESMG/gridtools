@@ -122,6 +122,11 @@ This creates a mini IBCAO grid that will fit
 on smaller memory systems.  The plot of the
 grid shows the grid cells.
 
+This example also demonstrates the different
+`angle_dx` calculations methods.  In some
+cases the default calcuation does not work
+for certain grids.
+
 ## mkGridsExample07.py
 
 This is currently a full fledged example of

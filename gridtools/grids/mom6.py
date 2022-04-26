@@ -3,7 +3,7 @@ Generic class and utility funtions for handling MOM6 grids.
 '''
 
 import logging, os
-import numpy
+import numpy as np
 import xarray as xr
 
 from .. import utils
@@ -197,7 +197,7 @@ class MOM6(object):
 
         # Copy points from ROMS grid
         for field in copy_fields:
-            self.mom6_grid['supergrid'][field] = numpy.zeros((ny+1, nx+1))
+            self.mom6_grid['supergrid'][field] = np.zeros((ny+1, nx+1))
             self.mom6_grid['supergrid'][field][ ::2, ::2] = roms_grid['psi'][field] # outer
             self.mom6_grid['supergrid'][field][1::2,1::2] = roms_grid['rho'][field] # inner
             self.mom6_grid['supergrid'][field][1::2, ::2] = roms_grid[ 'u' ][field] # between e/w
@@ -208,17 +208,21 @@ class MOM6(object):
         # "missing" values, which we'll assume to be water
         mask = roms_grid['rho']['mask']
         #mask[mask != 0] = 1
-        mask = numpy.where(mask != 0, 1, 0)
+        mask = np.where(mask != 0, 1, 0)
         #self.mom6_grid['cell_grid']['depth'] = roms_grid['rho']['h'] * mask
         # TODO: This can be improved instead of just clobbering land points with masking_depth
         self.mom6_grid['cell_grid']['depth'] = xr.where(mask, roms_grid['rho'][kwargs['topographyVariable']], masking_depth)
         self.mom6_grid['cell_grid']['ocean_mask'] = mask
-        self.mom6_grid['cell_grid']['land_mask'] = numpy.logical_not(mask)
+        self.mom6_grid['cell_grid']['land_mask'] = np.logical_not(mask)
 
         return
 
-    def approximate_MOM6_grid_metrics(self):
+    def approximate_MOM6_grid_metrics(self, **kwargs):
         '''Fill in missing MOM6 supergrid metrics by computing best guess values.
+
+        **Keyword arguments**:
+
+        * *angleCalcMethod* (``integer``) -- set the method for calculating angle_dx. Default: 0
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
@@ -227,16 +231,16 @@ class MOM6(object):
         ny = self.mom6_grid['supergrid']['ny']
 
         # Declare shapes
-        self.mom6_grid['supergrid']['dx']    = numpy.zeros((ny+1,nx  ))
-        self.mom6_grid['supergrid']['dy']    = numpy.zeros((ny,  nx+1))
-        self.mom6_grid['supergrid']['angle'] = numpy.zeros((ny+1,nx+1))
-        self.mom6_grid['supergrid']['area']  = numpy.zeros((ny,  nx  ))
+        self.mom6_grid['supergrid']['dx']    = np.zeros((ny+1,nx  ))
+        self.mom6_grid['supergrid']['dy']    = np.zeros((ny,  nx+1))
+        self.mom6_grid['supergrid']['angle'] = np.zeros((ny+1,nx+1))
+        self.mom6_grid['supergrid']['area']  = np.zeros((ny,  nx  ))
 
         # Rebuild to use generic routines; for now these are copies as well
         if 'lat' in self.mom6_grid['supergrid']:
-            self._fill_in_MOM6_supergrid_metrics_spherical()
+            self._fill_in_MOM6_supergrid_metrics_spherical(**kwargs)
         else:
-            self._fill_in_MOM6_supergrid_metrics_cartesian()
+            self._fill_in_MOM6_supergrid_metrics_cartesian(**kwargs)
 
         self._calculate_MOM6_cell_grid_area()
 
@@ -268,10 +272,24 @@ class MOM6(object):
         #    topog_ds.createDimension('ntiles', 1)
 
         # xarray=0.19.0 requires unpacking of Dataset variables by using .data
-        ds['depth'] = (('ny', 'nx'), kwargs['topographyGrid'].data)
-        ds['depth'].attrs['units'] = 'meters'
-        ds['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
-        ds['depth'].attrs['sha256'] = utils.sha256sum( kwargs['topographyGrid'] )
+
+        # Retain old behavior for now
+        if len(kwargs['topographyVariables']) == 0:
+            ds['depth'] = (('ny', 'nx'), kwargs['topographyGrid'].data)
+            ds['depth'].attrs['units'] = 'meters'
+            ds['depth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
+            ds['depth'].attrs['sha256'] = utils.sha256sum( kwargs['topographyGrid'] )
+        else:
+            for vrb in kwargs['topographyVariables']:
+                if vrb in kwargs['topographyGrid'].variables:
+                    ds[vrb] = (('ny', 'nx'), kwargs['topographyGrid'][vrb].data)
+                    # Copy attributes and rehash
+                    attrList = list(kwargs['topographyGrid'][vrb].attrs.keys())
+                    if 'sha256' in attrList:
+                        attrList.remove('sha256')
+                    for att in attrList:
+                        ds[vrb].attrs[att] = kwargs['topographyGrid'][vrb].attrs[att]
+                    ds[vrb]['sha256'] = utils.sha256sum( kwargs['topographyGrid'][vrb] )
 
         #    # Variables & Values
         #    hdepth = topog_ds.createVariable('depth', 'f4', ('ny','nx',))
@@ -293,7 +311,7 @@ class MOM6(object):
 
         **Keyword arguments**:
 
-        * *intType* (``str``) -- The default type to be written out to for the FMS
+        * *intType* (``string``) -- The default type to be written out to for the FMS
           coupler tile files.  Default: int32
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
@@ -398,10 +416,11 @@ class MOM6(object):
         # Supergrid can be ('y','x') or ('lat','lon)
         lonVar = 'x'
         latVar = 'y'
-        if not('x' in self.mom6_grid['supergrid']):
-            if 'lon' in self.mom6_grid['supergrid']:
-                lonVar = 'lon'
-                latVar = 'lat'
+        if 'supergrid' in self.mom6_grid:
+            if not('x' in self.mom6_grid['supergrid']):
+                if 'lon' in self.mom6_grid['supergrid']:
+                    lonVar = 'lon'
+                    latVar = 'lat'
 
         if 'supergrid' in self.mom6_grid:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
@@ -409,6 +428,7 @@ class MOM6(object):
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
             ds[lonVar] = (('ny', 'nx'), grd.grid[lonVar][1::2,1::2].data)
+
         ds[lonVar].attrs['sha256'] = utils.sha256sum( ds[lonVar] )
         ds[lonVar].attrs['standard_name'] = 'longitude'
         ds[lonVar].attrs['units'] = 'degrees_east'
@@ -419,6 +439,7 @@ class MOM6(object):
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
             ds[latVar] = (('ny', 'nx'), grd.grid[latVar][1::2,1::2].data)
+
         ds[latVar].attrs['sha256'] = utils.sha256sum( ds[latVar] )
         ds[latVar].attrs['standard_name'] = 'latitude'
         ds[latVar].attrs['units'] = 'degrees_north'
@@ -471,10 +492,11 @@ class MOM6(object):
         # Supergrid can be ('y','x') or ('lat','lon)
         lonVar = 'x'
         latVar = 'y'
-        if not('x' in self.mom6_grid['supergrid']):
-            if 'lon' in self.mom6_grid['supergrid']:
-                lonVar = 'lon'
-                latVar = 'lat'
+        if 'supergrid' in self.mom6_grid:
+            if not('x' in self.mom6_grid['supergrid']):
+                if 'lon' in self.mom6_grid['supergrid']:
+                    lonVar = 'lon'
+                    latVar = 'lat'
 
         if 'supergrid' in self.mom6_grid:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
@@ -482,6 +504,7 @@ class MOM6(object):
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
             ds[lonVar] = (('ny', 'nx'), grd.grid[lonVar][1::2,1::2].data)
+
         ds[lonVar].attrs['sha256'] = utils.sha256sum( ds[lonVar] )
         ds[lonVar].attrs['standard_name'] = 'longitude'
         ds[lonVar].attrs['units'] = 'degrees_east'
@@ -492,6 +515,7 @@ class MOM6(object):
         else:
             # xarray=0.19.0 requires unpacking of Dataset variables by using .data
             ds[latVar] = (('ny', 'nx'), grd.grid[latVar][1::2,1::2].data)
+
         ds[latVar].attrs['sha256'] = utils.sha256sum( ds[latVar] )
         ds[latVar].attrs['standard_name'] = 'latitude'
         ds[latVar].attrs['units'] = 'degrees_north'
@@ -535,8 +559,8 @@ class MOM6(object):
             #mask = mom6_grid['cell_grid'][name2 + '_mask']
             mask = self._generate_mask(name2, grd, **kwargs)
 
-            tile_cells_j, tile_cells_i = numpy.where(mask == 1)
-            tile_cells = numpy.column_stack((tile_cells_i, tile_cells_j)) + 1 # +1 converts from Python indices to Fortran
+            tile_cells_j, tile_cells_i = np.where(mask == 1)
+            tile_cells = np.column_stack((tile_cells_i, tile_cells_j)) + 1 # +1 converts from Python indices to Fortran
             #print(type(self.mom6_grid['cell_grid']['area']), type(mask))
 
             # In xarray, to pull cell values out for matching mask, the variable and mask have to appear in the same
@@ -546,13 +570,13 @@ class MOM6(object):
             dsCombined['area'] = (('ny','nx'), self.mom6_grid['cell_grid']['area'].data)
             dsCombined['mask'] = mask
             dsCombined['sha256'] = utils.sha256sum( self.mom6_grid['cell_grid']['area'] )
-            idx = numpy.nonzero(mask==1)
+            idx = np.nonzero(mask==1)
 
             #breakpoint()
             #xgrid_area = self.mom6_grid['cell_grid']['area'][mask == 1]
             xgrid_area = dsCombined['area'][idx[0], idx[1]]
             ncells = len(xgrid_area)
-            tile_dist = numpy.zeros((ncells,2))
+            tile_dist = np.zeros((ncells,2))
 
             # write out exchange grid file
 
@@ -741,9 +765,13 @@ class MOM6(object):
         a11 = self.mom6_grid['supergrid']['area'][1::2,1::2]
         self.mom6_grid['cell_grid']['area'] = a00 + a01 + a10 + a11
 
-    def _fill_in_MOM6_supergrid_metrics_spherical(self):
+    def _fill_in_MOM6_supergrid_metrics_spherical(self, **kwargs):
         """Fill in missing MOM6 supergrid metrics by computing best guess
         values based on latitude and longitude coordinates.
+
+        **Keyword arguments**:
+
+        * *angleCalcMethod* (``integer``) -- set the method for calculating angle_dx. Default: 0
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
@@ -759,30 +787,42 @@ class MOM6(object):
         # Approximate angles using centered differences in interior, and side differences on left/right edges
         # TODO: Why do something different at the edges when we have extra ROMS points available?
         # Because we're using a big enough footprint to need to.
-        cos_lat = numpy.cos(numpy.radians(lat))
-    #   self.mom6_grid['supergrid']['angle'][:,1:-1] = numpy.arctan( (lat[:,2:] - lat[:,:-2]) / ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
-    #   self.mom6_grid['supergrid']['angle'][:, 0  ] = numpy.arctan( (lat[:, 1] - lat[:, 0 ]) / ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
-    #   self.mom6_grid['supergrid']['angle'][:,-1  ] = numpy.arctan( (lat[:,-1] - lat[:,-2 ]) / ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+        cos_lat = np.cos(np.radians(lat))
+        #self.mom6_grid['supergrid']['angle'][:,1:-1] = np.arctan( (lat[:,2:] - lat[:,:-2]) / ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+        #self.mom6_grid['supergrid']['angle'][:, 0  ] = np.arctan( (lat[:, 1] - lat[:, 0 ]) / ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+        #self.mom6_grid['supergrid']['angle'][:,-1  ] = np.arctan( (lat[:,-1] - lat[:,-2 ]) / ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+
         # Compute it twice to recover from dateline problems, if any
-        angle = numpy.zeros(lat.shape)
-        angle2 = numpy.zeros(lat.shape)
-    #   angle[:,1:-1] = numpy.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
-    #   angle[:, 0  ] = numpy.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
-    #   angle[:,-1  ] = numpy.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
-        lon = numpy.where(lon < 0., lon+360, lon)
-        angle2[:,1:-1] = numpy.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
-        angle2[:, 0  ] = numpy.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
-        angle2[:,-1  ] = numpy.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
-        self.mom6_grid['supergrid']['angle'][:,:] = numpy.maximum(angle, angle2)
+        angle = np.zeros(lat.shape)
+        angle2 = np.zeros(lat.shape)
+
+        # A special edge case where angle computation has problems with certain grids.
+        # See: https://github.com/ESMG/gridtools/issues/19
+        #
+        # angle_dx Angle Calculation Method: 1
+        if 'angleCalcMethod' in kwargs.keys():
+            if kwargs['angleCalcMethod'] == 1:
+                angle[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+                angle[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+                angle[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+        lon = np.where(lon < 0., lon+360, lon)
+        angle2[:,1:-1] = np.arctan2( (lat[:,2:] - lat[:,:-2]) , ((lon[:,2:] - lon[:,:-2]) * cos_lat[:,1:-1]) )
+        angle2[:, 0  ] = np.arctan2( (lat[:, 1] - lat[:, 0 ]) , ((lon[:, 1] - lon[:, 0 ]) * cos_lat[:, 0  ]) )
+        angle2[:,-1  ] = np.arctan2( (lat[:,-1] - lat[:,-2 ]) , ((lon[:,-1] - lon[:,-2 ]) * cos_lat[:,-1  ]) )
+        self.mom6_grid['supergrid']['angle'][:,:] = np.maximum(angle, angle2)
 
         # Approximate cell areas as that of spherical polygon
         self.mom6_grid['supergrid']['area'][:,:] = R * R * spherical.quad_area(lat, lon)
 
         return
 
-    def _fill_in_MOM6_supergrid_metrics_cartesian(self):
+    def _fill_in_MOM6_supergrid_metrics_cartesian(self, **kwargs):
         """Fill in missing MOM6 supergrid metrics by computing best guess
         values based on x and y coordinates.
+
+        **Keyword arguments**:
+
+        * *angleCalcMethod* (``integer``) -- set the method for calculating angle_dx. Default: 0
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         """
@@ -791,17 +831,18 @@ class MOM6(object):
         y = self.mom6_grid['supergrid']['y']
 
         # Compute edge lengths
-        self.mom6_grid['supergrid']['dx'][:,:] = numpy.sqrt( (x[:,1:] - x[:,:-1])**2 + (y[:,1:] - y[:,:-1])**2 )
-        self.mom6_grid['supergrid']['dy'][:,:] = numpy.sqrt( (x[1:,:] - x[:-1,:])**2 + (y[1:,:] - y[:-1,:])**2 )
+        self.mom6_grid['supergrid']['dx'][:,:] = np.sqrt( (x[:,1:] - x[:,:-1])**2 + (y[:,1:] - y[:,:-1])**2 )
+        self.mom6_grid['supergrid']['dy'][:,:] = np.sqrt( (x[1:,:] - x[:-1,:])**2 + (y[1:,:] - y[:-1,:])**2 )
 
         # Compute angles using centered differences in interior, and side differences on left/right edges
         # TODO: Why do something different at the edges when we have extra ROMS points available?
-        self.mom6_grid['supergrid']['angle'][:,1:-1] = numpy.arctan2( (y[:,2:] - y[:,:-2]), (x[:,2:] - x[:,:-2]) )
-        self.mom6_grid['supergrid']['angle'][:, 0  ] = numpy.arctan2( (y[:, 1] - y[:, 0 ]), (x[:, 1] - x[:, 0 ]) )
-        self.mom6_grid['supergrid']['angle'][:,-1  ] = numpy.arctan2( (y[:,-1] - y[:,-2 ]), (x[:,-1] - x[:,-2 ]) )
+        self.mom6_grid['supergrid']['angle'][:,1:-1] = np.arctan2( (y[:,2:] - y[:,:-2]), (x[:,2:] - x[:,:-2]) )
+        self.mom6_grid['supergrid']['angle'][:, 0  ] = np.arctan2( (y[:, 1] - y[:, 0 ]), (x[:, 1] - x[:, 0 ]) )
+        self.mom6_grid['supergrid']['angle'][:,-1  ] = np.arctan2( (y[:,-1] - y[:,-2 ]), (x[:,-1] - x[:,-2 ]) )
 
         # Compute cell areas
-        self.mom6_grid['supergrid']['area'][:,:] = self.mom6_grid['supergrid']['dx'][:-1, :] * self.mom6_grid['supergrid']['dy'][:, :-1]
+        self.mom6_grid['supergrid']['area'][:,:] = self.mom6_grid['supergrid']['dx'][:-1, :] * \
+            self.mom6_grid['supergrid']['dy'][:, :-1]
 
         return
 
@@ -815,9 +856,10 @@ class MOM6(object):
         :return: land or ocean mask
         :rtype: xarray
 
-        Keyword args must have a valid depth grid in *topographyGrid*.  MOM6
-        parameters `MINIMUM_DEPTH`, `MASKING_DEPTH` and `MAXIMUM_DEPTH` may also
-        be specified.
+        Keyword arguments must have a valid depth variable in *topographyGrid* or
+        *topographyVariables* and *depthVariable*.
+        MOM6 parameters `MINIMUM_DEPTH`, `MASKING_DEPTH` and `MAXIMUM_DEPTH`
+        may also be specified.
 
         **Keyword arguments**:
 
@@ -835,7 +877,11 @@ class MOM6(object):
         '''
 
         # Access depth field
-        depthGrid = kwargs['topographyGrid']
+        if len(kwargs['topographyVariables']) == 0:
+            depthGrid = kwargs['topographyGrid']
+        else:
+            if kwargs['depthVariable'] in kwargs['topographyVariables']:
+                depthGrid = kwargs['topographyGrid'][kwargs['depthVariable']]
 
         # Determine values from other possible arguments
         minimum_depth = 0.0

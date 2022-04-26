@@ -7,6 +7,7 @@ import copy, datetime, hashlib, platform, subprocess, sys
 import numpy as np
 from decimal import *
 from . import sysinfo
+import gridtools
 
 def checkArgument(vDict, vKey, vVal):
     '''
@@ -46,6 +47,11 @@ def get_git_repo_version_info(grd=None):
     #    return repo_name + ': running git returned an error'
     sysObj = sysinfo.SysInfo(grd=grd)
     (out, err, rc) = sysObj.runCommand(git_command)
+
+    # On error provide the gridtools.__version__ variable as the version number
+    if rc != 0:
+        out = gridtools.__version__
+
     return repo_name + ": %s" % (out)
 
 def get_history_entry(argv):
