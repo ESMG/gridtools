@@ -447,7 +447,9 @@ class MOM6(object):
         # Global attributes
         self._add_global_attributes(ds)
 
-        ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds))
+        enc = grd.removeFillValueAttributes(data=ds)
+        enc['mask'].update({'dtype': 'int32'})
+        ds.to_netcdf(destinationFile, encoding=enc)
 
         return
 
@@ -523,7 +525,9 @@ class MOM6(object):
         # Global attributes
         self._add_global_attributes(ds)
 
-        ds.to_netcdf(destinationFile, encoding=grd.removeFillValueAttributes(data=ds))
+        enc = grd.removeFillValueAttributes(data=ds)
+        enc['mask'].update({'dtype': 'int32'})
+        ds.to_netcdf(destinationFile, encoding=enc)
 
         return
 

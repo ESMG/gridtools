@@ -149,7 +149,7 @@ grd.setPlotParameters(
     {
         'name': 'Mercator',
         'lat_0': 40.0,
-        'lon_0': 230.0        
+        'lon_0': 230.0
     }, subKey='projection'
 )
 

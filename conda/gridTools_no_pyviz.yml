@@ -1,0 +1,45 @@
+name: gridTools
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - bottleneck
+  - cartopy
+  - colorama
+  - colorcet
+  - conda
+  - coverage
+  - cython
+  - dask
+  - datashader
+  - docutils=0.16
+  - geoviews
+  - hvplot
+  - jupyterlab
+  - matplotlib
+  - m2r2
+  - netCDF4
+  - nodejs
+  - numba
+  - numpy
+  - owslib
+  - pandas
+  - panel
+  - param
+  - pip
+  - pooch
+  - pyct
+  - pykdtree
+  - pyproj
+  - pyqt
+  - pyqt5-sip
+  - pytest
+  - python==3.9
+  - requests
+  - scipy
+  - sphinx
+  - sphinx_rtd_theme
+  - sphinxcontrib-bibtex
+  - xarray
+  - xesmf
+  - xgcm

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2022-05-10
+
+Updates
+
+ - Track down more encoding issues in code to remove FMS coupler
+   complaints about data types.
+ - Fixed some whitespace issues.
+ - Pyviz repository is/was broken.  Added a conda env configuration file for
+   workaround.
+
 ## 2022-04-26
 
 Updates

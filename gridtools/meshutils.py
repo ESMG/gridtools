@@ -11,7 +11,7 @@ def writeLandmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     MOM6 h-points are masked at and above the MASKING_DEPTH.  A depth
     equal to the MASKING_DEPTH is masked as land.  MASKING_DEPTH is
     ignored if negative.  The default depth is zero (0.0).'''
-    
+
     masking_depth = 0.0
     if 'MASKING_DEPTH' in kwargs.keys():
         masking_depth = kwargs['MASKING_DEPTH']
@@ -31,7 +31,8 @@ def writeLandmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
             if hasattr(grd, varCoord):
                 dsDataset[varCoord] = grd[varCoord]
 
-    dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))
+    enc = grd.removeFillValueAttributes(data=dsDataset)
+    dsDataset.to_netcdf(outFile, encoding=enc)
 
     return
 
@@ -43,7 +44,7 @@ def writeOceanmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
     MOM6 h-points are masked at and above the MASKING_DEPTH.  A depth
     equal to the MASKING_DEPTH is masked as land.  MASKING_DEPTH is
     ignored if negative.  The default depth is zero (0.0).'''
-    
+
     masking_depth = 0.0
     if 'MASKING_DEPTH' in kwargs.keys():
         masking_depth = kwargs['MASKING_DEPTH']
@@ -63,4 +64,5 @@ def writeOceanmask(grd, dsData, dsVariable, outVariable, outFile, **kwargs):
             if hasattr(grd, varCoord):
                 dsDataset[varCoord] = grd[varCoord]
 
-    dsDataset.to_netcdf(outFile, encoding=grd.removeFillValueAttributes(data=dsDataset))
+    enc = grd.removeFillValueAttributes(data=dsDataset)
+    dsDataset.to_netcdf(outFile, encoding=enc)
