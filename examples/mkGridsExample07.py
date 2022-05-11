@@ -149,7 +149,9 @@ grd.makeSoloMosaic(
     inputDirectory=inputDir,
     overwrite=True,
 )
-grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid_7.nc"))
+
+# The FMS coupler (v1) does not like the 'tile' variable
+grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid_7.nc"), noTile=True)
 
 # Do some plotting!
 

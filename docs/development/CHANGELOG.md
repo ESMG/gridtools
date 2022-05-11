@@ -4,6 +4,10 @@
 
 Updates
 
+ - FMS version 1 notes: variables in the grid file may be double; the
+   `tile` variable should not be written.
+ - saveGrid(): Add option to prevent `tile` variable from being written.
+   Use `noTile=True`.
  - Track down more encoding issues in code to remove FMS coupler
    complaints about data types.
  - Fixed some whitespace issues.

@@ -187,7 +187,7 @@ class GridUtils(object):
         .. note::
 
             Currently defined debug levels:
-                0=off 
+                0=off
                 1=log debugging messages
                 2=raise an exception
                 3=stop with a pdb breakpoint after logging message
@@ -1817,11 +1817,32 @@ class GridUtils(object):
                     ncEncoding[ncVar] = {'dtype': 'S%d' % (stringVars[ncVar]), 'char_dim_name': 'string'}
 
         return ncEncoding
-    
-    def saveGrid(self, filename=None, directory=None, enc=None):
+
+    def saveGrid(self, filename=None, directory=None, enc=None, noTile=False):
         '''
-        This operation is destructive using the last known filename which can be overridden.
+        This function writes the current grid from memory to a netCDF file.
+
+        If the grid was opened from an existing grid, the last known filename
+        will be used and overwrite the original grid file.  The filename
+        can be overridden to keep the original grid file intact.
+
+        If grid is a new grid, no filename exists and will need to be passed
+        as an argument to this function.
+
+        **Keyword arguments**
+
+            * *filename* (``str``) -- the grid filename to use for saving the grid.
+            * *directory* (``str``) -- directory path to use for saving the grid.
+            * *enc* (``str``) -- this passes a dtype to all the grid variables.  Default: double or float64
+            * *noTile* (``boolean``) -- do not write the ``tile`` variable.  Default: False
+
+        .. note::
+
+            FMS version 1 does not like the ``tile`` variable within the grid file.  To
+            exclude this variable, use ``noTile=True``.  FMS version 1 is ok with variables
+            being double precision.  If single precision is required, set ``enc='float32'``.
         '''
+
         if filename:
             if directory:
                 filename = os.path.join(directory, filename)
@@ -1836,16 +1857,22 @@ class GridUtils(object):
         if self.grid['x'].attrs['units'] == 'degrees_east':
             self.grid['x'].values = np.where(self.grid['x'].values>180, self.grid['x'].values-360, self.grid['x'].values)
 
-        #Duplicate
-        #self.grid.to_netcdf(self.xrFilename, encoding=self.removeFillValueAttributes())
+        # User a temporary copy of self.grid so the original contents are not
+        # modified
+        toWrite = self.grid.copy()
+
+        # For FMS, do not write the tile variable in the grid file
+        if noTile:
+            if 'tile' in toWrite:
+                toWrite = toWrite.drop('tile')
 
         # Save the grid here
         try:
-            gridEncoding = self.removeFillValueAttributes()
+            gridEncoding = self.removeFillValueAttributes(toWrite)
             if enc:
                 for vrb in ['x', 'y', 'dx', 'dy', 'angle_dx', 'area']:
                   gridEncoding[vrb] = {'dtype': enc}
-            self.grid.to_netcdf(self.xrFilename, encoding = gridEncoding)
+            toWrite.to_netcdf(self.xrFilename, encoding = gridEncoding)
             msg = "Successfully wrote netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
         except:
