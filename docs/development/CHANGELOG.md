@@ -1,5 +1,13 @@
 # Changelog
 
+## 2022-05-11
+
+Updates
+
+ - Issue #22: fixing up creation of mosaics and exchange grids depending on
+   what is seen in the land mask.  Fix for ocean grid `tile` variable to
+   make sure it is of type `NC_CHAR`.
+
 ## 2022-05-10
 
 Updates

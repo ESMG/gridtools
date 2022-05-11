@@ -3,6 +3,12 @@
 ## Milestones
 
  - [ ] Release 0.3.3
+   - [ ] Resolve Issue #21
+     - [X] Save `tile` variable as type NC_CHAR in ocean grid
+     - [ ] Add test for regular grid with land
+     - [ ] Add test for regular grid without land
+     - [ ] Add test for regular grid specified to be without land
+     - [ ] Add test for regular grid with land but error out with noLandMosaic=True specified
    - [ ] Resolve Issue #19
      - [X] add a keyword option to trigger alternate calcuation of angle_dx
        in gridutils.grids.mom6 and gridutils.

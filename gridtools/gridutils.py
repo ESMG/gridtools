@@ -1859,20 +1859,23 @@ class GridUtils(object):
 
         # User a temporary copy of self.grid so the original contents are not
         # modified
+        stringVars = {}
         toWrite = self.grid.copy()
 
         # For FMS, do not write the tile variable in the grid file
         if noTile:
             if 'tile' in toWrite:
                 toWrite = toWrite.drop('tile')
+        else:
+            stringVars = {'tile': len(str(self.grid['tile'].data))}
 
         # Save the grid here
         try:
-            gridEncoding = self.removeFillValueAttributes(toWrite)
+            gridEncoding = self.removeFillValueAttributes(toWrite, stringVars=stringVars)
             if enc:
                 for vrb in ['x', 'y', 'dx', 'dy', 'angle_dx', 'area']:
                   gridEncoding[vrb] = {'dtype': enc}
-            toWrite.to_netcdf(self.xrFilename, encoding = gridEncoding)
+            toWrite.to_netcdf(self.xrFilename, encoding=gridEncoding)
             msg = "Successfully wrote netCDF file to %s" % (self.xrFilename)
             self.printMsg(msg, level=logging.INFO)
         except:
@@ -2056,6 +2059,7 @@ class GridUtils(object):
             * *overwrite* (``boolean``) -- set True to overwrite existing files. Default: False
             * *inputDirectory* (``string``) -- absolute or relative path to write model input files. Default: "INPUT"
             * *relativeToINPUTDir* (``string``) -- absolute or relative path for mosaic files to the INPUT directory. Default: "./"
+            * *noLandMosaic* (``boolean``) -- set True if the grid does not contain land points.  Default: False
 
         .. note::
             Integers stored in the mosaic tiles must be 32 bit integers.  If 64 bit integers are used,
@@ -2075,6 +2079,10 @@ class GridUtils(object):
             For *oceanGridFile*, if the filename is not provided, the routine will attempt to use
             the name provided when the grid was read.  The filename may need to be set if the grid
             was just constructed using the library.
+
+            If no land points are detected, the ``atmos_mosaic_tile1Xland_mosaic_tile1.nc`` file is omitted
+            from the mosaic tiles.  If it is known that the grid does not have land points, the
+            ``noLandMosaic=True`` can be used to further simply the generated mosaic tiles.
         '''
 
         # Check and set any defaults to kwargs
@@ -2097,6 +2105,7 @@ class GridUtils(object):
         utils.checkArgument(kwargs, 'overwrite', False)
         utils.checkArgument(kwargs, 'inputDirectory', "INPUT")
         utils.checkArgument(kwargs, 'relativeToINPUTDir', "./")
+        utils.checkArgument(kwargs, 'noLandMosaic', False)
 
         if len(self.grid.variables) == 0:
             # No grid found
@@ -2104,8 +2113,19 @@ class GridUtils(object):
             self.printMsg(msg, level=logging.ERROR)
             return
 
+        # Load the MOM6() class
         mdl = importlib.import_module('gridtools.grids.mom6')
         mom6 = mdl.MOM6()
+
+        # Do some solo_mosaic and coupler_mosaic adjustments here
+        landMask = mom6._generate_mask('land', self, **kwargs)
+        utils.checkArgument(kwargs, 'haveLandPoints', bool((landMask == 1).any()))
+
+        if kwargs['noLandMosaic'] and kwargs['haveLandPoints']:
+            msg = ("ERROR: The noLandMosaic option cannot be used if land points exist in the ocean grid.")
+            self.printMsg(msg, level=logging.ERROR)
+            return
+
         # Supergrid is stored via GridUtils.saveGrid()
         mom6.write_MOM6_topography_file(self, **kwargs)
         mom6.write_MOM6_solo_mosaic_file(self, **kwargs)
@@ -2726,7 +2746,7 @@ class GridUtils(object):
         to see how the grid should be extended.
 
         **Sources probed for information**:
-        
+
             * Global attribute: projection
             * Variable 'tile' attribute: geometry
         '''

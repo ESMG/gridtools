@@ -556,6 +556,11 @@ class MOM6(object):
         # Loop for the three types
         for name1, name2 in exchangeGrids:
 
+            # If no land mosaic is requested, skip writing these files
+            if kwargs['noLandMosaic']:
+                if name1 == 'land' or name2 == 'land':
+                    continue
+
             ds = xr.Dataset()
 
             # calculate the exchange grid for name1 X name2
@@ -719,9 +724,14 @@ class MOM6(object):
         add_string_var_1d(ds, 'atm_mosaic_file', 'atmosphere_mosaic_file_name',         self.mom6_grid['filenames']['mosaic']   , strVarMap)
         add_string_var_1d(ds, 'atm_mosaic',      'atmosphere_mosaic_name',              'atmos_mosaic'                     , strVarMap)
 
-        add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
-        add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
-        add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
+        if kwargs['noLandMosaic']:
+            add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
+        else:
+            add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'atmos_mosaic'                      ,  strVarMap)
 
         add_string_var_1d(ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      self.mom6_grid['filenames']['directory'],  strVarMap)
         add_string_var_1d(ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
@@ -731,8 +741,11 @@ class MOM6(object):
         add_string_var_1d(ds, 'ocn_topog_file',  'ocean_topog_file_name',               self.mom6_grid['filenames']['topography'], strVarMap)
 
         add_string_var_2d(ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', self.mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
-        add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', self.mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
-        add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
+        if not(kwargs['noLandMosaic']):
+            add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', self.mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
+            add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
+        else:
+            add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
 
         # Global attributes
         self._add_global_attributes(ds)
