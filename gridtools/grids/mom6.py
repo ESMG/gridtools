@@ -727,11 +727,11 @@ class MOM6(object):
         if kwargs['noLandMosaic']:
             add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
             add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
-            add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'atmos_mosaic'                      ,  strVarMap)
         else:
             add_string_var_1d(ds, 'lnd_mosaic_dir',  'directory_storing_land_mosaic',       self.mom6_grid['filenames']['directory'],  strVarMap)
-            add_string_var_1d(ds, 'lnd_mosaic_file', 'land_mosaic_file_name',               self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
-            add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'atmos_mosaic'                      ,  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic_file', 'atmospheric_mosaic_file_name',        self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
+            add_string_var_1d(ds, 'lnd_mosaic',      'land_mosaic_name',                    'land_mosaic'                      ,  strVarMap)
 
         add_string_var_1d(ds, 'ocn_mosaic_dir',  'directory_storing_ocean_mosaic',      self.mom6_grid['filenames']['directory'],  strVarMap)
         add_string_var_1d(ds, 'ocn_mosaic_file', 'ocean_mosaic_file_name',              self.mom6_grid['filenames']['mosaic']   ,  strVarMap)
