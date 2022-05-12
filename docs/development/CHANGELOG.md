@@ -4,7 +4,10 @@
 
 Updates
 
- - Issue #22: fixing up creation of mosaics and exchange grids depending on
+ - Resolve #21: makeSoloMosaic() will create the appropriate exchange grids
+   depending if land points exist within an ocean grid.
+ - Tests are now included to make sure issue #22 stays operational.
+ - Issue #21: fixing up creation of mosaics and exchange grids depending on
    what is seen in the land mask.  Fix for ocean grid `tile` variable to
    make sure it is of type `NC_CHAR`.
 

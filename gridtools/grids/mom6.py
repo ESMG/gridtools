@@ -561,6 +561,11 @@ class MOM6(object):
                 if name1 == 'land' or name2 == 'land':
                     continue
 
+            # If there are no land grid points, skip atmos/land exchange file
+            if not(kwargs['haveLandPoints']):
+                if name1 == 'atmos' and name2 == 'land':
+                    continue
+
             ds = xr.Dataset()
 
             # calculate the exchange grid for name1 X name2
@@ -742,9 +747,12 @@ class MOM6(object):
 
         add_string_var_2d(ds, 'aXo_file', 'nfile_aXo', 'atmXocn_exchange_grid_file', self.mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
         if not(kwargs['noLandMosaic']):
-            add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', self.mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
+            # If no land points exist in the ocean grid, do not use atmos to land exchange
+            if kwargs['haveLandPoints']:
+                add_string_var_2d(ds, 'aXl_file', 'nfile_aXl', 'atmXlnd_exchange_grid_file', self.mom6_grid['filenames']['atmos_land_exchange'] , strVarMap)
             add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['land_ocean_exchange'] , strVarMap)
         else:
+            # If no land mosaic is specified, the atmos mosaic is used instead
             add_string_var_2d(ds, 'lXo_file', 'nfile_lXo', 'lndXocn_exchange_grid_file', self.mom6_grid['filenames']['atmos_ocean_exchange'], strVarMap)
 
         # Global attributes
