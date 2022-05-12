@@ -3,7 +3,7 @@
 ## Milestones
 
  - [ ] Release 0.3.3
-   - [X] Resolve Issue #21
+   - [X] Resolve Issue #22
      - [X] Save `tile` variable as type NC_CHAR in ocean grid
      - [X] Add test for regular grid with land
      - [X] Add test for regular grid without land
