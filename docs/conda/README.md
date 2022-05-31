@@ -133,3 +133,131 @@ If you are planning to edit code within gridtools, please use:
 library.  Changes will immediately be seen when you restart
 the jupyter kernel and rerun all the cells or rerun the
 python script.
+
+# Troubleshooting
+
+There are at least two known failure modes for conda that are documented below.
+  * Upgrade of the `base` environment causes the conda package manager to malfunction.
+  * Reinstalling an environment will break on older systems due to an aged GLIBC.
+
+## Conda Package Manager Malfunction
+
+After performing an update or upgrade of the `base` environment to upgrade conda
+results in the package manager malfunctioning.  The typical problem encountered
+is the inability to contact any repository.  Here is a typical error when running
+certain commands:
+
+```
+$ conda create -n gridtest python==3.7.10
+Collecting package metadata (current_repodata.json): failed
+
+CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://conda.anaconda.org/pyviz/linux-64/current_repodata.json>
+Elapsed: -
+
+An HTTP error occurred when trying to retrieve this URL.
+HTTP errors are often intermittent, and a simple retry will get you on your way.
+'https://conda.anaconda.org/pyviz/linux-64'
+```
+
+### Revert back to prior version
+
+If conda is broken beyond repair, there may be a way to salvage your environments.  If you
+were fortunate to have kept the miniconda shell installer archive
+(`Miniconda3-py39_4.9.2-Linux-x86_64.sh`), then you may be in luck.
+
+Process:
+  * Deactivate any exiting environments
+  * Rename the existing miniconda root to a backup
+  * Remove any .bashrc references
+  * Re-login to clear any lingering shell enviroment references
+  * Re-install miniconda to create a new miniconda root
+  * Re-login to initialize the new shell environment
+  * Change directory into the backup root `envs` directory
+  * Copy (cp -a) environments you wish to salvage into the newly created miniconda root `envs` directory
+  * Attempt to activate the copied environment
+  * If all checks out, erase the backup miniconda root
+
+## GLIBC errors
+
+If you reload the gridtools environment on an old machine, you may encounter
+GLIBC errors as shown below.
+
+```
+(gridtest) jrcermakiii@chinook03:~/src/gridtools/examples$ python mkGridsExample01.py
+Traceback (most recent call last):
+  File "mkGridsExample01.py", line 12, in <module>
+    from gridtools.gridutils import GridUtils
+  File "/import/AKWATERS/jrcermakiii/src/gridtools/gridtools/gridutils.py", line 5, in <module>
+    import xarray as xr
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/xarray/__init__.py", line 1, in <module>
+    from . import testing, tutorial, ufuncs
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/xarray/testing.py", line 8, in <module>
+    from xarray.core import duck_array_ops, formatting, utils
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/xarray/core/duck_array_ops.py", line 13, in <module>
+    import pandas as pd
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/__init__.py", line 22, in <module>
+    from pandas.compat import (
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/compat/__init__.py", line 15, in <module>
+    from pandas.compat.numpy import (
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py", line 7, in <module>
+    from pandas.util.version import Version
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/util/__init__.py", line 1, in <module>
+    from pandas.util._decorators import (  # noqa
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/util/_decorators.py", line 14, in <module>
+    from pandas._libs.properties import cache_readonly  # noqa
+  File "/import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/_libs/__init__.py", line 13, in <module>
+    from pandas._libs.interval import Interval
+ImportError: /lib64/libc.so.6: version `GLIBC_2.14' not found (required by /import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest/lib/python3.7/site-packages/pandas/_libs/interval.cpython-37m-x86_64-linux-gnu.so)
+```
+
+This is an indication that the underlying system (or cluster) you are using is
+falling out of date. The supported python versions of modules managed by conda
+are under constant integration (CI) are are rebuilt using newer systems and
+hence are linked to more recent versions of GLIBC. On my particular system, the
+underlying GLIBC is version 2.12. One or more of the loaded python modules now
+requires GLIBC 2.14. Unless you have a backup of the conda environment, there is
+no way to recover the original operating environment. You will likely have to
+resort to conventional manual installation of modules to restore the environment.
+
+To see what your conda installation is using for GLIBC, use conda info. The
+version of glibc should be noted in the virtual packages.
+
+```
+$ conda info
+
+     active environment : gridtest
+    active env location : /import/AKWATERS/jrcermakiii/local/miniconda3/envs/gridtest
+            shell level : 1
+       user config file : /home/jrcermakiii/.condarc
+ populated config files : /home/jrcermakiii/.condarc
+          conda version : 4.9.2
+    conda-build version : not installed
+         python version : 3.9.1.final.0
+       virtual packages : __glibc=2.12=0
+                          __unix=0=0
+                          __archspec=1=x86_64
+       base environment : /import/AKWATERS/jrcermakiii/local/miniconda3  (writable)
+           channel URLs : https://conda.anaconda.org/pyviz/linux-64
+                          https://conda.anaconda.org/pyviz/noarch
+                          https://conda.anaconda.org/conda-forge/linux-64
+                          https://conda.anaconda.org/conda-forge/noarch
+                          https://repo.anaconda.com/pkgs/main/linux-64
+                          https://repo.anaconda.com/pkgs/main/noarch
+                          https://repo.anaconda.com/pkgs/r/linux-64
+                          https://repo.anaconda.com/pkgs/r/noarch
+          package cache : /import/AKWATERS/jrcermakiii/local/miniconda3/pkgs
+                          /home/jrcermakiii/.conda/pkgs
+       envs directories : /import/AKWATERS/jrcermakiii/local/miniconda3/envs
+                          /home/jrcermakiii/.conda/envs
+               platform : linux-64
+             user-agent : conda/4.9.2 requests/2.25.0 CPython/3.9.1 Linux/2.6.32-754.35.1.el6.61015g0000.x86_64 centos/6.10 glibc/2.12
+                UID:GID : 3739:2161
+             netrc file : None
+           offline mode : False
+```
+
+## Discoveries and Workarounds
+
+At the moment, the GLIBC trouble seems to be limited to the `pandas`
+package.  A workaround is to follow the installation proceedure for
+gridtools and then reinstall the `pandas` package manually via pip.
