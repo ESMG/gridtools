@@ -48,7 +48,7 @@ For a quicker recovery of a conda environment, use the exported
 YAML file:
 ```
 $ conda env remove --name gridTools
-$ conda env create -f=conda/gridTools_export-linux-64.yaml
+$ conda env create -f=conda/gridTools_export-linux-64.yml
 ```
 
 NOTE: In some cases, the above may fail.  You then have two options.
