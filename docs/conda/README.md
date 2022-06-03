@@ -142,9 +142,22 @@ There are at least two known failure modes for conda that are documented below.
 
 ## Conda Package Manager Malfunction
 
-After performing an update or upgrade of the `base` environment to upgrade conda
-results in the package manager malfunctioning.  The typical problem encountered
-is the inability to contact any repository.  Here is a typical error when running
+Upgrading conda is usually accomplished by following the warning message
+usually provided by conda:
+
+```
+==> WARNING: A newer version of conda exists. <==
+  current version: 4.9.2
+  latest version: 4.12.0
+
+Please update conda by running
+
+    $ conda update -n base -c defaults conda
+```
+
+In certain situations, after upgrading conda, the package manager is not longer
+functional.  The typical problem encountered is the inability to contact any
+repository.  Here is a typical error when running
 certain commands:
 
 ```
@@ -257,6 +270,8 @@ $ conda info
 ```
 
 ## Discoveries and Workarounds
+
+### pandas
 
 At the moment, the GLIBC trouble seems to be limited to the `pandas`
 package.  A workaround is to follow the installation proceedure for

@@ -33,7 +33,7 @@ class App(object):
     def __init__(self, grd=None):
 
         # Globals
-        
+
         # This application has its own copy of GridTools() object
         self.grd = grd
 
@@ -222,6 +222,7 @@ class App(object):
             'gridResolutionXUnits': self.gridResolutionXUnits.value,
             'gridResolutionYUnits': self.gridResolutionYUnits.value,
             'gridMode': int(self.gridMode.value),
+            'angleCalcMethod': int(self.angleCalcMethod.value),
             'gridType': self.gridType.value,
             'tilt': float(self.gtilt.value)
         })
@@ -245,7 +246,7 @@ class App(object):
                 'lat_0': float(self.glat0.value),
                 'lat_ts': float(self.glatts.value),
             }, subKey='projection')
-        
+
         self.grd.makeGrid()
 
         #if self.grd.gridMade:
@@ -567,12 +568,20 @@ class App(object):
 
         **Grid Representation**
 
+        A good reference for the description of the MOM6 grid can be found in the
+        [Discrete Horizontal and Vertical Grids](https://mom6.readthedocs.io/en/main/api/generated/pages/Discrete_Grids.html){target="_blank"}
+        section of the MOM6 documentation.
+
         Additional details of the
         [MOM6](https://github.com/ESMG/gridtools/blob/main/docs/grids/MOM6.md){target="_blank"}
         grid and
         [MOM6/ROMS](https://github.com/ESMG/gridtools/blob/main/docs/grids/MOM6ROMS.md){target="_blank"}
         grids can be found in the grid section of
         the user manual.
+
+        ### Grid Metrics
+        This control selects the `angle_dx` calculation method.  The default value is zero (0).  If
+        the values look incorrect after creating a grid, please try the value of one (1).
         ''', width=self.plotWidgetWidth)
 
         pageSetup = pn.WidgetBox('''
@@ -659,6 +668,7 @@ class App(object):
         self.gridResolutionYUnits = pn.widgets.Select(name="Grid Resolution Units(Y)", options=self.gridResolutionUnitNames, value=self.gridResolutionUnitNames[0])
         self.gridMode = pn.widgets.Spinner(name="Grid Mode", value=2, step=1, start=1, end=2, width=80)
         self.gridMode.disabled = True
+        self.angleCalcMethod = pn.widgets.Spinner(name="angleCalcMethod", value=0, step=1, start=0, end=1, width=80)
         self.unitNames = ['degrees', 'meters']
         self.dxUnits = pn.widgets.Select(name='dx Units', options=self.unitNames, value=self.unitNames[0])
         self.dyUnits = pn.widgets.Select(name='dy Units', options=self.unitNames, value=self.unitNames[0])
@@ -863,17 +873,20 @@ class App(object):
                                                 self.gridResolutionY,
                                                 self.gridResolutionYUnits,
                                                 self.gridControlUpdateButton)
+
         self.gridAdvancedControls = pn.WidgetBox(
             """
             See "Grids" Manual tab for details about these controls.
             ## Grid Reference
-            """, self.xGridControl, self.yGridControl, """    
+            """, self.xGridControl, self.yGridControl, """
             ## Grid Type
             For now, only MOM6 grids are supported.
             """, self.gridType, """
             ## Grid Mode
             For now, MOM6 grids require grid mode 2.
-            """, self.gridMode)
+            """, self.gridMode, """
+            ## Grid Metrics
+            """, self.angleCalcMethod)
 
         # Setup controls
         self.loggingControls = pn.WidgetBox('# Logging','''

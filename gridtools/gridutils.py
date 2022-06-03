@@ -1969,7 +1969,11 @@ class GridUtils(object):
         #    pass
 
         # Add additional metadata if available
-        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits', 'tilt']
+        addMetadata = ['centerX', 'centerY', 'centerUnits', 'dx', 'dxUnits', 'dy', 'dyUnits',
+            'tilt', 'angleCalcMethod', 'gridResolution', 'gridResolutionUnits',
+            'gridResolutionX', 'gridResolutionXUnits',
+            'gridResolutionY', 'gridResolutionYUnits',
+        ]
         for metaTag in addMetadata:
             if metaTag in self.gridInfo['gridParameters'].keys():
                 #self.grid.attrs['grid_%s' % (metaTag)] = self.gridInfo['gridParameters'][metaTag]
@@ -3166,7 +3170,8 @@ class GridUtils(object):
         **Keyword arguments**
 
             * *chunks* (``int, tuple of int or mapping of hashable to int``) -- xarray chunk description.
-	'''
+        '''
+
         # Process keyword arguments
         chunks = kwargs.pop('chunks', None)
 
@@ -3217,6 +3222,7 @@ class GridUtils(object):
                     chunks = dsObj['chunks']
 
         dsData = None
+        #breakpoint()
         try:
             if chunks:
                 dsData = xr.open_dataset(urlToOpen, chunks=chunks)

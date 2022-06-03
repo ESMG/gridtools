@@ -14,7 +14,7 @@ the defined resolution of the grid cells in the :math:`x`
 and :math:`y` direction.
 
 This example creates the IBCAO grid as described by the
-`Technical Reference and User's Guide <https://www.ngdc.noaa.gov/mgg/bathymetry/arctic/IBCAO_TechnicalReference.PDF>`_. 
+`Technical Reference and User's Guide <https://www.ngdc.noaa.gov/mgg/bathymetry/arctic/IBCAO_TechnicalReference.PDF>`_.
 :cite:`IBCAO_TechnicalReference` :cite:`GEBCO_Centenary_Conference`
 
 The user manual states that the IBCAO grid is a
@@ -116,3 +116,11 @@ make the grid::
 For systems with smaller amounts of memory,
 `example #6 <https://github.com/ESMG/gridtools/blob/exp/rel031/examples/mkGridsExample06.py>`_
 constructs a mini IBCAO grid with fewer grid points.
+
+Grid metrics
+------------
+
+This section describes the generation of grid metrics.  Grid metrics includes
+information such as `angle_dx`....
+
+

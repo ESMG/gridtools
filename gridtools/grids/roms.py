@@ -515,6 +515,7 @@ class ROMS(object):
                 spval=1e37):
         """
         transect, z, lon, lat = transect(var, istart, iend, jstart, jend, grd)
+
         optional switch:
           - Cpos='rho', 'u' or 'v'       specify the C-grid position where
                                          the variable rely
@@ -522,9 +523,12 @@ class ROMS(object):
                                          the verticies
           - spval                        special value
           - rtol                         tolerance parameter
+
         return a vertical transect between the points P1=(istart, jstart)
-        and P2=(iend, jend) from 3D variable var
+               and P2=(iend, jend) from 3D variable var
+
         lon, lat and z contain the C-grid position of the section for plotting.
+
         If vert=True, lon, lat and z contain contain the position of the
         verticies (to be used with pcolor)
         """
@@ -775,6 +779,7 @@ class ROMS(object):
         """
         transectview(self, var, tindex, istart, iend, jstart, jend, gridid,
                      {optional switch})
+
         optional switch:
           - filename         if defined, load the variable from file
           - spval            specify spval
@@ -794,6 +799,7 @@ class ROMS(object):
           - clb              add colorbar (defaul: True)
           - xaxis            use lon or lat for x axis
           - outfile          if defined, write figure to file
+
         plot vertical transect between the points P1=(istart, jstart)
         and P2=(iend, jend) from 3D variable var. If filename is provided,
         var must be a string and the variable will be load from the file.

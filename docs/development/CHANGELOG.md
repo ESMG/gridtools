@@ -1,5 +1,33 @@
 # Changelog
 
+## 2022-05-31 to 2022-06-02
+
+Begin release cycle for 0.3.3.
+
+ - Fix tutorial rendering on github
+   - `local_instllation_tutorial.ipynb`
+   - `gridtoolAppTutorial.ipynb`
+ - Update gridtools manual
+   - `source/tutorials/jupyterMOM6.rst`: API updates to `computeBathymetricRoughness()`
+ - Update API documentation
+   - `bathyutils.py:computeBathymetricRoughness()`: By default, the user should
+     supply an extended grid prior to diagnosis of roughness.  The user should
+     then clip the result to return the grid to the original dimensions.
+ - Update conda documentation
+   - Reolve issue #21
+ - Add commonly encountered problem to workarounds for jinja2.
+ - Add more metadata to written grid files.
+   - `grid_angleCalcMethod`
+   - `grid_resolution_x`, `grid_resolution_x_Units`
+   - `grid_resolution_y`, `grid_resolution_y_Units`
+   - `grid_gridResolution`, `grid_gridResolutionUnits`
+   - `grid_gridResolutionX`, `grid_gridResolutionXUnits`
+   - `grid_gridResolutionY`, `grid_gridResolutionYUnits`
+ - Example updates
+   - Make note to improve mkGridIterative with updated materials.
+   - `mkGridsExample4.ipynb`: improve metadata and comparison of the two
+     methods.  Apply `angle_dx` fix for this grid.
+
 ## 2022-05-11
 
 Updates

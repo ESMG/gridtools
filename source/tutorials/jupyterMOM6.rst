@@ -137,6 +137,7 @@ The location of the `GEBCO 2020` file needs to be set appropriately.
         topoGrids = grd.computeBathymetricRoughness(highResTopographyFile,
             depthName='elevation',
             maxMb=99, superGrid=False, useClipping=False,
+            useQHGridShift=True,
             auxVariables=['depth'])
 
 The routine ``computeBathymetricRoughness`` is called with the location of
@@ -144,20 +145,29 @@ the `GEBCO 2020` topography.  This routine normally only returns a
 roughness calculation (``h2``).  As seen above, a request was made for
 the ``depth`` grid.  Since `GEBCO 2020` topographic grid is an
 **elevation** we have to turn the ``depth`` grid into a
-**depth** by taking the negative of the grid.
+**depth** by taking the negative of the grid values.
+
+.. warning::
+
+    The bathymetric roughness uses a process of grid refinements.  The
+    number of refinements performed depends on available memory.  If more
+    memory is available, feel free to adjust the `maxMb` value upwards.  At
+    some point, the routine will fail due to lack of memory.  A greater value
+    will also cause the time required to complete the task to increase.  The
+    value, 99, is used for demonstration only.
 
 [5]::
 
-    # Turn the diagnosed topography grid into an actual depth
+    # Turn the diagnosed topography values into a depth value
     topoGrids['depth'] = -(topoGrids['depth'])
 
 .. _write-fms-coupler-and-mosaic-files:
 
-Write FMS coupler and mosaic files
-==================================
+Write FMS coupler, mosaic and grid exchange files
+=================================================
 
-Let us write the FMS coupler and mosaic files for the current model
-grid, roughness and topography.   Edit the ``wrkDir`` variable so
+Let us write the FMS coupler, mosaic and grid exchange files for the
+current model grid, roughness and topography.   Edit the ``wrkDir`` variable so
 it points to an empty directory.  A subdirectory called ``INPUT`` will
 also need to be created.
 
@@ -197,6 +207,10 @@ to allow comparison.
     MINIMUM_DEPTH, are specified.  If these are not specified,
     these default to a depth of zero (0.0) meters.  For more
     details, see :py:func:`~gridtools.gridutils.GridUtils.makeSoloMosaic`.
+
+    NOTE: The behavior of ``makeSoloMosaic`` will automatically adjust
+    creation of exchange files.  This is especially evident when the
+    land mask does not contain any land mask points.
 
 .. _examine-the-topography-grid:
 
@@ -283,7 +297,7 @@ by using a display() function.
     grd.setPlotParameters({
         'extent': [-140.0 ,-120.0, 49.0, 59.0]
     })
-    
+
     (figureMaskZoom, axesMaskZoom) = grd.plotGrid(showModelGrid = True,
             plotVariables={
             'mask': {
@@ -414,7 +428,7 @@ after running the above routine:
     0.000000 means that depths of **0.000000 or shallower** will
     be masked as land.  When the `MASKING_DEPTH` and `MINIMUM_DEPTH`
     are **EQUAL**, an additional depth of `epsilon` is applied so
-    the new point is actually an ocean point.  The value of `epsilon`
+    that any new points are actually an ocean points.  The value of `epsilon`
     may need to be changed if the new ocean points are masked by MOM6.
 
     See: :py:func:`~gridtools.gridutils.GridUtils.applyExistingOceanmask` or

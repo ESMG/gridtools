@@ -191,7 +191,7 @@ bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example3_computeBathymetri
 if os.path.isfile(bathyGridFilename):
     bathyGrids = xr.open_dataset(bathyGridFilename)
 else:
-    # Data sources cannot be in chunked mode for use in this routine
+    # This routine cannot utilize data sources that are in chunked mode
     bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
             maxMb=99, superGrid=False, useClipping=False,
             useQHGridShift=True, useOverlap=True,

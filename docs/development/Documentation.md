@@ -122,7 +122,10 @@ $ make
 $ make install
 ```
 
-Use of glibc is tricky, be careful.
+Use of a locally user installed glibc is tricky, be careful.  Use of
+this glibc can cause other side effects!  Here is some additional
+information about working with different glibc versions from a
+[stack overflow post](https://stackoverflow.com/questions/847179/multiple-glibc-libraries-on-a-single-host).
 
 ## MOM6 Manual
 

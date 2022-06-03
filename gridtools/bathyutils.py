@@ -688,9 +688,10 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
           clipped prior to computing the bathymetric roughness. Defualt: False
         * *useFixByOverlapQHGridShift* (``boolean``) --
           When using a regular grid, use overlapping grid technique to fill in partition boundaries.
-          See IMPLEMENTATION NOTES below. Default: True
+          See IMPLEMENTATION NOTES below. Default: False [DEPRICATED]
         * *useQHGridShift* (``boolean``) --
           For a regular grid, use the Q point values as the H values to fill missing points.
+          Default: False
         * *useOverlap* (``boolean``) --
           Use overlapping grid technique to fill in partition boundaries.  The outer column and
           row will still be missing.
@@ -737,17 +738,19 @@ def computeBathymetricRoughness(grd, dsName, **kwargs):
           the bathymetric roughness.  This will require more RAM. Default: False
 
     IMPLEMENTATION NOTES:
-      * For the supergrid, four zero bands along longitude are returned
+      * If a supergrid is used, four zero bands along longitude are returned
         representing the four grid partitions.  This needs to be fixed
         in the future.
-      * **useFixByOverlapQHGridShift** by default is True.  Roughness (h2) is
+      * **useQHGridShift** by default is False.  Roughness (h2) is
         diagnosed on the q-points and shifted by 1/2 a grid cell back to the
         h-points.  Accuracy of the roughness and other resultant variables are
         off by a 1/2 grid cell.  This only works for the regular grid, not the
-        supergrid.  If the grid is extended, setting **extendedGrid** to True,
+        supergrid (superGrid=False).
+      * **extendedGrid**: If the grid is extended, setting **extendedGrid** to True,
         tells this routine to attempt to diagnose h2 on the h-points without
         shifting the grid.  The extended grid should be extended by two grid
-        points on the supergrid.
+        points when working with the supergrid.  Use of the **extendedGrid**
+        option is recommended for best results.
       * Support for 'q' and 'uv' grid points are not supported.
       * If the program is running out of memory, reduce the maxMb value.
         This reduces the available memory footprint available to

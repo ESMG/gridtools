@@ -23,7 +23,7 @@ class SysInfo(object):
         # Initialize data structures
         self.versionDataLoaded = False
         self.versionData = dict()
-        
+
         # Maintain a table of python module/packages to increase
         # efficiency.
         self.installedPackages = dict()
@@ -126,18 +126,18 @@ class SysInfo(object):
                 return pkg_resources.get_distribution(mdlName).version
             except:
                 return None
-    
+
     def isAvailable(self, pkgReq, verReq, orLower=False):
         # Simple package and version checker
         # Defaults to equal or higher, or set orLower to True to test reverse
         # X.Y.Z each of X Y Z might be 10a or 10b
         pass
-        
+
     def is_lab_notebook(self):
         '''Detects if current process is a jupyter-lab process.'''
         return any(re.search('jupyter-lab', x)
                    for x in psutil.Process().parent().cmdline())    
-    
+
     def loadVersionData(self, **kwargs):
         '''This function loads module version data in a variety of ways.  The
         default is for modules currently loaded by the python executable.
@@ -156,7 +156,7 @@ class SysInfo(object):
             modules already loaded into the python environment.  Switching
             to a package manager will display all installed software which
             may be more information than desired.
-        
+
             For the `conda` package manager, the conda python module may
             be installed or the `conda` executable is available.
 
@@ -192,7 +192,7 @@ class SysInfo(object):
                 msg = ("Please install the 'conda' python module in this environment.")
                 if self.grd: self.grd.printMsg(msg, level=logging.INFO)
                 return
-        
+
             # Load conda environment information
             stdin, stdout, errcode =\
                 conda.cli.python_api.run_command(conda.cli.python_api.Commands.LIST, "--export")
@@ -227,10 +227,10 @@ class SysInfo(object):
             machineType = utils.get_machine()
             itemList['platform'] = "%s-%s" % (
                     systemName, machineType)
-        
+
         self.versionData = itemList
         self.versionDataLoaded = True
-        
+
     def printInfo(self, k, kd, msg):
         if hasattr(kd, k):
             print("%-40s: %s" % (msg, getattr(kd, k)))
@@ -273,7 +273,7 @@ class SysInfo(object):
             msg = ("ERROR: Command failed to run (%s)" % (cmdString))
             if self.grd: self.grd.debugMsg(msg)
             return (None, None, None)
-            
+
     def showAll(self, vList=[]):
         self.showSystem()
         self.showEnvironment()
@@ -299,7 +299,7 @@ class SysInfo(object):
         # Show versions of various modules
         if not(self.versionDataLoaded):
             self.loadVersionData()
-            
+
         itemList = self.versionData
 
         # Report

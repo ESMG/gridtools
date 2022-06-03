@@ -6,6 +6,8 @@
  * https://automating-gis-processes.github.io/CSC/notebooks/L2/geopandas-basics.html#Creating-geometries-into-a-GeoDataFrame
  * https://automating-gis-processes.github.io/CSC18/lessons/L4/point-in-polygon.html
  * https://realpython.com/python-property/#:~:text=Python's%20property()%20is%20the,use%20it%20without%20importing%20anything.
+ * https://stackoverflow.com/questions/847179/multiple-glibc-libraries-on-a-single-host
+ * https://stackoverflow.com/questions/17077494/how-do-i-convert-a-ipython-notebook-into-a-python-file-via-commandline
 ## Bookmarks 2021
  * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
  * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash

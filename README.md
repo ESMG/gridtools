@@ -140,6 +140,30 @@ plan to install a copy of the grid generation software.
 NOTE: These workarounds should be automatically installed with
 an installation of gridtools in step 2 using pip.
 
+## jinja2
+
+A commonly reported problem is seeing this message after installation of
+gridtools:
+```
+ImportError: cannot import name 'Markup' from 'jinja2''
+```
+
+A more modern version of `jinja2` will produce this message.  This
+library is currently pinned at 3.0.1.  Check to see what version you
+are using.
+
+```
+$ python
+Python 3.7.10 | packaged by conda-forge | (default, Feb 19 2021, 16:07:37)
+[GCC 9.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import jinja2
+>>> from jinja2 import Markup
+>>> print(jinja2.__version__)
+3.0.1
+>>>
+```
+
 ## nodejs
 
 OPTIONAL: This package is optional.  If not using **conda**, this package

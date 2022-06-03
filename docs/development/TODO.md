@@ -3,23 +3,35 @@
 ## Milestones
 
  - [ ] Release 0.3.3
+   - [ ] Resolve Issue #21
+     - [ ] Document GLIBC workarounds
+   - [ ] Resolve Issue #20
+     - [ ] pyviz repo issue
    - [X] Resolve Issue #22
      - [X] Save `tile` variable as type NC_CHAR in ocean grid
      - [X] Add test for regular grid with land
      - [X] Add test for regular grid without land
      - [X] Add test for regular grid specified to be without land
      - [X] Add test for regular grid with land and noLandMosaic=True specified (expected failure)
+     - [ ] Update docs/grids/MOM6.md with mosaic and exchange grid handling
    - [ ] Resolve Issue #19
      - [X] add a keyword option to trigger alternate calcuation of angle_dx
        in gridutils.grids.mom6 and gridutils.
-     - [ ] add appropriate `angle_dx` documentation so that users are informed
      - [X] modified example 13 for demonstrating the `angle_dx` issue
-     - [ ] add `angle_dx` to gridtools application
+     - [X] add angleCalcMethod (`angle_dx`) control to gridtools application
+     - [ ] add appropriate `angle_dx` documentation so that users are informed
    - [X] fix a few bugs confirming operation of gridtools.convertGrid()
    - [X] add python script example 13 showing ROMS to MOM6 grid
          conversion using gridtools.convertGrid()
    - [X] apply grid projection metadata to converted grid
    - [ ] Improve documentation and operation of gridutils.plotGrid()
+   - [X] Place additional metadata into MOM6 grid files
+     - [X] Grid parameters
+     - [X] Software stack, git information
+       - [X] Update to utils.get_git_repo_version_info()
+     - [X] Alternate version/software capture if conda and/or git is not available
+     - [X] Added proj string to netCDF file
+     - [X] Update conda capture code so a temporary file is not necessary
  - [ ] Release 0.x
    - [ ] Attempt to merge ROMS:pyroms.transectview with MOM6:m6toolbox.section2quadmesh
      - [ ] Port code for use with ROMS grids
@@ -34,12 +46,13 @@
    - [ ] Finish port ROMS mask editor as-is to gridtools for MOM6/ROMS grids (pylab)
    - [ ] Rewrite/Optimize pylab mask editor
    - [ ] Application improvements
-   - [ ] Boundery condition grid creation and support (OBCs)
-     - [ ] Save only the points we need instead of the whole supergrid
+     - [ ] add `proj` string to available metadata; currently only available when grid is written
+   - [ ] Open Boundery Condition and forcing grid creation and support (OBCs/forcing)
+     - [ ] Subsetting
+       - [ ] Save only the points we need instead of the whole supergrid
+     - [ ] OBC code: `https://github.com/jsimkins2/nwa25/tree/main/setup/boundary`
+     - [ ] Forcing code: `https://github.com/jsimkins2/nwa25/tree/main/setup/forcing`
    - [ ] Sponge data preparation
-   - [ ] Subsetting
-     - [ ] Add more flexibility for handling model grids
-     - [ ] Boundary files
    - [ ] Leverage dask (for users that lack access to large memory nodes)
    - [ ] More graceful handling of periodic grid edges: +0,+360 vs -180,+180
    - [ ] Enhanced grid/plot projection options (non-map based;
@@ -53,7 +66,8 @@
 
 # BUGS
 
- - [ ] gridtools applications do not start up properly when jupyter is
+ - [ ] Stereographic grid does not generate correct `angle_dx` for grid center (300, 40) dx(25/1deg) dy(35/1deg) tilt(-35) LCC
+ - [ ] some gridtools applications do not start up properly when jupyter is
        started with `--ip=0.0.0.0`
  - [ ] Investigate reliably of produced grids between platforms
  - [ ] A nested dictionary will clobber other nested elements instead
@@ -64,6 +78,8 @@
 
 # TASKS
 
+ - [ ] Update grid generation
+   - [ ] Updated source: `https://github.com/nikizadehgfdl/ocean_model_grid_generator`
  - [ ] Generic tool to subset a MOM6 grid for a given area for debugging.
    - [X] Name this function subsetGrid().
    - [ ] Allow selection of offset, spacing and range.
@@ -94,6 +110,7 @@
      - [X] Niki''s example added; but it may not be correct
      - [ ] Niki might have solved lat lon tilt?
    - [ ] grid generation in other projections (tri-polar, etc)
+     - [ ] store appropriate metadata when writing grid file
    - [ ] on saveGrid():
      - [X] convert lon [+0,+360] to [-180,+180]
      - [ ] Unify code that adjusts lon (PR#1)
@@ -128,7 +145,7 @@
  - [ ] integration of data sources
    - [ ] Using xesmf regridder and other tools to create bathymetry and
          other forcing and boundary files
-   - [ ] generic regridder for creating boundary files (OBCs) from data sources
+   - [ ] generic regridder for creating boundary files (OBCs) and forcing files from data sources
    - [ ] xesmf regridder for bathymetry sources
    - [ ] option to use source grid as a supergrid for coarsening
    - [ ] refactor function arguments into kwargs
@@ -233,7 +250,11 @@
    - [ ] Successful load of grid from a file
    - [ ] Reset appropriately when clearGrid() is called
  - [ ] numpypi
-   - [ ] a test fails in `test_trunc.py`
+   - [ ] a test fails in `test_trunc.py`; this has been since removed; still should look at why
+         because it was apparently working with earlier versions of python/numpy
+   - [ ] Update local fork with updates from adcroft and nikizadehgfdl (repackage and modern CI checks)
+     - `https://github.com/nikizadehgfdl/numpypi`
+     - `https://github.com/adcroft/numpypi`
  - [ ] CI/Actions test harnesses
    - [ ] pytest: Setup some simple projection tests: IBCAO, ....
    - [ ] pytest: Test other spherical grids not centered over the pole;
@@ -242,6 +263,7 @@
    - [ ] pytest: allow certain tests to fail if a module is not
          available (issue warnings instead)
    - [ ] selenium: Testing interactive methods may be harder.
+   - [ ] Continue with pytest or switch to unittest?
 
 # WISH
 
@@ -284,14 +306,6 @@
      - [ ] improve just clobbering shallower points with masking_depth
    - [ ] Allow conversion of MOM6 grids to ROMS grids
  - [ ] dynamic plot parameters based on grid type
- - [ ] Place additional metadata into MOM6 grid files
-   - [X] Grid parameters
-   - [X] Software stack, git information
-     - [ ] Update to utils.get_git_repo_version_info()
-   - [ ] Alternate version/software capture if conda and/or git is not available
-   - [X] Added proj string to netCDF file
-   - [ ] Tri polar grid description
-   - [X] Update conda capture code so a temporary file is not necessary
  - [ ] Work with generic non-mapping reference systems for use with
        some of the sample MOM6 problems
    - [ ] MOM6-examples: `double_gyre`
@@ -299,7 +313,6 @@
      - [ ] https://gist.github.com/adcroft/2a2b91d66625fd534372
    - [ ] MOM6 dumbbell: https://github.com/NOAA-GFDL/MOM6/search?q=dumbbell
      - [ ] Support for grid variable and plotting
-     - [ ] Learn about OBC preparation and sponges
  - [ ] Refactor any grid math into a gridmath library. Any grid
        computation that can stand on its own should be moved into a
        separate gridmath library.
@@ -331,7 +344,6 @@
      - [ ] https://github.com/MackenzieBlanusa/OHC_CMIP6
      - [ ] https://github.com/xarray-contrib/cf-xarray
      - [ ] https://github.com/jbusecke/cmip6_preprocessing
- - [ ] triton node issue: python netCDF4 large file reading seems to hang nodes
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
  - [ ] Update all references to field to either variable or grid
        depending on context.
@@ -340,3 +352,5 @@
 
  - [ ] ntiles,1 is written in `write_MOM6_topography_file`, is this
        required for MOM6?
+ - [ ] `angle_dx`: causes for problems in calculations?
+   - Curvature of the earth? See example grid +5 vs +30 degree tilt
