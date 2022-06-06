@@ -1,11 +1,20 @@
 #!/usr/bin/env python
 
-# This is the same as Example4 but in a python script instead of
+# This is the same as Example 4 but in a python script instead of
 # a notebook.
 
 import os
 import numpy as np
 import xarray as xr
+
+import os, sys
+from gridtools.gridutils import GridUtils
+
+grd = GridUtils()
+
+grd.printMsg("Example 5 is the same as Example 4.")
+grd.printMsg("This is a python script instead of a notebook.")
+grd.printMsg("---")
 
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 
@@ -41,11 +50,6 @@ Expected answers:
 print(yy[0,0], xx[0,0], lat[0,0], lon[0,0])
 print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1],\
         lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])
-
-import os, sys
-from gridtools.gridutils import GridUtils
-
-grd = GridUtils()
 
 grd.clearGrid()
 

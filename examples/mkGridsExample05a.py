@@ -8,9 +8,17 @@ import os, sys, logging
 import numpy as np
 import xarray as xr
 
+import os, sys
+from gridtools.gridutils import GridUtils
+
+grd = GridUtils()
+
 # Set a place to write files
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 inputDir = os.path.join(wrkDir, 'INPUT')
+
+grd.printMsg("Example 5a creates an IBCAO grid using a different earth radius than Example 4.")
+grd.pringMsg("---")
 
 # IBCAO
 # Working in cartesian coordinates, all values are in meters
@@ -47,11 +55,6 @@ Expected answers:
 ---''')
 print(yy[0,0], xx[0,0], lat[0,0], lon[0,0])
 print(yy[y.shape[0]-1, x.shape[0]-1], xx[y.shape[0]-1, x.shape[0]-1], lat[y.shape[0]-1, x.shape[0]-1], lon[y.shape[0]-1, x.shape[0]-1])
-
-import os, sys
-from gridtools.gridutils import GridUtils
-
-grd = GridUtils()
 
 grd.clearGrid()
 

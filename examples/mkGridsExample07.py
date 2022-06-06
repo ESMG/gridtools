@@ -59,6 +59,7 @@ grd.setGridParameters({
     'ensureEvenI': True,
     'ensureEvenJ': True,
     'tileName': 'tile1',
+    'angleCalcMethod': 1
 })
 grd.printMsg("")
 
@@ -93,7 +94,7 @@ ds.addDataSource({
 
 # Save the catalog just for demonstration
 ds.saveCatalog(os.path.join(wrkDir, 'catalog.json'))
-ds.saveCatalog(os.path.join(wrkDir, 'catalog.yaml'))
+ds.saveCatalog(os.path.join(wrkDir, 'catalog.yml'))
 
 # Bathymetry grid variables filename
 bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example7.nc')
@@ -107,6 +108,11 @@ if os.path.isfile(bathyGridFilename):
     bathyGrids = xr.open_dataset(bathyGridFilename)
 else:
     # Data sources cannot be in chunked mode for use in this routine
+
+    # NOTE: This uses the original workaround for diagnosing the
+    # bathymetric roughness.  Please see mkGridsExample07b.ipynb
+    # for the recommended method for computing bathymetric
+    # roughness.  Please also read the manual for more details.
     bathyGrids = grd.computeBathymetricRoughness('ds:GEBCO_2020',
             maxMb=99, superGrid=False, useClipping=False,
             useQHGridShift=True, useOverlap=True,
@@ -156,7 +162,9 @@ grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid_7.nc"), noTile=True)
 # Do some plotting!
 
 # Set some plot parameters for the grid and topography
-
+grd.printMsg("---")
+grd.printMsg("Plotting original diagnosed bathymetric field.")
+grd.printMsg("---")
 grd.setPlotParameters(
     {
         'figsize': (8,8),
@@ -196,6 +204,10 @@ figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy_7.png'), dpi=None,
 
 # Plot depth grid after we apply an existing landmask with minimum
 # depth set to 1000 meters
+grd.printMsg("---")
+grd.printMsg("Plotting original diagnosed bathymetric field with")
+grd.printMsg("MINIMUM_DEPTH=1000.0.")
+grd.printMsg("---")
 (figure, axes) = grd.plotGrid(
     showModelGrid=False,
     plotVariables={

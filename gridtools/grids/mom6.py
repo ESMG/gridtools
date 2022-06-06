@@ -261,6 +261,11 @@ class MOM6(object):
             grd.printMsg(msg, logging.WARNING)
             return
 
+        # This routine allows writing of multiple topography variables if
+        # specified.  Otherwise, just write the default topographyGrid.
+        # If the topographyVariable argument is not set, use [].
+        utils.checkArgument(kwargs, 'topographyVariables', [])
+
         ds = xr.Dataset()
 
         #nx = mom6_grid['cell_grid']['nx']
@@ -545,6 +550,10 @@ class MOM6(object):
             ('land', 'ocean')
         ]
 
+        # Set default values for some keywords
+        utils.checkArgument(kwargs, 'noLandMosaic', False)
+        utils.checkArgument(kwargs, 'haveLandPoints', True)
+
         # Calculate cell_grid area (if needed) - this happens if
         # this is called separately from the ROMS to MOM6 conversion tool.
         if not(self.initMOM6):
@@ -699,6 +708,10 @@ class MOM6(object):
             strVarMap[var_name] = 255
             ds[var_name] = ((dim_name,), [value])
             ds[var_name].attrs['standard_name'] = standard_name
+
+        # Set default values for some keywords
+        utils.checkArgument(kwargs, 'noLandMosaic', False)
+        utils.checkArgument(kwargs, 'haveLandPoints', True)
 
         # Accumulate string variables for encoding
         strVarMap = dict()
@@ -900,6 +913,9 @@ class MOM6(object):
 
         This function is based on code from :cite:p:`Ilicak_2020_ROMS_to_MOM6`.
         '''
+
+        # If the topographyVariables argument is not set, use [].
+        utils.checkArgument(kwargs, 'topographyVariables', [])
 
         # Access depth field
         if len(kwargs['topographyVariables']) == 0:

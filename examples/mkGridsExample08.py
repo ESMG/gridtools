@@ -63,7 +63,8 @@ grd.setGridParameters({
     'gridType': 'MOM6',
     'ensureEvenI': True,
     'ensureEvenJ': True,
-    'tileName': 'tile1'
+    'tileName': 'tile1',
+    'angleCalcMethod': 1
 })
 grd.printMsg("")
 

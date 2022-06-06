@@ -14,6 +14,11 @@ inputDir = os.path.join(wrkDir, 'INPUT')
 grd = GridUtils()
 grd.clearGrid()
 
+grd.printMsg("Example 6 creates a small mini IBCAO grid.")
+grd.printMsg("This example also demonstrates the angleCalcMethod option")
+grd.printMsg("and its impact on the angle_dx calcuation.")
+grd.printMsg("---")
+
 # Define IBCAO grid for gridtools library
 grd.setGridParameters({
     'projection': {

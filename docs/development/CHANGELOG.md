@@ -1,5 +1,17 @@
 # Changelog
 
+## 2022-06-03 to 2022-06-06
+
+Continue work on release 0.3.3.
+
+ - Update example 1 with `angle_dx` fix.
+ - Update example 3 with angleCalcMethod to squish warning.
+ - Update example 7 with additional information on computing bathymetric roughness.
+ - Update example 7a and 7b (notebook) showing plot of supergrid.
+ - Update example 12 (notebook) due to plotting API changes for showing grid or supergrid cells.
+ - Noted continued work on FRE-NCtools and the addition of the Ocean Model Grid Generator.
+ - grids/mom6.py: Add defaults for keyword arguments.
+
 ## 2022-05-31 to 2022-06-02
 
 Begin release cycle for 0.3.3.

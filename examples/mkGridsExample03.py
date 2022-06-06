@@ -87,6 +87,7 @@ grd.setGridParameters({
     'ensureEvenI': True,
     'ensureEvenJ': True,
     'tileName': 'tile1',
+    'angleCalcMethod': 0
 })
 grd.showGridParameters()
 grd.printMsg("")

@@ -153,6 +153,11 @@
 
 ## For Review Later
 
+ * FRE-NCtools
+   * Now combines FRE-NCtools with Niki's Ocean Model Grid Generator
+   * https://github.com/NOAA-GFDL/FRE-NCtools
+   * https://github.com/NOAA-GFDL/ocean_model_grid_generator
+
  * https://github.com/nsidc/mapx
    * The NSIDC mapx library and associated tools for gridding/reprojection.
 

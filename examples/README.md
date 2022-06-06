@@ -140,7 +140,16 @@ example.
 ## mkGridsExample07a.ipynb
 
 This example is just Example 7 but in a
-jupyter notebook form.
+jupyter notebook form.  The bathymetric
+roughness is computed using a workaround.
+
+## mkGridsExample07b.ipynb
+
+This example is just Example 7 but in jupyter
+notebook form.  The bathymetric roughness is
+computed using a another workaround that uses
+an extended grid.  This is the recommended
+method of computing the bathymetric roughness.
 
 ## mkGridsExample08.py
 
