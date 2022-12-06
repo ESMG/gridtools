@@ -8,6 +8,8 @@ Gridtools library applications.
 **maskEditorPylab()**
 This class is based on code from :cite:p:`ESMG_pyroms_2021`.
 
+**topoEditor()**
+
 '''
 # Modules
 import os, sys, io, logging, warnings

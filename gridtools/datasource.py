@@ -121,6 +121,6 @@ class DataSource(object):
         outfd = open(outFile, 'w')
         if extType == 'json':
             json.dump(self.cleanCatalog(self.catalog), outfd, indent=2)
-        if extType == 'yaml':
+        if extType in ['yaml', 'yml']:
             yaml.dump(self.cleanCatalog(self.catalog), outfd)
         outfd.close()
