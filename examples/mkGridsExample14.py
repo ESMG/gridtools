@@ -9,6 +9,9 @@ import xarray as xr
 from gridtools.gridutils import GridUtils
 from gridtools.datasource import DataSource
 
+# Test grid generation with small grid mercator which
+# causes calculation issues grid metric angle_dx
+
 # Setup a work directory
 wrkDir = '/import/AKWATERS/jrcermakiii/configs/zOutput'
 inputDir = os.path.join(wrkDir, "INPUT")
@@ -18,7 +21,7 @@ grd = GridUtils()
 
 # We can turn on extra output from the module
 grd.printMsg("Setting print and logging messages to the DEBUG level.")
-logFilename = os.path.join(wrkDir, 'LCC_20x30_7.log')
+logFilename = os.path.join(wrkDir, 'Mercator_angleDX_20x20.log')
 grd.setVerboseLevel(logging.DEBUG)
 grd.setDebugLevel(0)
 grd.setLogLevel(logging.DEBUG)
@@ -30,27 +33,27 @@ grd.clearGrid()
 
 # Specify the grid parameters
 # gridMode should be 2.0 for supergrid
-# Normally 30.0; 0.0 for debugging
-gtilt = 30.0
+gtilt = 0.0
 grd.printMsg("Set grid parameters.")
 grd.setGridParameters({
     'projection': {
-        'name': 'LambertConformalConic',
-        'lon_0': 230.0,
-        'lat_0': 40.0,
+        'name': 'Mercator',
+        'lon_0': 0.0,
+        'lat_0': 0.0,
+        'lat_ts': 0.0,
         'ellps': 'WGS84'
     },
-    'centerX': 230.0,
-    'centerY': 40.0,
-    'centerUnits': 'degrees',
-    'dx': 20.0,
+    'centerX': 0.0,
+    'centerY': 0.0,
+    'centerUnits': 'degress',
+    'dx': 2.0,
     'dxUnits': 'degrees',
-    'dy': 30.0,
+    'dy': 2.0,
     'dyUnits': 'degrees',
     'tilt': gtilt,
-    'gridResolutionX': 1.0,
-    'gridResolutionY': 1.0,
-    'gridResolution': 1.0,
+    'gridResolutionX': 0.1,
+    'gridResolutionY': 0.1,
+    'gridResolution': 0.1,
     'gridResolutionXUnits': 'degrees',
     'gridResolutionYUnits': 'degrees',
     'gridResolutionUnits': 'degrees',
@@ -97,7 +100,7 @@ ds.saveCatalog(os.path.join(wrkDir, 'catalog.json'))
 ds.saveCatalog(os.path.join(wrkDir, 'catalog.yml'))
 
 # Bathymetry grid variables filename
-bathyGridFilename = os.path.join(wrkDir, 'ocean_topog_Example7.nc')
+bathyGridFilename = os.path.join(wrkDir, 'ocean_topog.nc')
 
 # The bathymetric roughness can take a while to run.
 # If the file exists, we use that one instead of regenerating
@@ -125,27 +128,27 @@ else:
 
     # Write ocean_mask.nc and land_mask.nc based on existing field
     grd.writeOceanmask(bathyGrids, 'depth', 'mask',
-            os.path.join(wrkDir, 'ocean_mask_Example7.nc'),
+            os.path.join(wrkDir, 'ocean_mask_write.nc'),
             MASKING_DEPTH=0.0)
     grd.writeLandmask(bathyGrids, 'depth', 'mask',
-            os.path.join(wrkDir, 'land_mask_Example7.nc'),
+            os.path.join(wrkDir, 'land_mask_write.nc'),
             MASKING_DEPTH=0.0)
 
     # Apply existing land mask which should not change anything
     # The minimum depth will modify a couple points.   We save the
     # new field as 'newDepth' to allow comparison with 'depth'.
     bathyGrids['newDepth'] = grd.applyExistingLandmask(bathyGrids, 'depth',
-            os.path.join(wrkDir, 'land_mask_Example7.nc'), 'mask',
+            os.path.join(wrkDir, 'land_mask_write.nc'), 'mask',
             MASKING_DEPTH=0.0, MINIMUM_DEPTH=1000.0, MAXIMUM_DEPTH=-99999.0)
     bathyGrids['newDepth'].attrs['units'] = 'meters'
     bathyGrids['newDepth'].attrs['standard_name'] = 'topographic depth at Arakawa C h-points'
 
     # Write fields out to a file
     # TODO: provide a data source service hook?
-    bathyGrids.to_netcdf(os.path.join(wrkDir, 'ocean_topog_Example7.nc'),
+    bathyGrids.to_netcdf(os.path.join(wrkDir, 'ocean_topog_write2.nc'),
             encoding=grd.removeFillValueAttributes(data=bathyGrids))
 
-grd.saveGrid(filename=os.path.join(wrkDir, "LCC_20x30_Example7.nc"))
+grd.saveGrid(filename=os.path.join(wrkDir, "Mercator_angleDX_20x20.nc"))
 
 # Write out FMS related support files
 grd.makeSoloMosaic(
@@ -157,7 +160,7 @@ grd.makeSoloMosaic(
 )
 
 # The FMS coupler (v1) does not like the 'tile' variable
-grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid_7.nc"), noTile=True)
+grd.saveGrid(filename=os.path.join(inputDir, "ocean_hgrid.nc"), noTile=True)
 
 # Do some plotting!
 
@@ -170,14 +173,14 @@ grd.setPlotParameters(
         'figsize': (8,8),
         'projection': {
             'name': 'NearsidePerspective',
-            'lat_0': 40.0,
-            'lon_0': 230.0
+            'lat_0': 0.0,
+            'lon_0': 0.0
         },
-        'extent': [-160.0 ,-100.0, 20.0, 60.0],
+        'extent': [-90.0, 90.0, -20.0, 20.0],
         'iLinewidth': 1.0,
         'jLinewidth': 1.0,
         'showGridCells': True,
-        'title': "Nearside Perspective: 20x30 with %.1f degree tilt" % (gtilt),
+        'title': "Nearside Perspective: 20x20 with %.1f degree tilt" % (gtilt),
         'iColor': 'k',
         'jColor': 'k',
         'transform': cartopy.crs.PlateCarree(),
@@ -198,7 +201,7 @@ grd.setPlotParameters(
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_OrigBathy_7.png'), dpi=None,
+figure.savefig(os.path.join(wrkDir, '20x20_OrigBathy.png'), dpi=None,
         facecolor='w', edgecolor='w', orientation='landscape',
         transparent=False, bbox_inches=None, pad_inches=0.1)
 
@@ -220,17 +223,5 @@ grd.printMsg("---")
         }
     },
 )
-figure.savefig(os.path.join(wrkDir, 'LCC_20x30_MinBathy_7.png'), dpi=None, facecolor='w', edgecolor='w',
+figure.savefig(os.path.join(wrkDir, '20x20_MinBathy.png'), dpi=None, facecolor='w', edgecolor='w',
         orientation='landscape', transparent=False, bbox_inches=None, pad_inches=0.1)
-
-# Plot original gebco just using the grid extent, not the model grid points
-# as to show the real resolution of GEBCO
-# TODO: Future release
-
-# Plot model grid showing land mask points as painted
-# grid cells.
-# TODO: Future release
-
-# Plot model grid showing ocean mask points as painted
-# grid cells.
-# TODO: Future release

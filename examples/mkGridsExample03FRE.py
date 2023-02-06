@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys, os, logging, cartopy
 import numpy as np
 from gridtools.gridutils import GridUtils

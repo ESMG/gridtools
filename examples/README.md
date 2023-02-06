@@ -247,6 +247,15 @@ grid to a MOM6 grid.  NOTE: This only converts the grid.
 The library does not yet support conversion of boundary
 or forcing files.
 
+## mkGridsExample14.ipynb
+
+This example shows how different grids require different
+`angle_dx` calculations.
+
+## mkGridsExample14.py
+
+This is the same as Example 14 python notebook.
+
 ## mkGridsShowLoggers.py
 
 This scripts demonstrates how to access logging

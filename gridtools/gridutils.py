@@ -1241,7 +1241,7 @@ class GridUtils(object):
             ensure_ni_even = kwargs['ensureEvenI']
         if 'ensureEvenJ' in kwargs.keys():
             ensure_nj_even = kwargs['ensureEvenJ']
-        
+
         if llat0 == 0.0:
             msg = 'Generating regular lat-lon grid centered at (%.2f, %.2f) on equator.' % (llon0, llat0)
         else:
@@ -1270,7 +1270,7 @@ class GridUtils(object):
 
     def generate_regional_spherical(self, lon0, lon_span, lat0, lat_span, tilt, gRes, gMode):
         """Generate a regional grid centered at (lon0,lat0) with spans of (lon_span,lat_span) and tilted by angle tilt"""
-        
+
         Ni = int(lon_span / gRes)
         Nj = int(lat_span / gRes)
         if gMode == 2:
@@ -1291,14 +1291,14 @@ class GridUtils(object):
     #def generate_regional_mercator(self, lon0, lon_span, lat0, lat_span, tilt, gRes, gMode):
     def generate_regional_mercator(self, cUnits, cX, cY, dx, dxU, dy, dyU, tilt, grX, grXU, grY, grYU, pD, **kwargs):
         """Generate a regional mercator grid centered at (cX, cY) with spans of (dx, dy) with resolution (grX, grY) and tilted by angle tilt"""
-        
+
         gType = None
         if 'gridType' in kwargs.keys():
             gType = kwargs['gridType']
 
         lam_ = None
         phi_ = None
-            
+
         if gType == "MOM6":
             ensureEvenI = True
             ensureEvenJ = True
@@ -1328,11 +1328,69 @@ class GridUtils(object):
         if not(hasattr(lam_, 'shape')):
             msg = 'ERROR: Failed to create mercator grid!'
             self.printMsg(msg, level=logging.ERROR)
-            
+
         return lam_,phi_
 
     # Rebuilt grid generation routines
-    
+
+    def transformGridLonLatToXY(self, in_xx, in_yy, **kwargs):
+        '''Utility for transforming grid coordinates to/from (lon, lat) coordinates to
+           spherical (x, y) coordinates.  Use `inverse=True` to perform the reverse
+           operation.  This should only be called when a grid has been read and
+           provides a proper proj4 string.  If a proj4 string is not provided, this
+           routine defaults to "+stere".
+
+        :param in_xx: x or longitude coordinates
+        :type in_xx: array
+        :param in_yy: y or latitude coordinates
+        :type in_yy: array
+        :return: (x, y) or (longitude, latitude) coordinates
+        :rtype: arrays
+
+        **Keyword arguments**
+
+            * *inverse* (``boolean``) -- set to True to transform from (x, y) to
+              (lon, lat).  Default: False
+            * *PROJSTRING* (``string``) -- provide a custom proj4 projection
+              string.  Default: +stere
+            * *lat_0* (``float``) -- Optional argument provided to PROJSTRING.
+            * *lat_ts* (``float``) -- Optional argument provided to PROJSTRING.
+            * *ellps* (``float``) -- Optional argument provided to PROJSTRING.
+            * *R* (``float``) -- Optional argument provided to PROJSTRING.
+
+        .. note::
+            See :func:`setGridParameters` for definition of optional arguments to
+            PROJSTRING.
+        '''
+
+        utils.checkArgument(kwargs, 'inverse', False)
+        if hasattr(self.grid.attrs, 'proj'):
+            PROJSTRING = self.grid.attrs['proj']
+        else:
+            utils.checkArgument(kwargs, 'PROJSTRING', "+proj=stere")
+            PROJSTRING = kwargs['PROJSTRING']
+
+            if 'lat_0' in kwargs.keys():
+                PROJSTRING = "%s +lat_0=%f" % (PROJSTRING, kwargs['lat_0'])
+            if 'lat_ts' in kwargs.keys():
+                PROJSTRING = "%s +lat_ts=%f" % (PROJSTRING, kwargs['lat_ts'])
+            if 'ellps' in kwargs.keys():
+                PROJSTRING = "%s +ellps=%s" % (PROJSTRING, kwargs['ellps'])
+            if 'R' in kwargs.keys():
+                PROJSTRING = "%s +R=%f" % (PROJSTRING, kwargs['R'])
+
+        crs = CRS.from_proj4(PROJSTRING)
+        # The general pattern is from lon/lat to x/y of the given crs
+        proj = Transformer.from_crs(crs.geodetic_crs, crs)
+
+        if kwargs['inverse']:
+            #out_xx(lon), out_yy(lat)
+            out_xx, out_yy = proj.transform(in_xx, in_yy, direction='INVERSE')
+        else:
+            out_xx, out_yy = proj.transform(in_xx, in_yy)
+
+        return (out_xx, out_yy)
+
     def generate_regional_spherical_meters(self, cUnits, cX, cY, dx, dxU, dy, dyU, tilt, grX, grXU, grY, grYU, pD, **kwargs):
         '''Create a grid in the spherical projection using grid distances in meters.
 
@@ -1345,7 +1403,7 @@ class GridUtils(object):
 
         lam_ = None
         phi_ = None
-        
+
         if gType == "MOM6":
             ensureEvenI = True
             ensureEvenJ = True
@@ -1353,7 +1411,7 @@ class GridUtils(object):
                 ensureEvenI = kwargs['ensureEvenI']
             if 'ensureEvenJ' in kwargs.keys():
                 ensureEvenJ = kwargs['ensureEvenJ']
-            
+
             PROJSTRING = "+proj=stere"
             if 'lat_0' in pD.keys():
                 PROJSTRING = "%s +lat_0=%f" % (PROJSTRING, pD['lat_0'])
@@ -1365,7 +1423,7 @@ class GridUtils(object):
                 PROJSTRING = "%s +R=%f" % (PROJSTRING, pD['R'])
 
             msg = 'Transformation PROJ (%s)' % (PROJSTRING)
-            self.printMsg(msg, level=logging.INFO)                
+            self.printMsg(msg, level=logging.INFO)
 
             # create the coordinate reference system
             crs = CRS.from_proj4(PROJSTRING)
@@ -1376,7 +1434,7 @@ class GridUtils(object):
             # compute (x, y) from (lon, lat)
             gX, gY = proj.transform(cX, cY)
             msg = 'Computing center point in meters: (lat=%f, lon=%f) to (%f, %f)' % (cY, cX, gX, gY)
-            self.printMsg(msg, level=logging.INFO)                
+            self.printMsg(msg, level=logging.INFO)
 
             gMode = 1
             if 'gridMode' in kwargs.keys():
@@ -1403,19 +1461,19 @@ class GridUtils(object):
             lon, lat = proj.transform(xx, yy, direction='INVERSE')
             lam_ = lon
             phi_ = lat
-        
+
         return lam_,phi_
 
     def generate_regional_spherical_degrees(self, cUnits, cX, cY, dx, dxU, dy, dyU, tilt, grX, grXU, grY, grYU, pD, **kwargs):
         '''Create a grid in the spherical projection using grid distances in degrees.'''
-        
+
         gType = None
         if 'gridType' in kwargs.keys():
             gType = kwargs['gridType']
 
         lam_ = None
         phi_ = None
-        
+
         if gType == "MOM6":
             ensureEvenI = True
             ensureEvenJ = True
@@ -1434,14 +1492,14 @@ class GridUtils(object):
                 # Supergrid requested
                 Ni = Ni * 2
                 Nj = Nj * 2
-                
+
             # Generate a mesh at equator centered at (lon0, 0)
             lam_,phi_ = self.generate_latlon_mesh_centered(Ni, Nj, cX, dx, 0.0, dy)
             lam_,phi_ = self.rotate_z_mesh(lam_, phi_, (90.-cX)*self.PI_180)   #rotate around z to bring it centered at y axis
             lam_,phi_ = self.rotate_y_mesh(lam_, phi_, tilt*self.PI_180)       #rotate around y axis to tilt it as desired
             lam_,phi_ = self.rotate_x_mesh(lam_, phi_, cY*self.PI_180)         #rotate around x to bring it centered at (lon0,lat0)
             lam_,phi_ = self.rotate_z_mesh(lam_, phi_, -(90.-cX)*self.PI_180)  #rotate around z to bring it back
-        
+
         return lam_,phi_
 
     # xarray grid operations grid functions
@@ -2461,7 +2519,7 @@ class GridUtils(object):
         for k in gList:
             if k in self.gridInfo['gridParameterKeys']:
                 self.self.gridInfo['gridParameters'].pop(k, None)
-                            
+
         self.gridInfo['gridParameterKeys'] = self.gridInfo['gridParameters'].keys()
 
     def extendGrid(self, jStart, jEnd, iStart, iEnd, gridMethod='auto', gridProj='auto'):
@@ -2828,30 +2886,30 @@ class GridUtils(object):
                 if gkey in self.gridInfo['gridParameters'][subKey].keys():
                     return self.gridInfo['gridParameters'][subKey][gkey]
             return default
-        
+
         if gkey in self.gridInfo['gridParameterKeys']:
             return self.gridInfo['gridParameters'][gkey]
-        
+
         if inform:
             msg = "WARNING: Using (%s) for default parameter for (%s)." % (default, gkey)
             self.printMsg(msg, level=logging.DEBUG)
         return default
-        
+
     def setGridParameters(self, gridParameters, subKey=None):
         """Generic method for setting gridding parameters using dictionary arguments.
-    
+
         :param gridParameters: grid parameters to set or update
         :type gridParameters: dictionary
         :param subKey: an entry in gridParameters that contains a dictionary of information to set or update
         :type subKey: string
         :return: none
         :rtype: none
-        
+
         .. note::
             Core gridParameter list.  See other grid functions for other potential options.  
             Defaults are **bold**.  See the user manual for more
             details.
-            
+
             **Primary keys**
 
             * *centerUnits* (``string``) -- Grid center point units [**'degrees'**, 'meters']
@@ -2940,12 +2998,16 @@ class GridUtils(object):
 
         # Check for grids that are not divisible by the scale factor
         if ny % scaleFactor != 0 or nx % scaleFactor != 0:
-            self.printMsg("Unable to subset grid.  One of the regular grid dimensions\nis not evenly divisible by the scale factor.", level=logging.ERROR)
+            msg = "\n".join(
+                "Unable to subset grid.  One of the regular grid dimensions",
+                "is not evenly divisible by the scale factor."
+            )
+            self.printMsg(msg, level=logging.ERROR)
             return None
 
         newGrd = gridtools.gridutils.GridUtils()
-        newGrd.grid['x'] = self.grid['x'][::scaleFactor,::scaleFactor]
         newGrd.grid['y'] = self.grid['y'][::scaleFactor,::scaleFactor]
+        newGrd.grid['x'] = self.grid['x'][::scaleFactor,::scaleFactor]
 
         # Copy global level metadata
         for attr in self.grid.attrs.keys():
@@ -2953,6 +3015,168 @@ class GridUtils(object):
 
         # Recompute metrics
         history = "%s: subset grid with GridTools.subsetGrid() using scale factor %d" %\
+            (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
+
+        newGrd.computeGridMetricsSpherical(history=history, **kwargs)
+
+        return newGrd
+
+    def get_intermediate_points(self, p1, p2, n_pts=1):
+        """This returns intermediate grid points between points p1 and p2 in
+           grid space.  By default, only one intermediate point is returned
+           unless n_pts is larger than 1.  This routine assumes the line between
+           p1 and p2 is a straight line.
+
+        :param p1: grid point one
+        :type p1: array with two points (y1, x1)
+        :param p2: grid point two
+        :type p2: array with two points (y2, x1)
+        :param n_pts: number of intermediate points to find.  Default: 1
+        :type n_pts: integer
+        :return: one or more intermediate grid points
+        :rtype: array
+        """
+
+        y_spacing = (p2[0] - p1[0]) / (n_pts + 1)
+        x_spacing = (p2[1] - p1[1]) / (n_pts + 1)
+
+        return [
+            [p1[0] + i * y_spacing, p1[1] +  i * x_spacing]
+            for i in range(1, n_pts+1)
+        ]
+
+    def supersetGrid(self, scaleFactor, **kwargs):
+        """Create a superset of current grid by the specified scale factor.  Scale factor must
+        be an integer.  A superset of the current grid is returned or None on any error.
+        The grid points are split evenly by the addition of (scaleFactor-1) points.
+        """
+
+        # Check that scaleFactor is an integer
+        if scaleFactor != int(scaleFactor):
+            msg = "Unable to create a superset grid.  Scale factor must be an integer."
+            self.printMsg(msg, level=logging.ERROR)
+            return None
+
+        # Make this an integer
+        scaleFactor = int(scaleFactor)
+
+        if scaleFactor < 2:
+            msg = "Unable to create a superset grid.  Scale factor must be an integer of 2 or more."
+            self.printMsg(msg, level=logging.ERROR)
+            return None
+
+        # Create (scaleFactor-1) points between existing x and y grid
+
+        # Assume grid x,y is lat/lon points
+        (grdX, grdY) = self.transformGridLonLatToXY(self.grid['x'], self.grid['y'], **kwargs)
+
+        # The external points of the supergrid form the boundary for the internal
+        # points which now must be subdivided by (scaleFactor-1) points.
+        # We have to watch for boundary crossings on the grid.
+
+        # The new grid will be ((nyp-1)*scaleFactor, (nxp-1)*scaleFactor)
+
+        # Current grid
+        (nyp, nxp) = grdX.shape
+        ny = nyp - 1
+        nx = nxp - 1
+
+        # New grid
+        new_ny = ny * scaleFactor
+        new_nx = nx * scaleFactor
+        new_nyp = new_ny + 1
+        new_nxp = new_nx + 1
+
+        # Create the new grid
+        newGrid = {}
+        newGrid['y'] = np.empty((new_nyp, new_nxp,))
+        newGrid['x'] = np.empty((new_nyp, new_nxp,))
+        newGrid['y'][:] = np.nan
+        newGrid['x'][:] = np.nan
+
+        # Overlay current grid on new grid
+        newGrid['y'][::scaleFactor,::scaleFactor] = grdY
+        newGrid['x'][::scaleFactor,::scaleFactor] = grdX
+
+        # Fill in new points in new grid
+        # scaleFactor = 2, fill in horiz and vert depeding
+        # on where the corner of origin.
+        '''
+          INPUT    PASS 1   PASS 2
+          X 0 X    X X X    X X X
+          0 0 0 -> X 0 X -> X X X
+          X 0 X    X X X    X X X
+
+          With scaleFactor = 3, the array will look like:
+
+          INPUT    PASS 1   PASS 2 will need to fill in
+          1001     1111     additional points.
+          0000     1001
+          0000     1001
+          1001     1111
+
+          For now, the implementation is to walk across an
+          axis and fill in along the other axis given points
+          that span the gap.
+
+          PASS 2: STEP 1
+          1A11    In the first step in pass 2, we walk across an
+          1T01    axis, take the two existing points A and B
+          1T01    and compute for the itermediate target (T)
+          1B11    points and continue across.  Repeat for each
+                  new cell.
+
+          TODO: A consistency check could be done with opposing
+                points and further refinement.
+        '''
+        utils.dump_array(newGrid['x'], 'grid_1.txt', dump_type='bool')
+
+        # This fills in points along previously existing lines
+        for y in range(0,new_nyp,scaleFactor):
+            for x in range(0,new_nxp,scaleFactor):
+
+                # horiz
+                if y+scaleFactor < new_nyp:
+                    pt1 = [newGrid['y'][y,x],newGrid['x'][y,x]]
+                    pt2 = [newGrid['y'][y+scaleFactor,x],newGrid['x'][y+scaleFactor,x]]
+                    (new_pts) = self.get_intermediate_points(pt1, pt2, scaleFactor-1)
+                    newGrid['y'][y+1:y+scaleFactor,x] = [i[0] for i in new_pts[:]]
+                    newGrid['x'][y+1:y+scaleFactor,x] = [i[1] for i in new_pts[:]]
+
+                # vert
+                if x+scaleFactor < new_nxp:
+                    pt1 = [newGrid['y'][y,x],newGrid['x'][y,x]]
+                    pt2 = [newGrid['y'][y,x+scaleFactor],newGrid['x'][y,x+scaleFactor]]
+                    (new_pts) = self.get_intermediate_points(pt1, pt2, scaleFactor-1)
+                    newGrid['y'][y,x+1:x+scaleFactor] = [i[0] for i in new_pts[:]]
+                    newGrid['x'][y,x+1:x+scaleFactor] = [i[1] for i in new_pts[:]]
+
+        # This fills interior points
+        for y in range(1,new_nyp,scaleFactor):
+            for x in range(1,new_nxp,scaleFactor):
+                # For each center point group, walk along the
+                # interior x axis to fill in the middle points
+                for xx in range(x,x+scaleFactor-1):
+                    pt1 = [newGrid['y'][y-1,xx],newGrid['x'][y-1,xx]]
+                    pt2 = [newGrid['y'][y+scaleFactor-1,xx],newGrid['x'][y+scaleFactor-1,xx]]
+                    (new_pts) = self.get_intermediate_points(pt1, pt2, scaleFactor-1)
+                    newGrid['y'][y:y+scaleFactor-1,xx] = [i[0] for i in new_pts[:]]
+                    newGrid['x'][y:y+scaleFactor-1,xx] = [i[1] for i in new_pts[:]]
+
+        # Convert coordinates from spherical back to lat/lon
+        kwargs['inverse'] = True
+        grd_ll = self.transformGridLonLatToXY(newGrid['x'], newGrid['y'], **kwargs)
+
+        newGrd = gridtools.gridutils.GridUtils()
+        newGrd.grid['y'] = (("nyp", "nxp"), grd_ll[1])
+        newGrd.grid['x'] = (("nyp", "nxp"), grd_ll[0])
+
+        # Copy global level metadata
+        for attr in self.grid.attrs.keys():
+            newGrd.grid.attrs[attr] = self.grid.attrs[attr]
+
+        # Recompute metrics
+        history = "%s: superset grid with GridTools.subsetGrid() using scale factor %d" %\
             (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), scaleFactor)
 
         newGrd.computeGridMetricsSpherical(history=history, **kwargs)

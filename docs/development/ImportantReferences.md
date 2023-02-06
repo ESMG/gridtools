@@ -2,12 +2,18 @@
 
 [CREDITS](CREDITS.md) and citations have been consolidated.
 
+## Bookmarks 2023
+ * https://gis.stackexchange.com/questions/353698/how-to-clip-an-xarray-to-a-smaller-extent-given-the-lat-lon-coordinates
+ * https://stackoverflow.com/questions/1704823/create-numpy-matrix-filled-with-nans
+ * https://stackoverflow.com/questions/43594646/how-to-calculate-the-coordinates-of-the-line-between-two-points-in-python
+
 ## Bookmarks 2022
  * https://automating-gis-processes.github.io/CSC/notebooks/L2/geopandas-basics.html#Creating-geometries-into-a-GeoDataFrame
  * https://automating-gis-processes.github.io/CSC18/lessons/L4/point-in-polygon.html
  * https://realpython.com/python-property/#:~:text=Python's%20property()%20is%20the,use%20it%20without%20importing%20anything.
  * https://stackoverflow.com/questions/847179/multiple-glibc-libraries-on-a-single-host
  * https://stackoverflow.com/questions/17077494/how-do-i-convert-a-ipython-notebook-into-a-python-file-via-commandline
+ * https://stackoverflow.com/questions/64737439/xarray-dataset-change-value-of-coordinates-while-keeping-attributes
 ## Bookmarks 2021
  * http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
  * https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
@@ -153,10 +159,14 @@
 
 ## For Review Later
 
+ * A workflow for Jupyter Notebooks
+   * https://papermill.readthedocs.io/en/latest/
+
  * FRE-NCtools
    * Now combines FRE-NCtools with Niki's Ocean Model Grid Generator
    * https://github.com/NOAA-GFDL/FRE-NCtools
    * https://github.com/NOAA-GFDL/ocean_model_grid_generator
+   * https://github.com/adcroft/numpypi.git
 
  * https://github.com/nsidc/mapx
    * The NSIDC mapx library and associated tools for gridding/reprojection.

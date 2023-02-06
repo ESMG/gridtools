@@ -1,5 +1,30 @@
 # Changelog
 
+## 2023-02-03 to 2023-02-06
+
+Continue work on release 0.3.3.
+
+ - New function: `gridtools.transformGridLonLatToXY()`.
+ - New feature: ability to create higher resolution grids
+   from existing grids.  Function: `gridtools.supersetGrid()`
+ - Add debugging utility to help see what is
+   in an array: Function: `utils.dump_array()`
+ - Update example python scripts to use the
+   generic: `#!/usr/bin/env python`.  It is highly recommended
+   to use python 3 at this point in time.
+ - Fix up some whitespace.
+ - Add a few bookmarks to start out 2023.
+ - Add example 14 to illustrate the computational problem of
+   computing `angle_dx`.
+ - Add citation for `gridpak` from the ROMS grid generation
+   toolbox.
+
+## 2022-06-10
+
+Continue work on release 0.3.3.
+
+ - Important discovery: updating an xarray coordinate value
+
 ## 2022-06-03 to 2022-06-06
 
 Continue work on release 0.3.3.

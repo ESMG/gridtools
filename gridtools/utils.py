@@ -9,6 +9,8 @@ from decimal import *
 from . import sysinfo
 import gridtools
 
+# TODO: generic utility functions need access to a logging mechanism
+
 def checkArgument(vDict, vKey, vVal):
     '''
     This checks to see if there is a key in the passed dictionary.  If the
@@ -30,6 +32,38 @@ def checkArgument(vDict, vKey, vVal):
             vDict[vKey] = vVal
     except:
         pass
+
+
+def dump_array(dobj, output_file, dump_type='bool'):
+    '''
+    Utility to dump the contents of a python array.
+
+    Type 'bool' will print a matrix of 0 and 1 representing
+    the array of values(1) vs. nans(0).
+    '''
+
+    if not(hasattr(dobj, 'shape')):
+        msg = "The passed object to utils.data_array() needs to be an array with a shape attribute."
+        print(msg)
+        return
+        #self.printMsg(msg, level=logging.ERROR)
+
+    (nx, ny) = dobj.shape
+
+    fp = open(output_file, 'w')
+
+    fp.write(f"x:{nx} y:{ny}\n")
+    for x in range(0,nx):
+        for y in range(0,ny):
+            if dump_type == 'bool':
+                if np.isnan(dobj[x,y]):
+                    fp.write('0')
+                else:
+                    fp.write('1')
+        fp.write("\n")
+    fp.write("\n")
+
+    fp.close()
 
 def get_git_repo_version_info(grd=None):
     """Describe the current version of this script as known by Git.

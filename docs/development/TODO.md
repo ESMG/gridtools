@@ -109,6 +109,8 @@
      - [ ] having tilt may not produce conformal grids
      - [X] Niki''s example added; but it may not be correct
      - [ ] Niki might have solved lat lon tilt?
+     - [ ] use stere transform to go from x/y meters to lat/lon
+       - `gdaltransform -s_srs "+ellps=WGS84 +proj=stere +lat_0=0 +lat_ts=0" -t_srs EPSG:4326`
    - [ ] grid generation in other projections (tri-polar, etc)
      - [ ] store appropriate metadata when writing grid file
    - [ ] on saveGrid():
@@ -181,11 +183,13 @@
 
 # TODO
 
+ - [ ] Improve gridutils.supersetGrid() when filling in cell centers
+       with interpolated grid points.
  - [ ] Improve gridutils.getXYDist() to maybe look at other
        derivatives to improve accuracy of appending points along
        a non-regularly spaced line.
  - [X] Incorporate grid extension (extending) code
-   - [X] initial automatic grid detection code 
+   - [X] initial automatic grid detection code
    - [X] spherical coords
      - [ ] test northern hemispheric grids
      - [ ] test southern hemispheric grids
