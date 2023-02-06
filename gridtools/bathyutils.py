@@ -34,7 +34,7 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
           depth is shallower than the masking depth, the depth is set to
           the minimum depth.  If the masking depth is undefined or equal to the
           minimum depth, the new depth is set deeper by epsilon to avoid becoming
-          masked as land. Default: 1.0e-14
+          masked as land. Default: 1.0e-10
         * *MINIMUM_DEPTH* (``float``) --
           Minimum ocean depth. Default: 0.0
         * *MASKING_DEPTH* (``float``) --
@@ -81,7 +81,7 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
         return
 
     # Determine values from other possible arguments
-    epsilon_depth = 1.0e-14
+    epsilon_depth = 1.0e-10
     minimum_depth = 0.0
     masking_depth = -99999.0
     maximum_depth = -99999.0
@@ -133,14 +133,15 @@ def applyExistingLandmask(grd, dsData, dsVariable, maskFile, maskVariable, **kwa
     workData['newDepth'] = xr.where(condExp, masking_depth, workData['depth'])
 
     # 2. Test points that should be marked as ocean.  If they are shallower than
-    #    the masking depth, then set them to the minimum depth.  If
-    #    masking depth is undefined, set them to the minimum depth + epsilon.
+    #    or equal to the masking depth, then set them to the minimum depth.  If
+    #    masking depth is undefined or equal to the minimum depth,
+    #    set them to the minimum depth + epsilon.
 
-    condExp = (workData['land_mask'] == 0) & (workData['newDepth'] < masking_depth)
+    condExp = (workData['land_mask'] == 0) & (workData['newDepth'] <= masking_depth)
     nPts = condExp.data.ravel().sum()
     if nPts > 0:
         if masking_depth == minimum_depth:
-            msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth + epsilon_depth, nPts))
+            msg = (" * Number of ocean points with new depth of %f: %d\n   * With epsilon depth" % (minimum_depth + epsilon_depth, nPts))
             workData['newDepth'] = xr.where(condExp, minumum_depth + epsilon_depth, workData['newDepth'])
         else:
             msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth, nPts))
@@ -183,7 +184,7 @@ def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kw
           depth is shallower than the masking depth, the depth is set to
           the minimum depth.  If the masking depth is undefined or equal to the
           minimum depth, the new depth is set deeper by epsilon to avoid becoming
-          masked as land. Default: 1.0e-14
+          masked as land. Default: 1.0e-10
         * *MINIMUM_DEPTH* (``float``) --
           Minimum ocean depth. Default: 0.0
         * *MASKING_DEPTH* (``float``) --
@@ -230,7 +231,7 @@ def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kw
         return
 
     # Determine values from other possible arguments
-    epsilon_depth = 1.0e-14
+    epsilon_depth = 1.0e-10
     minimum_depth = 0.0
     masking_depth = -99999.0
     maximum_depth = -99999.0
@@ -287,14 +288,15 @@ def applyExistingOceanmask(grd, dsData, dsVariable, maskFile, maskVariable, **kw
     workData['newDepth'] = xr.where(condExp, masking_depth, workData['depth'])
 
     # 2. Test points that should be marked as ocean.  If they are shallower than
-    #    the masking depth, then set them to the minimum depth.  If
-    #    masking depth is undefined, set them to the minimum depth + epsilon.
+    #    or equal to the masking depth, then set them to the minimum depth.  If
+    #    masking depth is undefined or equal to the minimum depth,
+    #    set them to the minimum depth + epsilon.
 
-    condExp = (workData['ocean_mask'] == 1) & (workData['newDepth'] < masking_depth)
+    condExp = (workData['ocean_mask'] == 1) & (workData['newDepth'] <= masking_depth)
     nPts = condExp.data.ravel().sum()
     if nPts > 0:
         if masking_depth == minimum_depth:
-            msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth + epsilon_depth, nPts))
+            msg = (" * Number of ocean points with new depth of %f: %d\n   * With epsilon depth" % (minimum_depth + epsilon_depth, nPts))
             workData['newDepth'] = xr.where(condExp, minimum_depth + epsilon_depth, workData['newDepth'])
         else:
             msg = (" * Number of ocean points with new depth of %f: %d" % (minimum_depth, nPts))

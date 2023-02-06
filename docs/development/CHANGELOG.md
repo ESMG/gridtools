@@ -25,6 +25,24 @@ Continue work on release 0.3.3.
 
  - Important discovery: updating an xarray coordinate value
 
+## 2022-12-06
+
+Bug fixes and other notes
+
+ - When applying ocean or land masks, when a land point was turned into
+   a ocean point, the depth should be equal to or less than the masking
+   depth.
+ - Emit a message noting an epsilon depth was used in creating a ocean
+   point.
+ - Mask application routines need to know when the minimum or masking
+   depth is undefined.
+ - Mask application routines need to know how to properly fill in a ocean
+   point if it was a land point.  Default is masking depth plus an epsilon.
+ - Add a todo to work on a topographic grid editor.  It should operate very
+   similar to the mask editor.
+ - Ensure to save a yaml configuration for datasets with the extension of yaml or
+   yml.
+
 ## 2022-06-03 to 2022-06-06
 
 Continue work on release 0.3.3.

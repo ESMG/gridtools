@@ -66,6 +66,7 @@
 
 # BUGS
 
+ - [X] Ensure a dataset yaml configuration file is saved if the extension is either yaml or yml.
  - [ ] Stereographic grid does not generate correct `angle_dx` for grid center (300, 40) dx(25/1deg) dy(35/1deg) tilt(-35) LCC
  - [ ] some gridtools applications do not start up properly when jupyter is
        started with `--ip=0.0.0.0`
@@ -117,6 +118,12 @@
      - [X] convert lon [+0,+360] to [-180,+180]
      - [ ] Unify code that adjusts lon (PR#1)
    - [ ] Verify unification of radius (R) throughout code
+ - [ ] topo grid editor
+   - [ ] utilize MOM6 IJ/TOPO edits feature
+   - [ ] expore and edit depths on the grid
+   - [ ] save new grid
+   - [ ] write new mask files
+   - [ ] write new mosaic files
  - [ ] grid mask editor (ocean, etc)
      - [ ] save super grid in addition to regular grid so
            editors can plot outside edge of regular grid
@@ -351,6 +358,9 @@
  - [ ] Add an Example 7a to demonstrate using existing files from Example 7.
  - [ ] Update all references to field to either variable or grid
        depending on context.
+ - [ ] Mask application routines
+   - [ ] Need to handle cases where masking or other depth configuration is undefined; maybe just throw an error
+   - [ ] Need to add methods of filling in or recovering depth values for land points that are made ocean points
 
 # QUESTIONS
 
