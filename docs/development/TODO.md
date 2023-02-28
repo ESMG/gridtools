@@ -125,6 +125,7 @@
    - [ ] write new mask files
    - [ ] write new mosaic files
  - [ ] grid mask editor (ocean, etc)
+     - [ ] Fix grid offset vs coastlines (`https://bairdlangenbrunner.github.io/python-for-climate-scientists/matplotlib/pcolormesh-grid-fix.html`)
      - [ ] save super grid in addition to regular grid so
            editors can plot outside edge of regular grid
      - [X] create a working example for binder.org

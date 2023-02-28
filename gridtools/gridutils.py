@@ -3129,7 +3129,7 @@ class GridUtils(object):
           TODO: A consistency check could be done with opposing
                 points and further refinement.
         '''
-        utils.dump_array(newGrid['x'], 'grid_1.txt', dump_type='bool')
+        #utils.dump_array(newGrid['x'], 'grid_1.txt', dump_type='bool')
 
         # This fills in points along previously existing lines
         for y in range(0,new_nyp,scaleFactor):

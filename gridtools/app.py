@@ -20,6 +20,7 @@ import numpy as np
 import xarray as xr
 from io import BytesIO
 import panel as pn
+from bokeh.models import CustomJSHover, HoverTool
 pn.extension()
 
 import hvplot.xarray
@@ -122,7 +123,7 @@ class App(object):
         self.loggingFilename = None
         self.verboseLevel = 0
         self.debugLevel = 0
-        
+
         self.initializeWidgets()
         self.initializeTabs()
         self.initializeDashboard()
@@ -331,7 +332,7 @@ class App(object):
             self.grd.setPlotParameters({
                 'showSupergrid': True
             })
-        
+
         # LambertConformalConic
         if projectionName == 'LambertConformalConic':
             self.grd.setPlotParameters({
@@ -987,7 +988,7 @@ class App(object):
             ('Logging', self.loggingControls),
             ('Numpypi', self.numpyPiControls)
         ])
-        
+
     def initializeDashboard(self):
 
         # Pull all the final dashboard together in an application
@@ -995,7 +996,7 @@ class App(object):
             pn.Column(pn.Row(self.clearLogButton, self.statusWidget), sizing_mode='stretch_width', width_policy='max'),
             pn.Row(self.controlTabs, self.displayTabs)
         )
-        
+
         # Attach application to GridUtils for integration into panel, etc
         # Do this just before launching the application
         self.grd.application(
@@ -1049,6 +1050,7 @@ class maskEditor(object):
     def getGridSubset(self, lClickY, lClickX, grd):
 
         grdShape = grd.shape
+        #grdShape = grd['mask'].shape
 
         # First check the bounds of the click
         # If out of bounds, bring back to nearest
@@ -1107,8 +1109,10 @@ class maskEditor(object):
         # If undefined, set it to a center grid point
         if self.lastClickY == -1:
             self.lastClickY = int(self.da.shape[0] / 2)
+            #self.lastClickY = int(self.da['mask'].shape[0] / 2)
         if self.lastClickX == -1:
             self.lastClickX = int(self.da.shape[1] / 2)
+            #self.lastClickX = int(self.da['mask'].shape[1] / 2)
 
         if x is not None:
 
@@ -1134,14 +1138,63 @@ class maskEditor(object):
         # This has a side effect of dynamically changing the colorbar and the
         # rendered image.
 
+        def setv():
+            return 4
+
         # Do we overlay the model grid outline?
         if self.showModelGridOutline.value:
+            #breakpoint()
             # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
+            # https://discourse.holoviz.org/t/how-to-preserve-lat-lon-coordinate-labels-when-projecting-data/4093
             fullGrid = [(x-1) for x in self.da.shape]
+            #fullGrid = [(x-1) for x in self.da['mask'].shape]
             # When drawing a path, it has to follow around the edge of the grid
             # Drawing is fine on Example 9b
+
+            # Setting up custom formatter
+            formatter_code = """
+            const projections = Bokeh.require("core/util/projections");
+            const x = special_vars.x
+            const y = special_vars.y
+            const coords = projections.wgs84_mercator.invert(x, y)
+            return "" + (coords[%d]).toFixed(4)
+            """
+
+            formatter_code_x = formatter_code % 0
+            formatter_code_y = formatter_code % 1
+
+            custom_tooltips = [
+                ("setv", "@setv"),
+                ("lon", "@lon"),
+                ("lat", "@lat"),
+                ("lonc", "@lon{custom}"),
+                ("latc", "@lat{custom}"),
+                ("mask", "@mask"),
+                ("(x,y)", "($x, $y)"),
+                ("(sx,sy)", "($sx, $sy)"),
+                ("(data_x,data_y)", "($data_x, $data_y)"),
+                ("(indices)", "($indices)"),
+            ]
+            custom_formatters = {
+                "@lon": CustomJSHover(code=formatter_code_x),
+                "@lat": CustomJSHover(code=formatter_code_y),
+            }
+            custom_hover = HoverTool(tooltips=custom_tooltips, formatters=custom_formatters)
+
+            #plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
+            #    'lon', 'lat', 'mask', projection = self.crs, global_extent=True,
+            #    frame_height=540,
+            #    cmap=hv.plotting.util.process_cmap(self.customCM),
+            #    coastline='10m',
+            #    clim=(0,1))\
+            #plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
+            #    x='lon', y='lat', z='mask', projection = self.crs, global_extent=True,
+            #    frame_height=540,
+            #    cmap=hv.plotting.util.process_cmap(self.customCM),
+            #    coastline='10m',
+            #    clim=(0,1), tools=[custom_hover])\
             plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(
-                'lon', 'lat', 'mask', projection = self.crs, global_extent=True,
+                x='lon', y='lat', z='mask', projection = self.crs, global_extent=True,
                 frame_height=540,
                 cmap=hv.plotting.util.process_cmap(self.customCM),
                 coastline='10m',
@@ -1164,6 +1217,7 @@ class maskEditor(object):
                 frame_height=540)
             opt_kwargs = dict()
             plt.opts(title='Ocean Mask Editor', **opt_kwargs)
+            #breakpoint()
         else:
             # REF: https://hvplot.holoviz.org/user_guide/Geographic_Data.html#declaring-an-output-projection
             plt = self.da.sel(ny = slice(gy1, gy2), nx = slice(gx1, gx2)).hvplot.quadmesh(

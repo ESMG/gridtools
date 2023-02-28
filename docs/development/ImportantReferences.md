@@ -3,9 +3,19 @@
 [CREDITS](CREDITS.md) and citations have been consolidated.
 
 ## Bookmarks 2023
+ * https://bairdlangenbrunner.github.io/python-for-climate-scientists/matplotlib/pcolormesh-grid-fix.html
+ * https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
+ * https://docs.xarray.dev/en/stable/user-guide/time-series.html
  * https://gis.stackexchange.com/questions/353698/how-to-clip-an-xarray-to-a-smaller-extent-given-the-lat-lon-coordinates
+ * https://matplotlib.org/stable/gallery/images_contours_and_fields/pcolormesh_grids.html
+ * https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html#matplotlib.axes.Axes.pcolormesh
+ * https://notebook.community/PyHOGS/pyhogs.github.io/pyhogs-code/notebooks/examples/Colormap_examples
+ * https://numpy.org/doc/stable/reference/generated/numpy.mgrid.html
+ * https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html
  * https://stackoverflow.com/questions/1704823/create-numpy-matrix-filled-with-nans
+ * https://stackoverflow.com/questions/15908371/matplotlib-colorbars-and-its-text-labels
  * https://stackoverflow.com/questions/43594646/how-to-calculate-the-coordinates-of-the-line-between-two-points-in-python
+ * https://stackoverflow.com/questions/72395938/how-to-make-tick-label-with-subscript-bold
 
 ## Bookmarks 2022
  * https://automating-gis-processes.github.io/CSC/notebooks/L2/geopandas-basics.html#Creating-geometries-into-a-GeoDataFrame
@@ -194,3 +204,5 @@
  * Pyston: https://github.com/pyston/pyston
    - 30% speed improvement over Python
 
+ * Bookmarks to review later
+   - https://stackoverflow.com/questions/62415524/data-points-falling-outside-the-meshgrid-being-interpolated-over-while-the-mesh

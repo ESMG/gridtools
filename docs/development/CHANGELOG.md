@@ -1,5 +1,31 @@
 # Changelog
 
+## 2023-02-28
+
+Development work
+ * Fixes for github actions
+ * Experimentation with mask editor and the hover tool - no joy
+
+## 2023-02-07
+
+Experimenting with hover in geoviews/bokeh/xarray/holoviews
+to improve the mask editor.  Most of these do not use the
+geoview dynamic mapping using an xarray input.
+
+ * https://discourse.holoviz.org/t/how-to-add-an-extra-variable-to-hover-on-image-or-contourf-plot/1664/5
+ * https://docs.bokeh.org/en/3.0.1/docs/user_guide/interaction/tools.html#ug-interaction-tools-formatting-tooltip-fields
+ * https://github.com/holoviz/holoviews/issues/3107
+ * https://discourse.holoviz.org/t/how-to-preserve-lat-lon-coordinate-labels-when-projecting-data/4093
+ * https://geoviews.org/user_guide/Geometries.html
+ * https://sites.google.com/view/raybellwaves/cheat-sheets/hvplotholoviewsgeoviews?pli=1
+ * https://hvplot.holoviz.org/user_guide/Customization.html
+ * https://hvplot.holoviz.org/user_guide/Gridded_Data.html
+ * https://stackoverflow.com/questions/59678780/show-extra-columns-when-hovering-in-a-scatter-plot-with-hvplot
+ * https://stackoverflow.com/questions/59609911/holoviews-hovertool-show-extra-row
+
+This is the exact issue we are having:
+ * https://github.com/holoviz/geoviews/issues/100
+
 ## 2023-02-03 to 2023-02-06
 
 Continue work on release 0.3.3.
