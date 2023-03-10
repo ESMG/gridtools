@@ -55,12 +55,14 @@ jobs:
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
-          conda create --name gridTools --file conda/gridtools_py3_8_linux_64.txt
+          conda create --quiet --yes --name gridTools --file conda/gridtools_py3_8_linux_64.txt
           conda activate gridTools
-          conda install -y pytest
-          conda list > output/conda.txt
+          conda list --explicit > output/conda_stage1.txt
+          conda install -quiet --yes pytest
+          conda list --explicit > output/conda_stage2.txt
           python -m pip install -q -e .
           pip list > output/pip.txt
+          conda list --explicit > output/conda_final.txt
 
       # Run tests
       - name: Tests

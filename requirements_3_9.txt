@@ -1,0 +1,1 @@
+numpypi@git+https://github.com/jr3cermak/numpypi.git@dev#egg=numpypi

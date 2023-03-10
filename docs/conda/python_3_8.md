@@ -47,3 +47,9 @@ for hdf and netcdf to support MPI operations for esmf.
   hdf5                            1.12.2-nompi_h4df4325_101 --> 1.12.2-mpi_mpich_h5d83325_1
   libnetcdf                        4.9.1-nompi_hd2e9713_102 --> 4.9.1-mpi_mpich_h5eb6f38_2
 ```
+
+## github workflow
+
+```
+$ conda install pytest
+```
