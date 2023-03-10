@@ -16,6 +16,7 @@
  * https://stackoverflow.com/questions/15908371/matplotlib-colorbars-and-its-text-labels
  * https://stackoverflow.com/questions/43594646/how-to-calculate-the-coordinates-of-the-line-between-two-points-in-python
  * https://stackoverflow.com/questions/72395938/how-to-make-tick-label-with-subscript-bold
+ * https://stackoverflow.com/questions/75114841/debugger-warning-from-ipython-frozen-modules
 
 ## Bookmarks 2022
  * https://automating-gis-processes.github.io/CSC/notebooks/L2/geopandas-basics.html#Creating-geometries-into-a-GeoDataFrame

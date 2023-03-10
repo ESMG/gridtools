@@ -1,5 +1,13 @@
 # Changelog
 
+## 2023-03-09
+
+Tighten up conda packages and requirements.txt files to
+support three versions of python known to support
+esmf, esmpy and xesmf.  We begin with python 3.8, 3.9
+and 3.10.  There is one nagging package left to begin
+support for 3.11.
+
 ## 2023-02-28
 
 Development work
