@@ -57,6 +57,7 @@ jobs:
         run: |
           conda create --name gridTools --file conda/gridtools_py3_8_linux_64.txt
           conda activate gridTools
+          conda install -y pytest
           conda list > output/conda.txt
           python -m pip install -q -e .
           pip list > output/pip.txt
