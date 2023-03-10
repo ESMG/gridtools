@@ -55,7 +55,7 @@ jobs:
       # The worker drops you in the middle of your checked out repository
       - name: Install
         run: |
-          conda env create -q -f conda/gridTools_export-linux-64.yml
+          conda create --name gridTools --file conda/gridtools_py3_8_linux_64.txt
           conda activate gridTools
           conda list > output/conda.txt
           python -m pip install -q -e .
