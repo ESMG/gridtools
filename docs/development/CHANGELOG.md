@@ -1,5 +1,9 @@
 # Changelog
 
+## 2023-03-11
+
+Sync numpypi (dev) branch with upstream repository.
+
 ## 2023-03-09
 
 Tighten up conda packages and requirements.txt files to
