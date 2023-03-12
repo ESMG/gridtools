@@ -3,6 +3,7 @@
 ## 2023-03-11
 
 Sync numpypi (dev) branch with upstream repository.
+Remove `test_trunc.py` test.
 
 ## 2023-03-09
 
