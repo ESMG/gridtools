@@ -3,6 +3,7 @@
 [CREDITS](CREDITS.md) and citations have been consolidated.
 
 ## Bookmarks 2023
+ * https://adamj.eu/tech/2019/03/11/pip-install-from-a-git-repository/
  * https://bairdlangenbrunner.github.io/python-for-climate-scientists/matplotlib/pcolormesh-grid-fix.html
  * https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
  * https://docs.xarray.dev/en/stable/user-guide/time-series.html
@@ -169,6 +170,13 @@
  * https://conda.io/projects/conda-build/en/latest/user-guide/tutorials/build-pkgs.html
 
 ## For Review Later
+
+ * NCAR
+   * https://github.com/NCAR
+   * https://github.com/NCAR/mom6_bathy
+   * https://github.com/NCAR/mom6-tools
+   * https://github.com/alperaltuntas
+   * https://github.com/gustavo-marques
 
  * A workflow for Jupyter Notebooks
    * https://papermill.readthedocs.io/en/latest/
