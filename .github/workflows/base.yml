@@ -41,6 +41,7 @@ jobs:
 
       # Show the environment of the runner
       - name: Environment
+        shell: bash -l {0}
         run: |
           echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
           echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -56,6 +57,7 @@ jobs:
 
       # The worker drops you in the middle of your checked out repository
       - name: Install
+        shell: bash -l {0}
         run: |
           conda create --quiet --yes --name gridTools --file conda/gridtools_${{ matrix.python-version }}.txt
           conda activate gridTools
@@ -76,6 +78,7 @@ jobs:
 
       # Archive output to github artifacts
       - name: Archive
+        shell: bash -l {0}
         uses: actions/upload-artifact@v3
         with:
           name: artifact-output
