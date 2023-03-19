@@ -78,7 +78,6 @@ jobs:
 
       # Archive output to github artifacts
       - name: Archive
-        shell: bash -l {0}
         uses: actions/upload-artifact@v3
         with:
           name: artifact-output
